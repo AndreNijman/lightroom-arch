@@ -19,8 +19,9 @@ smoke::assert_contains() {
 smoke::dry_run() {
   local tmp_home
   tmp_home=$(mktemp -d)
-  local output="${PROJECT_ROOT}/test-output/smoke-dry-run.log"
-  mkdir -p "${PROJECT_ROOT}/test-output"
+  local output_dir="${LIGHTROOM_ARCH_TEST_OUTPUT_DIR:-${PROJECT_ROOT}/test-output}"
+  local output="${output_dir}/smoke-dry-run.log"
+  mkdir -p "${output_dir}"
   HOME="${tmp_home}" \
     XDG_DATA_HOME="${tmp_home}/.local/share" \
     XDG_STATE_HOME="${tmp_home}/.local/state" \

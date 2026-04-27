@@ -12,4 +12,7 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 docker build -t "${IMAGE_NAME}" -f "${SCRIPT_DIR}/Dockerfile" "${PROJECT_ROOT}"
-docker run --rm -v "${PROJECT_ROOT}:/work/lightroom-arch:ro" "${IMAGE_NAME}"
+docker run --rm \
+  -e LIGHTROOM_ARCH_TEST_OUTPUT_DIR=/tmp/lightroom-arch-test-output \
+  -v "${PROJECT_ROOT}:/work/lightroom-arch:ro" \
+  "${IMAGE_NAME}"
