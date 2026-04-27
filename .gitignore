@@ -1,0 +1,15 @@
+*.log
+/tmp/
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.zip
+*.7z
+*.rar
+.DS_Store
+/test-output/
+/tests/fixtures/*.NEF
+/tests/fixtures/*.CR2
+/tests/fixtures/*.ARW
+/tests/fixtures/*.DNG
