@@ -256,6 +256,24 @@ bottle_name = sys.argv[1]
 deps = ["arial32", "times32", "courie32", "vcredist2019", "dotnet48"]
 extra_deps = [dep.strip() for dep in os.environ.get("BOTTLES_CC_EXTRA_DEPS", "").split(",") if dep.strip()]
 deps.extend(dep for dep in extra_deps if dep not in deps)
+dependency_order = {
+    "corefonts": 10,
+    "arial32": 20,
+    "times32": 21,
+    "courie32": 22,
+    "vcredist2019": 30,
+    "dotnet40": 40,
+    "dotnet48": 41,
+    "gecko": 50,
+    "mono": 51,
+    "iertutil": 60,
+    "wininet": 61,
+    "urlmon": 62,
+    "jscript": 63,
+    "riched20": 64,
+    "webview2": 70,
+}
+deps = sorted(deps, key=lambda dep: (dependency_order.get(dep, 1000), dep))
 manager = Manager(g_settings=Gio.Settings.new(APP_ID), is_cli=False)
 time.sleep(3)
 index = yaml.load(urllib.request.urlopen("https://proxy.usebottles.com/repo/dependencies/index.yml", timeout=30).read())

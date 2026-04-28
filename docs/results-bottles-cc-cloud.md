@@ -9,6 +9,7 @@ Status: in progress.
 | Phase 0: Branch setup | 2026-04-28T09:05:00+08:00 | 2026-04-28T09:08:02+08:00 | 20 min | Scaffolded Bottles approach from `main`; Flatpak preferred and native Bottles retained only as fallback context. |
 | Phase 1: Research | 2026-04-28T09:08:03+08:00 | 2026-04-28T09:09:45+08:00 | 20 min | Selected `caffe` primary and `soda` fallback; no Lightroom-cloud-specific Bottles success report found. |
 | Phase 2 attempt 1: `caffe` default deps | 2026-04-28T09:14:46+08:00 | 2026-04-28T09:50:01+08:00 | 90 min | Bottle and dependencies installed after script fixes; Adobe bootstrapper launched, prompted for Gecko, then hung with no CC Desktop installation. |
+| Phase 2 attempt 2a: `caffe` browser deps | 2026-04-28T09:53:58+08:00 | 2026-04-28T10:45:00+08:00 | 90 min | Invalidated by script dependency-order bug: native `wininet` was enabled before `iertutil`, causing Wine to enter `winedbg` while setting the `urlmon` override. |
 
 ## Target
 
@@ -70,3 +71,25 @@ HTTP Request Status code 200.
 ```
 
 Decision for attempt 1: proceed to attempt 2, still on primary runner, with additional Adobe-specific browser/runtime dependencies.
+
+### Attempt 2a: Primary Runner, Browser Deps, Invalid Script Ordering
+
+- Runner: `caffe`, normalized by the script to `caffe-9.7`.
+- Bottle: `LightroomCCCloudAttempt2`.
+- Dependencies requested through Bottles backend: `arial32`, `times32`, `courie32`, `vcredist2019`, `dotnet48`, `gecko`, `mono`, `wininet`, `urlmon`, `iertutil`, `riched20`, `webview2`.
+- Log: `~/.local/state/lightroom-arch/bottles-cc-phase2-2.log`.
+- Outcome: invalid attempt. The dependency manager installed `wininet` before `iertutil`; enabling the native `wininet` override caused Wine itself to fail before `iertutil` could be installed.
+
+Representative log excerpt:
+
+```text
+Dependency installed: wininet in LightroomCCCloudAttempt2
+Installing dependency [urlmon] in bottle [LightroomCCCloudAttempt2].
+Copying urlmon.dll to .../drive_c/windows/system32//urlmon.dll
+Adding Key: [HKEY_CURRENT_USER\Software\Wine\DllOverrides] with Value: [urlmon] and Data: [native,builtin]
+err:module:import_dll Library iertutil.dll (which is needed by L"C:\\windows\\system32\\wininet.dll") not found
+err:module:DelayLoadFailureHook failed to delay load wininet.dll.InternetOpenA
+wine: Unimplemented function wininet.dll.InternetOpenA called ... starting debugger...
+```
+
+Script fix: order browser DLL dependencies so `iertutil` is installed before `wininet` and `urlmon`. Re-run attempt 2 after this fix because the failure did not exercise the Adobe bootstrapper.
