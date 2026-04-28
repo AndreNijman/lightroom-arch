@@ -11,6 +11,7 @@ Status: in progress.
 | Phase 2 attempt 1: `caffe` default deps | 2026-04-28T09:14:46+08:00 | 2026-04-28T09:50:01+08:00 | 90 min | Bottle and dependencies installed after script fixes; Adobe bootstrapper launched, prompted for Gecko, then hung with no CC Desktop installation. |
 | Phase 2 attempt 2a: `caffe` browser deps | 2026-04-28T09:53:58+08:00 | 2026-04-28T10:45:00+08:00 | 90 min | Invalidated by script dependency-order bug: native `wininet` was enabled before `iertutil`, causing Wine to enter `winedbg` while setting the `urlmon` override. |
 | Phase 2 attempt 2b: `caffe` browser deps reordered | 2026-04-28T10:46:38+08:00 | 2026-04-28T11:13:02+08:00 | 90 min | Dependencies installed and Adobe bootstrapper launched with WebView2, but no visible window or Creative Cloud install appeared; process looped on WinRT/RPC/OLE errors. |
+| Phase 2 attempt 3: `soda` default deps | 2026-04-28T11:14:43+08:00 | 2026-04-28T11:58:00+08:00 | 90 min | Fallback runner installed dependencies and launched Adobe bootstrapper. A hidden `Creative Cloud Installer` X11 window was found and mapped, but the installer content stayed black and no CC Desktop executable was installed. |
 
 ## Target
 
@@ -145,3 +146,68 @@ HTTP Request Status code 200.
 ```
 
 Decision for attempt 2: proceed to the single fallback runner attempt. The added browser stack improved dependency coverage but did not get past the Creative Cloud bootstrapper wall.
+
+### Attempt 3: Fallback Runner, Default Deps
+
+- Runner: `soda`, normalized by the script to `soda-9.0-1`.
+- Bottle: `LightroomCCCloudAttempt3`.
+- Dependencies installed through Bottles backend: `arial32`, `times32`, `courie32`, `vcredist2019`, `dotnet48`.
+- Log: `~/.local/state/lightroom-arch/bottles-cc-phase2-3.log`.
+- Install log: `~/.local/state/lightroom-arch/bottles-cc-phase2-3-install.log`.
+- Additional diagnostic trace: `/tmp/lightroom-attempt3.strace.*`.
+- Screenshot: `docs/screenshots/bottles-cc-cloud/attempt3-creative-cloud-installer-black.png`.
+- Outcome: failed. The Adobe bootstrapper launched and created a `Creative Cloud Installer` X11 window, but the window was initially hidden from Hyprland. After mapping it manually with `xdotool`, the installer surface was blank black and did not install Creative Cloud Desktop.
+
+Commands:
+
+```sh
+BOTTLES_CC_BOTTLE=LightroomCCCloudAttempt3 \
+BOTTLES_CC_RUNNER=soda \
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/bottles-cc-phase2-3-install.log \
+scripts/install.sh --approach bottles-cc-cloud --version cc-cloud --installer /home/andre/Downloads/Lightroom
+```
+
+Important observations:
+
+- Wine displayed a Gecko prompt. The user clicked `Install`; the prompt closed.
+- The bootstrapper continued running with low CPU but no visible UI for roughly 20 minutes.
+- Hyprland initially reported no Adobe/Wine window, but Xwayland had an unmapped X11 window named `Creative Cloud Installer`.
+- The hidden window was mapped and raised with `xdotool windowmap 16777217 windowraise 16777217 windowactivate 16777217`.
+- Once mapped, Hyprland reported `class=steam_proton`, `title=Creative Cloud Installer`, `pid=973932`, `xwayland=true`, workspace `3`, monitor `0`, size `958x584`.
+- The mapped installer rendered as a black window only. A focus/resize repaint nudge did not change it.
+- `strace` showed repeated Wine message-loop traffic: reads/writes with `wineserver`, `sched_yield`, and nonblocking X/Unix socket reads returning `EAGAIN`. There were no installer payload downloads, no Creative Cloud child process, and no Adobe application install writes.
+- No `Creative Cloud.exe`, `ACC*.exe`, or `Lightroom.exe` was found in the bottle.
+- The process was terminated with SIGTERM after diagnostics at user direction.
+
+Representative log excerpts:
+
+```text
+[INFO] bottle=LightroomCCCloudAttempt3
+[INFO] runner=soda
+[INFO] expected_lightroom_exe=/home/andre/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloudAttempt3/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe
+[INFO] bottles.component=soda-9.0-1 status=download url=https://github.com/bottlesdevs/wine/releases/download/soda-9.0-1/soda-9.0-1-x86_64.tar.xz
+[INFO] bottles.dependencies=arial32,times32,courie32,vcredist2019,dotnet48 extra=none method=bottles-backend
+[INFO] run: bottles_cc::flatpak_env flatpak run --command=bottles-cli com.usebottles.bottles run -b LightroomCCCloudAttempt3 -e .../Lightroom_Set-Up_707q.exe
+[ERROR] Lightroom cloud executable not found after install: /home/andre/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloudAttempt3/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe
+```
+
+Representative diagnostics:
+
+```text
+Creative Cloud Installer window:
+  X11 id: 16777217
+  WM_CLASS: steam_proton
+  Geometry: 1360x799 at 280,213
+  Hyprland: mapped=true hidden=false xwayland=true
+
+strace:
+  read
+  epoll_wait
+  rt_sigprocmask
+  getrusage
+  write/writev
+  sched_yield
+  recvmsg(...)= -1 EAGAIN
+```
+
+Decision for attempt 3: stop Phase 2 after the final allowed runner attempt. The fallback runner changed the visible failure mode from no mapped window to a blank Creative Cloud Installer window, but still did not complete the Creative Cloud Desktop bootstrap.
