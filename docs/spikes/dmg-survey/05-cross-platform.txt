@@ -1,0 +1,129 @@
+Phase 4.3 cross-platform runtime/code check
+============================================
+
+$ find /tmp/dmg-survey/extracted -name "*.jar" -o -name "*.class"
+
+$ find /tmp/dmg-survey/extracted -name "*.py" -o -name "*.pyc"
+
+$ find /tmp/dmg-survey/extracted -name "*.lua" -o -name "*.js" -o -name "*.html" -not -path "*/Resources/en.lproj/*"
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/utils.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/IE8/angular.min.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/IE8/jquery.min.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/angular.min.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.custom-scrollbar.min.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.min.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.placeholder.min.js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html
+
+JavaScript/HTML/CSS candidate sizes:
+3702 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.placeholder.min.js
+4138 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/utils.js
+7105 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js
+14718 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.custom-scrollbar.min.js
+18755 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js
+19420 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js
+20487 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html
+27317 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.css
+89475 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.min.js
+93636 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/IE8/jquery.min.js
+108238 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/IE8/angular.min.js
+176530 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/angular.min.js
+718925 /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/clean.css
+
+Selected HTML/JS references indicating host environment:
+
+$ grep -RIE "webkit|WebView|cef|cep|window\.|external|Native|Install|LaunchServices|com\.adobe|adobe" Resources/main.html Resources/js
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:<html style="width: 100%; height: 100%; overflow:hidden;" ng-app="AdobeInstaller">
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:    <title>Adobe Installer</title>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                <input id="piiContinueButton" class="btn btn-primary" type="button" value="{{ Utils.getLocalizedString('StartInstalling') }}" ng-click='mainCtrl.piiContinueButtonClick()' style='float:left' />
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                                            <div class="progressText ellip-line" ng-show="!mainCtrl.isInErrorState">{{ Utils.getLocalizedString('InstallingPercent', mainCtrl.currentProgress.toString()) }}</div>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                                            <div class="progressText ellip-line" ng-show="mainCtrl.isInErrorState">{{ Utils.getLocalizedString('InstallationFailedHeader') }}</div>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                                            <span class="minutesLeftText" ng-show="mainCtrl.isInErrorState"> {{ Utils.getLocalizedString('InstallationFailedSubHeader') }}</span>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                <div id="launchScreenText1" class="launchScreenText1">{{ Utils.getLocalizedString("InstallationComplete") }}</div>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                <div id="launchScreenText2" class="launchScreenText2">{{ Utils.getLocalizedString(mainCtrl.autoDeleteAfterInstall?"AppIsOpeningAndAutoDeleteInstaller":"AppIsOpening", mainCtrl.applicationName) }}</div>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/utils.js: * if any.  The intellectual and technical concepts contained
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js: * if any.  The intellectual and technical concepts contained
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("overrideCrossButtonState", "false");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("overrideCrossButtonState", "true");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("quitConfirmationNoClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("quitConfirmationYesClicked", JSON.stringify(quitConfirmationFeedbackData));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        if (!(screenData == undefined || screenData == null) && "isMessageFromNative" in screenData && screenData["isMessageFromNative"] == "true")
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:            //isMessageFromNative is true when quitConfirmation message is sent from Native
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("retryClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:                self.alertTitle = Utils.getLocalizedString("RetryInstallationTitle");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:                self.alertTitle = Utils.getLocalizedString("InstallationFailedTitle");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:                stringLocation += Utils.getLocalizedString("InstallLocationDefault");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:            var locationStr = Utils.getLocalizedString("InstallLocation");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:            sendMessageToNative("locationRetryClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("proxyAlertLoginButtonClicked", JSON.stringify(details));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js: * if any.  The intellectual and technical concepts contained
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:    self.autoDeleteAfterInstall = false;
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:        if (jsonData.autoDeleteAfterInstall == "true")
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:            self.autoDeleteAfterInstall = true;
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:        Utils.getElemById("webSSOPollingScreenTitle").innerHTML = Utils.getLocalizedString('InstallProduct', self.applicationName);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:        Utils.getElemById("pollingWaitScreenTitle").innerHTML = Utils.getLocalizedString('InstallProduct', self.applicationName);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:			Utils.getElemById("welcomeScreenTitle").innerHTML = Utils.getLocalizedString('InstallProduct', self.applicationName);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:	    sendMessageToNative("welcomeContinueButtonClick", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:    	Utils.getElemById("surveyScreenTitle").innerHTML = Utils.getLocalizedString('InstallProduct', self.applicationName);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:        sendMessageToNative("surveyContinueButtonClicked", JSON.stringify(surveyResponse));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:	    sendMessageToNative("testAppContinueButtonClicked", JSON.stringify(jsonResponse));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:		Utils.getElemById("piiScreenTitle").innerHTML = Utils.getLocalizedString('InstallProduct', self.applicationName);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:	    sendMessageToNative("piiContinueButtonClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:            jsonData.errorURL = 'MinimalisticKaizenInstaller';
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:                    sendMessageToNative("carouselLoadComplete", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:            sendMessageToNative("defaultContentShown", data);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js: * if any.  The intellectual and technical concepts contained
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js://Native Gateway
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:function sendMessageToNative(message, jsonData) {
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        if (window.JSObject) {
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:            var retVal = window.JSObject.messageFromHtml(message, jsonDataString);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("logMessage", message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:function messageFromNative(message, jsonDataString) {
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    logMessage("Start messageFromNativeToUI: " + message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        logMessage("Exception occured while handling message '" + message + "' : " + e.message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    logMessage("End messageFromNativeToUI: " + message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative(jsonData.message, e.data);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        sendMessageToNative("documentReady", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:var appModule = angular.module('AdobeInstaller', []);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("openurl", event.target.href);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        sendMessageToNative(analyticsMsg, "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("openFileURL", event.target.href);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("locationChangeClicked", self.pathResponseData);
+
+Info.plist UI/runtime hints:
+bplist00
+ !"#$!%&()23456789:70WDTXcodeYDTSDKName_
+NSHumanReadableCopyright\CFBundleNameZDTSDKBuild_
+CFBundleDevelopmentRegion_
+CFBundleVersion_
+BuildMachineOSBuild_
+NSPrincipalClass]NSMainNibFile_
+CFBundleShortVersionString_
+CFBundlePackageType_
+CFBundleSupportedPlatforms_
+CFBundleIconFile_
+NSAppTransportSecurity_
+CFBundleInfoDictionaryVersion_
+CFBundleExecutableZDTCompiler_
+CFBundleIdentifier_
+DTPlatformVersion\DTXcodeBuild_
+CFBundleSignature_
+LSMinimumSystemVersion_
+SMPrivilegedExecutables_
+DTPlatformBuild[LSUIElementT1020[macosx10.14o
+Lightroom InstallerV18E219WEnglishX5.3.5.13U19G73]NSApplicationXMainMenuTAPPL
+'VMacOSXXapp.icns
+NSExceptionDomains
+,-Yadobe.com
+./00_
+"NSExceptionAllowsInsecureHTTPLoads_
+NSIncludesSubdomains		S6.0WInstall_
+"com.apple.compilers.llvm.clang.1_0_
+com.adobe.InstallRGMW10E1001Q1T10.7
+com.adobe.acc.installer.v2_
+@anchor apple generic and identifier "com.adobe.acc.installer.v2"	
+
+Conclusion: no Java, Python, Lua, or standalone scripting runtime found. HTML/JS/CSS assets appear to be resources for a native macOS installer UI, not an Electron/CEF application.
