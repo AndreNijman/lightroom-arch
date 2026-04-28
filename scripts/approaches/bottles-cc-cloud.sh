@@ -170,7 +170,8 @@ bottles_cc::download_component() {
   fi
 
   printf '%s  %s\n' "${checksum}" "${archive_path}" | md5sum -c -
-  root_dir=$(tar -tf "${archive_path}" | head -n 1 | cut -d/ -f1)
+  root_dir=$(tar -tf "${archive_path}" | sed -n '1p')
+  root_dir=${root_dir%%/*}
   fs::run tar -xf "${archive_path}" -C "${install_dir}"
   target_dir=${root_dir%-x86_64}
   if [[ "${root_dir}" != "${target_dir}" && -d "${install_dir}/${root_dir}" && ! -e "${install_dir}/${target_dir}" ]]; then
