@@ -127,10 +127,6 @@ drive_c/users/andre/AppData/Local/Adobe/OOBE
 | Develop exposure/contrast feedback under 2 seconds | Blocked | Lightroom was not installed. |
 | Exports JPEG verified by `file` and `identify` | Blocked | Lightroom was not installed. |
 
-## Screenshots
-
-- `docs/screenshots/lutris/install-creative-cloud-bootstrapper.png`: desktop state during the Creative Cloud bootstrapper run. No Lightroom window was available to capture.
-
 ## Known Issues
 
 - The provided Windows installer is a Creative Cloud bootstrapper, not the Lightroom 5.x offline installer this approach targets.
