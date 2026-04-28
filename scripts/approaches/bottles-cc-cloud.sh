@@ -18,6 +18,7 @@ done
 : "${BOTTLES_CC_LATENCYFLEX:=latencyflex-v0.1.1}"
 : "${BOTTLES_CC_FLATPAK_APP:=com.usebottles.bottles}"
 : "${BOTTLES_CC_DATA_HOME:=${HOME}/.var/app/${BOTTLES_CC_FLATPAK_APP}/data/bottles}"
+: "${BOTTLES_CC_EXTRA_DEPS:=}"
 : "${BOTTLES_CC_EXPECTED_EXE:=${HOME}/.var/app/com.usebottles.bottles/data/bottles/bottles/${BOTTLES_CC_BOTTLE}/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe}"
 
 LIGHTROOM_ARCH_INSTALLER=''
@@ -229,11 +230,12 @@ bottles_cc::create_bottle() {
 }
 
 bottles_cc::install_dependencies() {
-  log::info "bottles.dependencies=arial32,times32,courie32,vcredist2019,dotnet48 method=bottles-backend"
+  log::info "bottles.dependencies=arial32,times32,courie32,vcredist2019,dotnet48 extra=${BOTTLES_CC_EXTRA_DEPS:-none} method=bottles-backend"
   if [[ "${LIGHTROOM_ARCH_DRY_RUN}" == "1" ]]; then
     return 0
   fi
-  bottles_cc::flatpak_env flatpak run --command=python3 "${BOTTLES_CC_FLATPAK_APP}" - "${BOTTLES_CC_BOTTLE}" <<'PY'
+  BOTTLES_CC_EXTRA_DEPS="${BOTTLES_CC_EXTRA_DEPS}" bottles_cc::flatpak_env flatpak run --command=python3 "${BOTTLES_CC_FLATPAK_APP}" - "${BOTTLES_CC_BOTTLE}" <<'PY'
+import os
 import sys
 import time
 import urllib.request
@@ -252,6 +254,8 @@ from bottles.frontend.params import APP_ID
 
 bottle_name = sys.argv[1]
 deps = ["arial32", "times32", "courie32", "vcredist2019", "dotnet48"]
+extra_deps = [dep.strip() for dep in os.environ.get("BOTTLES_CC_EXTRA_DEPS", "").split(",") if dep.strip()]
+deps.extend(dep for dep in extra_deps if dep not in deps)
 manager = Manager(g_settings=Gio.Settings.new(APP_ID), is_cli=False)
 time.sleep(3)
 index = yaml.load(urllib.request.urlopen("https://proxy.usebottles.com/repo/dependencies/index.yml", timeout=30).read())
