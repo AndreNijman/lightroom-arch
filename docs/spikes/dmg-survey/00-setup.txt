@@ -1,0 +1,31 @@
+Phase 0 setup
+=============
+
+Repository: /home/andre/projects/lightroom-arch
+Branch created: spike/dmg-survey
+Temporary workspace: /tmp/dmg-survey
+Report directory: docs/spikes/dmg-survey
+
+Required tool inventory:
+
+- 7z: /usr/bin/7z (already present)
+- dmg2img: missing
+- file: /usr/bin/file (already present)
+- strings: /usr/bin/strings (already present)
+- xxd: /usr/bin/xxd (already present)
+- jq: /usr/bin/jq (already present)
+
+Install attempts:
+
+- `pacman -S --needed --noconfirm dmg2img`
+  - Result: failed, `error: target not found: dmg2img`
+- `pacman -Fy && pacman -F dmg2img`
+  - Result: package file database refreshed, no package owning `dmg2img` found
+- `yay -Ss '^dmg2img$'`
+  - Result: refused because this session is running as root (`Avoid running yay as root/sudo.`)
+
+Notes:
+
+- `dmg2img` is unavailable on this host via configured pacman repositories.
+- The survey will still attempt 7z-based DMG inspection/extraction first, as requested.
+- Any `dmg2img` metadata or fallback extraction steps will be recorded as skipped if the tool remains unavailable.
