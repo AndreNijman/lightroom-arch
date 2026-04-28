@@ -8,6 +8,7 @@ Status: in progress.
 | --- | --- | --- | --- | --- |
 | Phase 0: Branch setup | 2026-04-28T09:05:00+08:00 | 2026-04-28T09:08:02+08:00 | 20 min | Scaffolded Bottles approach from `main`; Flatpak preferred and native Bottles retained only as fallback context. |
 | Phase 1: Research | 2026-04-28T09:08:03+08:00 | 2026-04-28T09:09:45+08:00 | 20 min | Selected `caffe` primary and `soda` fallback; no Lightroom-cloud-specific Bottles success report found. |
+| Phase 2 attempt 1: `caffe` default deps | 2026-04-28T09:14:46+08:00 | 2026-04-28T09:50:01+08:00 | 90 min | Bottle and dependencies installed after script fixes; Adobe bootstrapper launched, prompted for Gecko, then hung with no CC Desktop installation. |
 
 ## Target
 
@@ -19,3 +20,53 @@ Status: in progress.
 - Primary runner: `caffe`
 - Fallback runner: `soda`
 - Expected Lightroom executable: `~/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloud/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe`
+
+## Phase 2: Bottle Creation And Bootstrapper Install
+
+### Attempt 1: Primary Runner, Default Deps
+
+- Runner: `caffe`, normalized by the script to `caffe-9.7`.
+- Components provisioned: `caffe-9.7`, `dxvk-2.7.1`, `vkd3d-proton-3.0`, `dxvk-nvapi-v0.9.1`, `latencyflex-v0.1.1`.
+- Dependencies installed through Bottles backend: `arial32`, `times32`, `courie32`, `vcredist2019`, `dotnet48`.
+- Log: `~/.local/state/lightroom-arch/bottles-cc-phase2-1.log`.
+- Outcome: failed. The Adobe bootstrapper started and wrote WAM/Dunamis logs, but did not install Creative Cloud Desktop or Lightroom.
+
+Commands:
+
+```sh
+BOTTLES_CC_RUNNER=caffe \
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/bottles-cc-phase2-1-install.log \
+scripts/install.sh --approach bottles-cc-cloud --version cc-cloud --installer /home/andre/Downloads/Lightroom
+```
+
+Important observations:
+
+- Bottles CLI runs in forced offline mode, so the first implementation could not fetch managed components. The script now provisions the pinned runner and DLL components before invoking `bottles-cli`.
+- `bottles-cli` has no `dependencies` subcommand in Bottles 63.2. The script now invokes Bottles' Python backend dependency manager from inside the Flatpak.
+- Flatpak sandboxing blocked the original installer path. The script now stages the installer under `~/.var/app/com.usebottles.bottles/data/bottles/temp/lightroom-arch-installers/`.
+- Wine displayed a `Wine Gecko Installer` prompt. The user clicked `Install`; the prompt closed.
+- After Gecko completed, no Adobe installer window appeared. The only remaining installer process was `Lightroom_Set-Up_707q.exe`.
+- No `Creative Cloud.exe`, `Creative Cloud*.exe`, `ACC*.exe`, or `Lightroom.exe` was found in the bottle.
+
+Representative log excerpts:
+
+```text
+dependency=arial32 status=installed
+dependency=times32 status=installed
+dependency=courie32 status=installed
+dependency=vcredist2019 status=installed
+dependency=dotnet48 status=installed
+[INFO] installer.staged=/home/andre/.var/app/com.usebottles.bottles/data/bottles/temp/lightroom-arch-installers/Lightroom_Set-Up_707q.exe
+[INFO] run: bottles_cc::flatpak_env flatpak run --command=bottles-cli com.usebottles.bottles run -b LightroomCCCloud -e /home/andre/.var/app/com.usebottles.bottles/data/bottles/temp/lightroom-arch-installers/Lightroom_Set-Up_707q.exe
+01c0:err:kerberos:kerberos_LsaApInitializePackage no Kerberos support, expect problems
+020c:err:ole:ifproxy_release_public_refs IRemUnknown_RemRelease failed with error 0x800706be
+```
+
+Adobe WAM/Dunamis logs showed the bootstrapper initialized and reached Adobe telemetry:
+
+```text
+Application initialized successfully.
+HTTP Request Status code 200.
+```
+
+Decision for attempt 1: proceed to attempt 2, still on primary runner, with additional Adobe-specific browser/runtime dependencies.
