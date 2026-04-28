@@ -1,0 +1,174 @@
+Phase 4.1 binary inventory
+==========================
+
+Note: the requested `find ... | xargs file` pipeline is whitespace-unsafe for this DMG because the top-level app path contains spaces (`Lightroom Installer`). A NUL-safe equivalent was used for the inventory below.
+
+$ find /tmp/dmg-survey/extracted -type f -print0 | xargs -0 file 2>/dev/null | sort -u | head -200
+/tmp/dmg-survey/extracted/Lightroom Installer/.DS_Store:                                                                          Apple Desktop Services Store
+/tmp/dmg-survey/extracted/Lightroom Installer/.background.tiff:                                                                   TIFF image data, big-endian, direntries=20, width=446, height=376, bps=0, compression=LZW, PhotometricInterpretation=RGB, description=LRCC_BG1.png, orientation=upper-left
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Info.plist:                                        Apple binary property list
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library/LaunchServices/com.adobe.acc.installer.v2: Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install:                                     Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:                                           ASCII text, with no line terminators
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeDirectory:                Mac OS X Code Directory version 20200 flags 0x10000 - 131 bytes
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeRequirements-1:           Mac OS X Code Directory version 20200 flags 0x10000 - 167 bytes
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeRequirements:             Mac OS X Code Requirement Set - 180 bytes
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeSignature:                DER Encoded PKCS#7 Signed Data
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/cs_CZ.json:                   Unicode text, UTF-16, little-endian text, with very long lines (366)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/da_DK.json:                   Unicode text, UTF-16, little-endian text, with very long lines (328)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/de_DE.json:                   Unicode text, UTF-16, little-endian text, with very long lines (457)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/en_US.json:                   Unicode text, UTF-16, little-endian text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/es_ES.json:                   Unicode text, UTF-16, little-endian text, with very long lines (363)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/es_MX.json:                   Unicode text, UTF-16, little-endian text, with very long lines (363)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/fi_FI.json:                   Unicode text, UTF-16, little-endian text, with very long lines (317)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/fr_CA.json:                   Unicode text, UTF-16, little-endian text, with very long lines (376)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/fr_FR.json:                   Unicode text, UTF-16, little-endian text, with very long lines (376)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/it_IT.json:                   Unicode text, UTF-16, little-endian text, with very long lines (362)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/ja_JP.json:                   Unicode text, UTF-16, little-endian text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/ko_KR.json:                   Unicode text, UTF-16, little-endian text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/nb_NO.json:                   Unicode text, UTF-16, little-endian text, with very long lines (328)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/nl_NL.json:                   Unicode text, UTF-16, little-endian text, with very long lines (338)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/pl_PL.json:                   Unicode text, UTF-16, little-endian text, with very long lines (355)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/pt_BR.json:                   Unicode text, UTF-16, little-endian text, with very long lines (354)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/ru_RU.json:                   Unicode text, UTF-16, little-endian text, with very long lines (359)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/sv_SE.json:                   Unicode text, UTF-16, little-endian text, with very long lines (316)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/tr_TR.json:                   Unicode text, UTF-16, little-endian text, with very long lines (379)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/zh_CN.json:                   Unicode text, UTF-16, little-endian text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary/zh_TW.json:                   Unicode text, UTF-16, little-endian text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/English.lproj/InfoPlist.strings:         Unicode text, UTF-16, little-endian text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/MainMenu.nib:                            Apple binary property list
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/app.icns:                                Mac OS X icon, 57328 bytes, "ic12" type
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/clean.css:                               ASCII text, with very long lines (63639)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/config.xml:                              ASCII text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/cs.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/da.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/de.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/es.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/fi.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/fr.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/cancelButton.png:                 PNG image data, 12 x 12, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/cancelButton2x.png:               PNG image data, 24 x 24, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/ccIcon.png:                       PNG image data, 29 x 22, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/ccIcon2x.png:                     PNG image data, 58 x 44, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/check.png:                        PNG image data, 12 x 12, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/check2x.png:                      PNG image data, 24 x 24, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/checkEmpty.png:                   PNG image data, 12 x 12, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/checkEmpty2x.png:                 PNG image data, 24 x 24, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/checkFull.png:                    PNG image data, 12 x 12, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/checkFull2x.png:                  PNG image data, 24 x 24, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/checkmark.png:                    PNG image data, 64 x 64, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/checkmark2x.png:                  PNG image data, 128 x 128, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/dropdown.png:                     PNG image data, 12 x 12, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/dropdown2x.png:                   PNG image data, 24 x 24, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/elevation.png:                    PNG image data, 219 x 103, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/elevation2x.png:                  PNG image data, 219 x 103, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/errorIcon.png:                    PNG image data, 16 x 16, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/errorIcon2x.png:                  PNG image data, 32 x 32, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/productIcon.png:                  PNG image data, 44 x 42, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/productIcon2x.png:                PNG image data, 88 x 84, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/productIcon4x.png:                PNG image data, 176 x 168, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/spinner.gif:                      GIF image data, version 89a, 64 x 64
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/spinner2x.gif:                    GIF image data, version 89a, 128 x 128
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/timer.png:                        PNG image data, 48 x 48, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/images/timer2x.png:                      PNG image data, 96 x 96, 8-bit/color RGBA, non-interlaced
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/it.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/ja.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:                              JavaScript source, ASCII text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:                    JavaScript source, ASCII text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:                 JavaScript source, ASCII text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/utils.js:                             JavaScript source, Unicode text, UTF-8 (with BOM) text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/ko.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/IE8/angular.min.js:                  JavaScript source, ASCII text, with very long lines (564)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/IE8/jquery.min.js:                   JavaScript source, ASCII text, with very long lines (65483)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/angular.min.js:                      JavaScript source, ASCII text, with very long lines (647)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.custom-scrollbar.min.js:      JavaScript source, ASCII text, with very long lines (8681)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.min.js:                       JavaScript source, ASCII text, with very long lines (65451)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib/jquery.placeholder.min.js:           JavaScript source, ASCII text, with very long lines (3604)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.css:                                assembler source, ASCII text, with very long lines (677)
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                               HTML document, Unicode text, UTF-8 (with BOM) text
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/nb.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/nl.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/pl.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/pt.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/ru.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/sv.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/tr.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh-Hans.lproj/InfoPlist.strings:         empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh-Hant.lproj/InfoPlist.strings:         empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh.lproj/InfoPlist.strings:              empty
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/_CodeSignature/CodeResources:                      XML 1.0 document, ASCII text
+
+Full file type inventory (all extracted files, unique file -b output):
+     19 empty
+      6 Unicode text, UTF-16, little-endian text
+      5 PNG image data, 24 x 24, 8-bit/color RGBA, non-interlaced
+      5 PNG image data, 12 x 12, 8-bit/color RGBA, non-interlaced
+      3 JavaScript source, ASCII text
+      2 Unicode text, UTF-16, little-endian text, with very long lines (376)
+      2 Unicode text, UTF-16, little-endian text, with very long lines (363)
+      2 Unicode text, UTF-16, little-endian text, with very long lines (328)
+      2 PNG image data, 219 x 103, 8-bit/color RGBA, non-interlaced
+      2 Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+      2 Apple binary property list
+      1 assembler source, ASCII text, with very long lines (677)
+      1 XML 1.0 document, ASCII text
+      1 Unicode text, UTF-16, little-endian text, with very long lines (457)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (379)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (366)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (362)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (359)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (355)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (354)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (338)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (317)
+      1 Unicode text, UTF-16, little-endian text, with very long lines (316)
+      1 TIFF image data, big-endian, direntries=20, width=446, height=376, bps=0, compression=LZW, PhotometricInterpretation=RGB, description=LRCC_BG1.png, orientation=upper-left
+      1 PNG image data, 96 x 96, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 88 x 84, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 64 x 64, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 58 x 44, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 48 x 48, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 44 x 42, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 32 x 32, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 29 x 22, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 176 x 168, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 16 x 16, 8-bit/color RGBA, non-interlaced
+      1 PNG image data, 128 x 128, 8-bit/color RGBA, non-interlaced
+      1 Mac OS X icon, 57328 bytes, "ic12" type
+      1 Mac OS X Code Requirement Set - 180 bytes
+      1 Mac OS X Code Directory version 20200 flags 0x10000 - 167 bytes
+      1 Mac OS X Code Directory version 20200 flags 0x10000 - 131 bytes
+      1 JavaScript source, Unicode text, UTF-8 (with BOM) text
+      1 JavaScript source, ASCII text, with very long lines (8681)
+      1 JavaScript source, ASCII text, with very long lines (65483)
+      1 JavaScript source, ASCII text, with very long lines (65451)
+      1 JavaScript source, ASCII text, with very long lines (647)
+      1 JavaScript source, ASCII text, with very long lines (564)
+      1 JavaScript source, ASCII text, with very long lines (3604)
+      1 HTML document, Unicode text, UTF-8 (with BOM) text
+      1 GIF image data, version 89a, 64 x 64
+      1 GIF image data, version 89a, 128 x 128
+      1 DER Encoded PKCS#7 Signed Data
+      1 Apple Desktop Services Store
+      1 ASCII text, with very long lines (63639)
+      1 ASCII text, with no line terminators
+      1 ASCII text
+
+Counts derived from file output:
+Mach-O binaries: 2
+ELF binaries: 0
+Universal/fat Mach-O binaries: 0
+Architecture-independent candidate files by extension (.jar .class .py .pyc .js .html .css .xml): 14
+
+.app bundles:
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app
+
+.framework directories:
+
+.dylib files:
+
+.bundle directories:
+
+Mach-O files identified:
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library/LaunchServices/com.adobe.acc.installer.v2: Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install:                                     Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
