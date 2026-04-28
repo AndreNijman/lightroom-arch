@@ -1,0 +1,151 @@
+# Wine CC Cloud Results
+
+Status: aborted - incomplete.
+
+## Timing Log
+
+| Phase | Started | Ended | Budget | Outcome |
+| --- | --- | --- | --- | --- |
+| Phase 0: Branch setup | 2026-04-28T08:28:29+08:00 | 2026-04-28T08:28:29+08:00 | 15 min | Scaffolded from `main`; prerequisites checked. |
+| Phase 1: Research | 2026-04-28T08:28:30+08:00 | 2026-04-28T08:30:44+08:00 | 30 min | No Lightroom-cloud-specific Wine success report found; Adobe CC/Photoshop evidence only. |
+| Phase 2 attempt 1: bare Wine + bootstrapper | 2026-04-28T08:31:00+08:00 | 2026-04-28T08:32:59+08:00 | 2 hr phase budget | Failed. Bootstrapper produced Adobe OOBE/dunamis state only; no Creative Cloud app and no Lightroom executable. |
+| Phase 2 attempt 2: corefonts vcrun2019 dotnet48 + bootstrapper | 2026-04-28T08:33:28+08:00 | 2026-04-28T08:45:29+08:00 | 2 hr phase budget | Failed. Dependencies installed, but bootstrapper hit the same MSHTML/JScript failure and produced no Creative Cloud or Lightroom executable. |
+| Phase 2 attempt 3: add mshtml jscript ie8 + bootstrapper | 2026-04-28T08:46:40+08:00 | 2026-04-28T08:59:42+08:00 | 2 hr phase budget | Failed. Current winetricks does not provide `mshtml`; bootstrapper again hit the same MSHTML/JScript failure and produced no Creative Cloud or Lightroom executable. |
+| Abort decision | 2026-04-28T08:59:42+08:00 | 2026-04-28T09:00:31+08:00 | 6 hr total budget | Aborted after three consecutive commits with no measurable progress on the CC bootstrapper blocker. |
+
+## Target
+
+- Product: Adobe Lightroom cloud through Adobe Creative Cloud desktop.
+- Not in scope: Lightroom Classic, Lightroom 6 standalone.
+- Prefix: `~/.wine-lightroom-cc`
+- Expected executable: `~/.wine-lightroom-cc/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe`
+
+## Environment
+
+```text
+Linux ThinkpadL16 6.19.13-arch1-1 #1 SMP PREEMPT_DYNAMIC Tue, 21 Apr 2026 23:38:22 +0000 x86_64 GNU/Linux
+wine-staging 11.7-1
+winetricks 20260125-1
+wine-gecko 2.47.4-2
+wine-mono 11.0.0-1
+GPU: Advanced Micro Devices, Inc. [AMD/ATI] HawkPoint1
+```
+
+## Phase 2: CC Bootstrapper Install
+
+### Attempt 1: Bare Wine + Bootstrapper
+
+Command:
+
+```sh
+rm -rf /home/andre/.wine-lightroom-cc
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/cc-cloud-phase2-1-install.log \
+  scripts/install.sh --approach wine-cc-cloud --version cc-cloud \
+  --installer /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe \
+  2>&1 | tee /home/andre/.local/state/lightroom-arch/cc-cloud-phase2-1.log
+```
+
+Outcome: failed. The bootstrapper reached Wine's IE/MSHTML stack, created only Adobe OOBE/dunamis state, and did not install Creative Cloud desktop.
+
+Relevant log excerpt:
+
+```text
+[INFO] run: env WINEPREFIX=/home/andre/.wine-lightroom-cc wine /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe
+017c:fixme:mshtml:process_meta_element Unsupported document mode L"chrome=1"
+017c:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000001
+017c:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000002
+017c:fixme:mshtml:ActiveScriptSite_OnScriptError
+```
+
+Observed prefix artifacts:
+
+```text
+drive_c/users/andre/AppData/Roaming/com.adobe.dunamis
+drive_c/users/andre/AppData/Local/Adobe/OOBE
+```
+
+### Attempt 2: corefonts, vcrun2019, dotnet48 + Bootstrapper
+
+Command:
+
+```sh
+rm -rf /home/andre/.wine-lightroom-cc
+WINEPREFIX=/home/andre/.wine-lightroom-cc WINEARCH=win64 wineboot --init
+WINEPREFIX=/home/andre/.wine-lightroom-cc winetricks -q corefonts vcrun2019 dotnet48
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/cc-cloud-phase2-2-install.log \
+  scripts/install.sh --approach wine-cc-cloud --version cc-cloud \
+  --installer /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe \
+  2>&1 | tee /home/andre/.local/state/lightroom-arch/cc-cloud-phase2-2.log
+```
+
+Outcome: failed. `corefonts`, `vcrun2019`, and `dotnet48` installed into the fresh prefix, but the Adobe bootstrapper still entered Wine's IE/MSHTML stack and failed with the same unsupported document mode and JScript property errors as attempt 1. No Adobe GUI was visible in Hyprland, and the only Adobe paths on disk were temp/OOBE/dunamis state. The process was stopped after no Creative Cloud executable appeared and the hard post-install Lightroom executable verification failed.
+
+Relevant log excerpt:
+
+```text
+020c:fixme:mshtml:process_meta_element Unsupported document mode L"chrome=1"
+020c:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000001
+020c:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000002
+020c:fixme:mshtml:ActiveScriptSite_OnScriptError (0343E948)->(03446560)
+[ERROR] Lightroom cloud executable not found after install: /home/andre/.wine-lightroom-cc/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe
+```
+
+Observed prefix artifacts:
+
+```text
+drive_c/users/andre/AppData/Roaming/com.adobe.dunamis
+drive_c/users/andre/AppData/Local/Temp/Adobe
+drive_c/users/andre/AppData/Local/Adobe
+```
+
+### Attempt 3: add mshtml, jscript, ie8 + Bootstrapper
+
+Command:
+
+```sh
+rm -rf /home/andre/.wine-lightroom-cc
+WINEPREFIX=/home/andre/.wine-lightroom-cc WINEARCH=win64 wineboot --init
+WINEPREFIX=/home/andre/.wine-lightroom-cc winetricks -q corefonts vcrun2019 dotnet48 mshtml jscript ie8
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/cc-cloud-phase2-3-install.log \
+  scripts/install.sh --approach wine-cc-cloud --version cc-cloud \
+  --installer /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe \
+  2>&1 | tee /home/andre/.local/state/lightroom-arch/cc-cloud-phase2-3.log
+```
+
+Outcome: failed. The intended browser-stack workaround could not be applied as written because `winetricks 20260125` reports `Unknown arg mshtml`. The wrapper still continued into the bootstrapper after dependency setup, and the bootstrapper reproduced the same Wine IE/MSHTML and JScript failure signature. No Adobe GUI was visible and no Creative Cloud or Lightroom executable was installed.
+
+Relevant log excerpt:
+
+```text
+Unknown arg mshtml
+0148:fixme:mshtml:process_meta_element Unsupported document mode L"chrome=1"
+0148:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000001
+0148:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000002
+0148:fixme:mshtml:ActiveScriptSite_OnScriptError (0343DC70)->(03445888)
+[ERROR] Lightroom cloud executable not found after install: /home/andre/.wine-lightroom-cc/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe
+```
+
+Observed prefix artifacts:
+
+```text
+drive_c/users/andre/AppData/Roaming/com.adobe.dunamis
+drive_c/users/andre/AppData/Local/Temp/Adobe
+drive_c/users/andre/AppData/Local/Adobe
+```
+
+## Criteria
+
+| Criterion | Status | Evidence |
+| --- | --- | --- |
+| Launches and stays open >=2 min idle | Not reached | Creative Cloud desktop did not install; Lightroom executable never appeared. |
+| Imports NEF | Not reached | Blocked before Lightroom install. |
+| Develop edit feedback <2s | Not reached | Blocked before Lightroom install. |
+| Export JPEG verified with `file` and `identify` | Not reached | Blocked before Lightroom install. |
+
+## Conclusion
+
+The branch was aborted in Phase 2. The Adobe CC bootstrapper consistently stops in Wine's IE/MSHTML/JScript path before installing Creative Cloud desktop. Attempts 1 and 2 reproduced the same unsupported document mode and unimplemented JScript property errors. Attempt 3 could not fully apply the requested browser-stack workaround because current winetricks has no `mshtml` verb, and the bootstrapper still reproduced the same failure signature.
+
+No OAuth/login, Creative Cloud launch, Lightroom install, Lightroom launch, or NEF criteria validation was reached. Further effort on this branch should not retry these same verbs; the next meaningful experiment would need either a different Adobe Creative Cloud installer package, a known-good archived Wine/Proton runtime from an external report, or an approach that avoids the bootstrapper's embedded IE/MSHTML dependency entirely.
+
+Merge decision: do not merge. This approach is incomplete and the branch remains open for review.
