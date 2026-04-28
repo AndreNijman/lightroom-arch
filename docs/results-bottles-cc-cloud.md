@@ -1,6 +1,6 @@
 # Bottles CC Cloud Results
 
-Status: in progress.
+Status: incomplete. Phase 2 aborted after all three allowed bootstrapper attempts failed to install Creative Cloud Desktop.
 
 ## Timing Log
 
@@ -12,6 +12,11 @@ Status: in progress.
 | Phase 2 attempt 2a: `caffe` browser deps | 2026-04-28T09:53:58+08:00 | 2026-04-28T10:45:00+08:00 | 90 min | Invalidated by script dependency-order bug: native `wininet` was enabled before `iertutil`, causing Wine to enter `winedbg` while setting the `urlmon` override. |
 | Phase 2 attempt 2b: `caffe` browser deps reordered | 2026-04-28T10:46:38+08:00 | 2026-04-28T11:13:02+08:00 | 90 min | Dependencies installed and Adobe bootstrapper launched with WebView2, but no visible window or Creative Cloud install appeared; process looped on WinRT/RPC/OLE errors. |
 | Phase 2 attempt 3: `soda` default deps | 2026-04-28T11:14:43+08:00 | 2026-04-28T11:58:00+08:00 | 90 min | Fallback runner installed dependencies and launched Adobe bootstrapper. A hidden `Creative Cloud Installer` X11 window was found and mapped, but the installer content stayed black and no CC Desktop executable was installed. |
+| Phase 3: CC desktop launch + login | 2026-04-28T11:58:00+08:00 | 2026-04-28T11:58:00+08:00 | 45 min | Not reached; CC Desktop was never installed. |
+| Phase 4: Install Lightroom from CC | 2026-04-28T11:58:00+08:00 | 2026-04-28T11:58:00+08:00 | 30 min | Not reached; CC Desktop was never installed. |
+| Phase 5: Launch + sign in to Lightroom | 2026-04-28T11:58:00+08:00 | 2026-04-28T11:58:00+08:00 | 20 min | Not reached; Lightroom cloud was never installed. |
+| Phase 6: Criteria validation | 2026-04-28T11:58:00+08:00 | 2026-04-28T11:58:00+08:00 | 20 min | Not reached; Lightroom cloud was never installed. |
+| Phase 7: Decision | 2026-04-28T11:58:00+08:00 | 2026-04-28T12:00:00+08:00 | 15 min | Marked Bottles CC approach incomplete. |
 
 ## Target
 
@@ -23,6 +28,22 @@ Status: in progress.
 - Primary runner: `caffe`
 - Fallback runner: `soda`
 - Expected Lightroom executable: `~/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloud/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe`
+
+## Environment
+
+```text
+uname: Linux ThinkpadL16 6.19.13-arch1-1 #1 SMP PREEMPT_DYNAMIC Tue, 21 Apr 2026 23:38:22 +0000 x86_64 GNU/Linux
+GPU: AMD Ryzen 7 PRO 250 w/ Radeon 780M Graphics
+Bottles: Flatpak com.usebottles.bottles, Bottles 63.2 CLI/backend
+Primary runner: caffe-9.7
+Fallback runner: soda-9.0-1
+```
+
+## Runner Choice
+
+- Primary: `caffe`, selected because Bottles community Adobe reports tend to prefer Caffe/Soda-style application runners over gaming runners for desktop apps with browser and service dependencies.
+- Fallback: `soda`, selected because it is Bottles' maintained Wine runtime and was the bounded fallback for testing whether a different bundled runtime passed the Creative Cloud bootstrapper wall.
+- Runners not tried: additional GE-Proton, Vaniglia, or repeated Caffe/Soda variants. The branch time-box limited Phase 2 to three attempts.
 
 ## Phase 2: Bottle Creation And Bootstrapper Install
 
@@ -211,3 +232,40 @@ strace:
 ```
 
 Decision for attempt 3: stop Phase 2 after the final allowed runner attempt. The fallback runner changed the visible failure mode from no mapped window to a blank Creative Cloud Installer window, but still did not complete the Creative Cloud Desktop bootstrap.
+
+## Criteria Table
+
+| Criterion | Result | Evidence |
+| --- | --- | --- |
+| CC Desktop installed and launches | Fail | No `Creative Cloud.exe`, `ACC*.exe`, or CC Desktop install tree found after all three attempts. |
+| OAuth login | Not reached | CC Desktop was never installed. |
+| Lightroom cloud installed from CC | Not reached | CC Desktop was never installed. |
+| Lightroom stays open >=2 min idle | Not reached | Lightroom cloud was never installed. |
+| Import NEF | Not reached | Lightroom cloud was never installed. |
+| Edit exposure + contrast with <2s feedback | Not reached | Lightroom cloud was never installed. |
+| Export JPEG and verify with `file`/`identify` | Not reached | Lightroom cloud was never installed. |
+
+## Screenshots
+
+- `docs/screenshots/bottles-cc-cloud/attempt3-creative-cloud-installer-black.png`: mapped `Creative Cloud Installer` window from attempt 3, rendering only black content.
+
+## Logs And Traces
+
+- Attempt 1 combined log: `~/.local/state/lightroom-arch/bottles-cc-phase2-1.log`
+- Attempt 1 install log: `~/.local/state/lightroom-arch/bottles-cc-phase2-1-install.log`
+- Attempt 2 invalid ordering log: `~/.local/state/lightroom-arch/bottles-cc-phase2-2.log`
+- Attempt 2b combined log: `~/.local/state/lightroom-arch/bottles-cc-phase2-2b.log`
+- Attempt 2b install log: `~/.local/state/lightroom-arch/bottles-cc-phase2-2b-install.log`
+- Attempt 3 combined log: `~/.local/state/lightroom-arch/bottles-cc-phase2-3.log`
+- Attempt 3 install log: `~/.local/state/lightroom-arch/bottles-cc-phase2-3-install.log`
+- Attempt 3 Adobe WAM log: `~/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloudAttempt3/drive_c/users/steamuser/Temp/CreativeCloud/ACC/WAM.log`
+- Attempt 3 Adobe Dunamis log: `~/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloudAttempt3/drive_c/users/steamuser/Temp/Adobe/com.adobe.dunamis/dunamis-2026-04-28_03-19-28.log`
+- Attempt 3 syscall traces: `/tmp/lightroom-attempt3.strace.*`
+
+## Conclusion
+
+Bottles did not get Adobe Lightroom cloud past the Creative Cloud bootstrapper phase. Caffe with default dependencies, Caffe with browser/WebView2 dependencies, and Soda with default dependencies all failed before CC Desktop installed.
+
+The most useful new diagnostic came from attempt 3: the installer was not truly absent. It created a hidden Xwayland window named `Creative Cloud Installer`; once mapped, the window rendered black and remained in a Wine message loop. That points to an embedded browser/UI rendering or Wine IPC problem in the Creative Cloud bootstrapper, not a missing installer path or missing user interaction.
+
+Further effort may improve diagnostics, but this branch should not continue with more runner cycling under the current rules. A future branch should only proceed if it changes the hypothesis materially, such as testing a native Windows VM baseline, a different Creative Cloud bootstrapper generation, or a runtime known to support the specific embedded browser stack Adobe currently ships.
