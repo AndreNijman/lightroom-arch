@@ -70,12 +70,16 @@ bottles_cc::resolve_installer() {
 }
 
 bottles_cc::ensure_flatpak_bottles() {
-  if flatpak info com.usebottles.bottles >/dev/null 2>&1; then
-    log::info "bottles.installation=flatpak-installed"
+  if flatpak info --user com.usebottles.bottles >/dev/null 2>&1; then
+    log::info "bottles.installation=flatpak-installed scope=user"
     return 0
   fi
-  log::info "bottles.installation=flatpak-install"
-  fs::run flatpak install --system -y flathub com.usebottles.bottles
+  if flatpak info --system com.usebottles.bottles >/dev/null 2>&1; then
+    log::info "bottles.installation=flatpak-installed scope=system"
+    return 0
+  fi
+  log::info "bottles.installation=flatpak-install scope=user"
+  fs::run flatpak install --user -y flathub com.usebottles.bottles
 }
 
 bottles_cc::run_cli() {

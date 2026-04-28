@@ -15,7 +15,7 @@ Status: in progress.
 - Not in scope: Lightroom Classic, Lightroom 6 standalone.
 - Installer source: `/home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe`
 - Test fixture source: `/home/andre/Pictures/test-raws/`
-- Bottles distribution: Flatpak preferred via `com.usebottles.bottles`; native/AUR Bottles only as fallback if Flatpak is unavailable.
+- Bottles distribution: Flatpak preferred via `com.usebottles.bottles`; user-scope Flatpak is used because system-scope deployment is not permitted for this user. Native/AUR Bottles only as fallback if Flatpak is unavailable.
 - Primary runner: `caffe`
 - Fallback runner: `soda`
 - Expected Lightroom executable: `~/.var/app/com.usebottles.bottles/data/bottles/bottles/LightroomCCCloud/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe`

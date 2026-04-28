@@ -80,6 +80,10 @@ preflight::check_os() {
 }
 
 preflight::check_flathub() {
+  if flatpak remotes --user --columns=name 2>/dev/null | grep -Fxq flathub; then
+    log::info "preflight.flatpak.flathub=present scope=user"
+    return 0
+  fi
   if flatpak remotes --system --columns=name 2>/dev/null | grep -Fxq flathub; then
     log::info "preflight.flatpak.flathub=present scope=system"
     return 0
@@ -92,12 +96,20 @@ preflight::check_flathub() {
 }
 
 preflight::check_bottles_installable() {
-  if flatpak info com.usebottles.bottles >/dev/null 2>&1; then
+  if flatpak info --user com.usebottles.bottles >/dev/null 2>&1; then
+    log::info "preflight.bottles.flatpak=installed scope=user"
+    return 0
+  fi
+  if flatpak info --system com.usebottles.bottles >/dev/null 2>&1; then
     log::info "preflight.bottles.flatpak=installed"
     return 0
   fi
+  if flatpak remote-ls --user flathub --app 2>/dev/null | grep -Fq 'com.usebottles.bottles'; then
+    log::info "preflight.bottles.flatpak=installable scope=user"
+    return 0
+  fi
   if flatpak remote-ls --system flathub --app 2>/dev/null | grep -Fq 'com.usebottles.bottles'; then
-    log::info "preflight.bottles.flatpak=installable"
+    log::info "preflight.bottles.flatpak=installable scope=system"
     return 0
   fi
   if command -v bottles >/dev/null 2>&1; then
