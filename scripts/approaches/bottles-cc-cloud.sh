@@ -22,6 +22,7 @@ done
 
 LIGHTROOM_ARCH_INSTALLER=''
 LIGHTROOM_ARCH_VERSION='cc-cloud'
+BOTTLES_CC_ACCESSIBLE_INSTALLER=''
 
 bottles_cc::usage() {
   cat <<'USAGE'
@@ -278,9 +279,25 @@ bottles_cc::set_windows_version() {
   bottles_cc::run_cli edit -b "${BOTTLES_CC_BOTTLE}" --win win10
 }
 
+bottles_cc::stage_installer() {
+  local installer=$1
+  local destination_dir="${BOTTLES_CC_DATA_HOME}/temp/lightroom-arch-installers"
+  local destination
+  destination="${destination_dir}/$(basename -- "${installer}")"
+  if [[ "${installer}" == "${BOTTLES_CC_DATA_HOME}"/* ]]; then
+    BOTTLES_CC_ACCESSIBLE_INSTALLER=${installer}
+    return 0
+  fi
+  fs::mkdir "${destination_dir}"
+  fs::run cp -f -- "${installer}" "${destination}"
+  BOTTLES_CC_ACCESSIBLE_INSTALLER=${destination}
+  log::info "installer.staged=${BOTTLES_CC_ACCESSIBLE_INSTALLER}"
+}
+
 bottles_cc::run_bootstrapper() {
   local installer=$1
-  bottles_cc::run_cli run -b "${BOTTLES_CC_BOTTLE}" -e "${installer}"
+  bottles_cc::stage_installer "${installer}"
+  bottles_cc::run_cli run -b "${BOTTLES_CC_BOTTLE}" -e "${BOTTLES_CC_ACCESSIBLE_INSTALLER}"
 }
 
 bottles_cc::verify_lightroom() {
