@@ -147,3 +147,5 @@ drive_c/users/andre/AppData/Local/Adobe
 The branch was aborted in Phase 2. The Adobe CC bootstrapper consistently stops in Wine's IE/MSHTML/JScript path before installing Creative Cloud desktop. Attempts 1 and 2 reproduced the same unsupported document mode and unimplemented JScript property errors. Attempt 3 could not fully apply the requested browser-stack workaround because current winetricks has no `mshtml` verb, and the bootstrapper still reproduced the same failure signature.
 
 No OAuth/login, Creative Cloud launch, Lightroom install, Lightroom launch, or NEF criteria validation was reached. Further effort on this branch should not retry these same verbs; the next meaningful experiment would need either a different Adobe Creative Cloud installer package, a known-good archived Wine/Proton runtime from an external report, or an approach that avoids the bootstrapper's embedded IE/MSHTML dependency entirely.
+
+Merge decision: do not merge. This approach is incomplete and the branch remains open for review.
