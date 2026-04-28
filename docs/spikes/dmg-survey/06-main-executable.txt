@@ -1,0 +1,92 @@
+Phase 4.4 main executable analysis
+==================================
+
+Primary executable selected from Contents/MacOS: /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install
+
+$ file <main executable>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install: Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+
+$ llvm-otool -L <main executable>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install:
+	/System/Library/Frameworks/ServiceManagement.framework/Versions/A/ServiceManagement (compatibility version 1.0.0, current version 1336.251.2)
+	/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore (compatibility version 1.0.0, current version 607.1.40)
+	/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL (compatibility version 1.0.0, current version 1.0.0)
+	/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)
+	/System/Library/Frameworks/WebKit.framework/Versions/A/WebKit (compatibility version 1.0.0, current version 607.1.40)
+	/System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa (compatibility version 1.0.0, current version 23.0.0)
+	/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration (compatibility version 1.0.0, current version 963.250.1)
+	/System/Library/Frameworks/Security.framework/Versions/A/Security (compatibility version 1.0.0, current version 58286.251.4)
+	/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 1570.15.0)
+	/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)
+	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 400.9.4)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
+	/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 1671.40.118)
+	/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 50.1.0)
+	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1570.15.0)
+	/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 944.3.0)
+
+$ strings <main executable> | grep -E "\.dylib|\.framework" | sort -u | head -50
+/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit
+/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices
+/System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa
+/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
+/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices
+/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation
+/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit
+/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore
+/System/Library/Frameworks/OpenGL.framework/Versions/A/OpenGL
+/System/Library/Frameworks/Security.framework/Versions/A/Security
+/System/Library/Frameworks/ServiceManagement.framework/Versions/A/ServiceManagement
+/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration
+/System/Library/Frameworks/WebKit.framework/Versions/A/WebKit
+/usr/lib/libSystem.B.dylib
+/usr/lib/libc++.1.dylib
+/usr/lib/libobjc.A.dylib
+IM.dylibH
+IM.dylibL
+ib.dylibH
+re.dylibL
+
+Bundled LaunchServices helper: /tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library/LaunchServices/com.adobe.acc.installer.v2
+
+$ file <helper executable>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library/LaunchServices/com.adobe.acc.installer.v2: Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+
+$ llvm-otool -L <helper executable>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library/LaunchServices/com.adobe.acc.installer.v2:
+	/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration (compatibility version 1.0.0, current version 963.250.1)
+	/System/Library/Frameworks/Security.framework/Versions/A/Security (compatibility version 1.0.0, current version 58286.251.4)
+	/System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa (compatibility version 1.0.0, current version 23.0.0)
+	/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation (compatibility version 300.0.0, current version 1570.15.0)
+	/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 228.0.0)
+	/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 400.9.4)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
+	/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit (compatibility version 45.0.0, current version 1671.40.118)
+	/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices (compatibility version 1.0.0, current version 50.1.0)
+	/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 1570.15.0)
+	/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices (compatibility version 1.0.0, current version 944.3.0)
+
+$ strings <helper executable> | grep -E "\.dylib|\.framework" | sort -u | head -50
+/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit
+/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices
+/System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa
+/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
+/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices
+/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation
+/System/Library/Frameworks/Security.framework/Versions/A/Security
+/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration
+/usr/lib/libSystem.B.dylib
+/usr/lib/libc++.1.dylib
+/usr/lib/libobjc.A.dylib
+IM.dylibL
+
+Categorization
+--------------
+Apple system frameworks/libraries used by main executable: AppKit.framework, CoreFoundation.framework, Foundation.framework, Security.framework, WebKit.framework, libSystem.B.dylib.
+Apple system frameworks/libraries used by helper: Foundation.framework, ServiceManagement.framework, libSystem.B.dylib.
+Adobe-bundled dynamic libraries/frameworks linked directly: none shown by llvm-otool -L.
+Open-source third-party dynamic libraries linked directly: none shown by llvm-otool -L.
+
+Interpretation
+--------------
+The main executable is a native macOS x86_64 Mach-O application that embeds WebKit for HTML/JS UI resources and talks to a privileged LaunchServices helper. No cross-platform loader/runtime appears in the Mach-O dependency list.
