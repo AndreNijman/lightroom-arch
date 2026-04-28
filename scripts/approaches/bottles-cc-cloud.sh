@@ -75,7 +75,7 @@ bottles_cc::ensure_flatpak_bottles() {
     return 0
   fi
   log::info "bottles.installation=flatpak-install"
-  fs::run flatpak install -y flathub com.usebottles.bottles
+  fs::run flatpak install --system -y flathub com.usebottles.bottles
 }
 
 bottles_cc::run_cli() {

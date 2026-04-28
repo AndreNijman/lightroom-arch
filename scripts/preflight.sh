@@ -80,8 +80,8 @@ preflight::check_os() {
 }
 
 preflight::check_flathub() {
-  if flatpak remotes --columns=name 2>/dev/null | grep -Fxq flathub; then
-    log::info "preflight.flatpak.flathub=present"
+  if flatpak remotes --system --columns=name 2>/dev/null | grep -Fxq flathub; then
+    log::info "preflight.flatpak.flathub=present scope=system"
     return 0
   fi
   if [[ "${LIGHTROOM_ARCH_DRY_RUN}" == "1" ]]; then
@@ -96,7 +96,7 @@ preflight::check_bottles_installable() {
     log::info "preflight.bottles.flatpak=installed"
     return 0
   fi
-  if flatpak remote-ls flathub --app 2>/dev/null | grep -Fq 'com.usebottles.bottles'; then
+  if flatpak remote-ls --system flathub --app 2>/dev/null | grep -Fq 'com.usebottles.bottles'; then
     log::info "preflight.bottles.flatpak=installable"
     return 0
   fi
