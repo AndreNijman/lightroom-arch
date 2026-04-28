@@ -56,6 +56,19 @@ preflight::require_or_warn() {
   log::die "Required command missing: ${command_name} (install ${package_hint})"
 }
 
+preflight::require_package_or_warn() {
+  local package_name=$1
+  if pacman -Q "${package_name}" >/dev/null 2>&1; then
+    log::info "preflight.package.${package_name}=present"
+    return 0
+  fi
+  if [[ "${LIGHTROOM_ARCH_DRY_RUN}" == "1" ]]; then
+    log::warn "preflight.package.${package_name}=missing"
+    return 0
+  fi
+  log::die "Required package missing: ${package_name}"
+}
+
 preflight::os_release_id() {
   local id='unknown'
   if [[ -r /etc/os-release ]]; then
@@ -111,8 +124,8 @@ preflight::run() {
   log::info "preflight.gpu.${gpu_summary}"
   preflight::require_or_warn wine wine
   preflight::require_or_warn winetricks winetricks
-  preflight::require_or_warn wine-gecko wine-gecko
-  preflight::require_or_warn wine-mono wine-mono
+  preflight::require_package_or_warn wine-gecko
+  preflight::require_package_or_warn wine-mono
   aur_helper=$(pacman::aur_helper)
   os_id=$(preflight::os_release_id)
   log_path=$(log::path)
