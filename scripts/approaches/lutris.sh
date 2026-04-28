@@ -89,9 +89,26 @@ lutris::install_color_profile() {
   fs::copy "${source_profile}" "${target}"
 }
 
+lutris::default_lightroom_exe() {
+  local prefix=$1
+  printf '%s\n' "${prefix}/drive_c/Program Files/Adobe/Adobe Photoshop Lightroom/lightroom.exe"
+}
+
+lutris::verify_install() {
+  local prefix=$1
+  local exe_path
+  exe_path=$(lutris::default_lightroom_exe "${prefix}")
+  if [[ "${LIGHTROOM_ARCH_DRY_RUN}" == "1" ]]; then
+    log::info "verify.lightroom_exe=${exe_path}"
+    return 0
+  fi
+  [[ -f "${exe_path}" ]] || log::die "Lightroom executable not found after install: ${exe_path}"
+}
+
 lutris::desktop_entry() {
   local prefix=$1
-  local exe_path="${prefix}/drive_c/Program Files/Adobe/Adobe Photoshop Lightroom/lightroom.exe"
+  local exe_path
+  exe_path=$(lutris::default_lightroom_exe "${prefix}")
   local desktop_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
   local desktop_file="${desktop_dir}/lightroom-arch.desktop"
   fs::mkdir "${desktop_dir}"
@@ -124,6 +141,7 @@ lutris::main() {
   lutris::install_dependencies "${prefix}"
   lutris::install_color_profile "${prefix}"
   lutris::run_installer "${prefix}"
+  lutris::verify_install "${prefix}"
   lutris::desktop_entry "${prefix}"
   log::info "approach.lutris.complete prefix=${prefix}"
 }
