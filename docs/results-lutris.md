@@ -1,14 +1,18 @@
 # Lutris Approach Results
 
-Status: container dry-run passes; real install validation pending.
+Status: incomplete. Container dry-run passes, but the provided Creative Cloud bootstrapper does not install Lightroom under the Lutris-style Wine prefix.
 
 ## Environment
 
 - Host distro: Arch Linux
+- Kernel: `Linux ThinkpadL16 6.19.13-arch1-1 #1 SMP PREEMPT_DYNAMIC Tue, 21 Apr 2026 23:38:22 +0000 x86_64 GNU/Linux`
 - GPU detected by preflight: AMD, Mesa
+- GPU device: `c5:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] HawkPoint1 (rev de)`
 - AUR helper detected by preflight: yay
-- Wine command detected by preflight: present
 - Wine package: `wine-staging 11.7-1`
+- Winetricks package: `winetricks 20260125-1`
+- Wine Gecko package: `wine-gecko 2.47.4-2`
+- Wine Mono package: `wine-mono 11.0.0-1`
 - Lutris package: not installed
 - Container runtime: Docker installed and `tests/container/run.sh` passes
 
@@ -51,7 +55,13 @@ tests/smoke.sh --dry-run
 Real install:
 
 ```sh
-scripts/install.sh --approach lutris --version 5.7.1 --installer /path/to/Lightroom_5.7.1.exe
+scripts/install.sh --approach lutris --version creative-cloud-bootstrapper --installer /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe
+```
+
+Outer tee log:
+
+```text
+/home/andre/.local/state/lightroom-arch/real-install-1777335038.log
 ```
 
 ## Log Excerpts
@@ -79,17 +89,51 @@ tests/container/run.sh
 exit 0
 ```
 
+Real install failure excerpt:
+
+```text
+[INFO] preflight.command.wine=present
+[INFO] preflight.command.winetricks=present
+[INFO] preflight.package.wine-gecko=present
+[INFO] preflight.package.wine-mono=present
+[INFO] approach=lutris version=creative-cloud-bootstrapper
+[INFO] run: env WINEPREFIX=... winetricks -q gdiplus windowscodecs corefonts
+gdiplus already installed, skipping
+windowscodecs already installed, skipping
+corefonts already installed, skipping
+[INFO] run: env WINEPREFIX=... wine /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe
+01f4:fixme:mshtml:process_meta_element Unsupported document mode L"chrome=1"
+01f4:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000001
+01f4:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000002
+01f4:fixme:mshtml:ActiveScriptSite_OnScriptError (03414820)->(0341E888)
+[ERROR] Lightroom executable not found after install: /home/andre/.local/share/lightroom-arch/prefixes/lightroom-creative-cloud-bootstrapper/drive_c/Program Files/Adobe/Adobe Photoshop Lightroom/lightroom.exe
+```
+
+Post-install prefix inspection found only Adobe bootstrapper state:
+
+```text
+drive_c/users/andre/AppData/Roaming/com.adobe.dunamis
+drive_c/users/andre/AppData/Local/Adobe/OOBE
+```
+
 ## Criteria
 
 | Criterion | Result | Notes |
 | --- | --- | --- |
 | Dry-run install flow | Pass | `tests/smoke.sh --dry-run` exits 0 and asserts expected log lines. |
 | Arch container dry-run smoke | Pass | Docker installed; `tests/container/run.sh` exits 0. |
-| Launches and idles for at least 2 minutes | Not tested | Requires licensed installer and GUI VM. |
-| Imports RAW | Not tested | Use `$LR_TEST_RAW` or CC0 fixture. |
-| Develop exposure/contrast feedback under 2 seconds | Not tested | Requires GPU-capable GUI validation. |
-| Exports JPEG verified by `file` and `identify` | Not tested | Requires real install. |
+| Launches and idles for at least 2 minutes | Fail | Lightroom was not installed; `lightroom.exe` is absent. |
+| Imports RAW | Blocked | Lightroom was not installed. `~/Pictures/test-raws/` is also missing, so no NEF fixture is available. |
+| Develop exposure/contrast feedback under 2 seconds | Blocked | Lightroom was not installed. |
+| Exports JPEG verified by `file` and `identify` | Blocked | Lightroom was not installed. |
 
 ## Screenshots
 
-Expected path: `docs/screenshots/lutris/`.
+- `docs/screenshots/lutris/install-creative-cloud-bootstrapper.png`: desktop state during the Creative Cloud bootstrapper run. No Lightroom window was available to capture.
+
+## Known Issues
+
+- The provided Windows installer is a Creative Cloud bootstrapper, not the Lightroom 5.x offline installer this approach targets.
+- Wine's MSHTML/JScript path logs unsupported document mode and script-property errors while running the bootstrapper.
+- The bootstrapper exits without installing `lightroom.exe`; the script now treats this as a hard failure instead of writing a misleading desktop entry.
+- `~/Pictures/test-raws/` is missing, so NEF-based criteria could not be attempted after the install failure.
