@@ -111,6 +111,8 @@ preflight::run() {
   log::info "preflight.gpu.${gpu_summary}"
   preflight::require_or_warn wine wine
   preflight::require_or_warn winetricks winetricks
+  preflight::require_or_warn wine-gecko wine-gecko
+  preflight::require_or_warn wine-mono wine-mono
   aur_helper=$(pacman::aur_helper)
   os_id=$(preflight::os_release_id)
   log_path=$(log::path)
