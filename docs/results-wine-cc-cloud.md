@@ -10,6 +10,7 @@ Status: in progress.
 | Phase 1: Research | 2026-04-28T08:28:30+08:00 | 2026-04-28T08:30:44+08:00 | 30 min | No Lightroom-cloud-specific Wine success report found; Adobe CC/Photoshop evidence only. |
 | Phase 2 attempt 1: bare Wine + bootstrapper | 2026-04-28T08:31:00+08:00 | 2026-04-28T08:32:59+08:00 | 2 hr phase budget | Failed. Bootstrapper produced Adobe OOBE/dunamis state only; no Creative Cloud app and no Lightroom executable. |
 | Phase 2 attempt 2: corefonts vcrun2019 dotnet48 + bootstrapper | 2026-04-28T08:33:28+08:00 | 2026-04-28T08:45:29+08:00 | 2 hr phase budget | Failed. Dependencies installed, but bootstrapper hit the same MSHTML/JScript failure and produced no Creative Cloud or Lightroom executable. |
+| Phase 2 attempt 3: add mshtml jscript ie8 + bootstrapper | 2026-04-28T08:46:40+08:00 | 2026-04-28T08:59:42+08:00 | 2 hr phase budget | Failed. Current winetricks does not provide `mshtml`; bootstrapper again hit the same MSHTML/JScript failure and produced no Creative Cloud or Lightroom executable. |
 
 ## Target
 
@@ -74,6 +75,41 @@ Relevant log excerpt:
 020c:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000001
 020c:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000002
 020c:fixme:mshtml:ActiveScriptSite_OnScriptError (0343E948)->(03446560)
+[ERROR] Lightroom cloud executable not found after install: /home/andre/.wine-lightroom-cc/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe
+```
+
+Observed prefix artifacts:
+
+```text
+drive_c/users/andre/AppData/Roaming/com.adobe.dunamis
+drive_c/users/andre/AppData/Local/Temp/Adobe
+drive_c/users/andre/AppData/Local/Adobe
+```
+
+### Attempt 3: add mshtml, jscript, ie8 + Bootstrapper
+
+Command:
+
+```sh
+rm -rf /home/andre/.wine-lightroom-cc
+WINEPREFIX=/home/andre/.wine-lightroom-cc WINEARCH=win64 wineboot --init
+WINEPREFIX=/home/andre/.wine-lightroom-cc winetricks -q corefonts vcrun2019 dotnet48 mshtml jscript ie8
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/cc-cloud-phase2-3-install.log \
+  scripts/install.sh --approach wine-cc-cloud --version cc-cloud \
+  --installer /home/andre/Downloads/Lightroom/Lightroom_Set-Up_707q.exe \
+  2>&1 | tee /home/andre/.local/state/lightroom-arch/cc-cloud-phase2-3.log
+```
+
+Outcome: failed. The intended browser-stack workaround could not be applied as written because `winetricks 20260125` reports `Unknown arg mshtml`. The wrapper still continued into the bootstrapper after dependency setup, and the bootstrapper reproduced the same Wine IE/MSHTML and JScript failure signature. No Adobe GUI was visible and no Creative Cloud or Lightroom executable was installed.
+
+Relevant log excerpt:
+
+```text
+Unknown arg mshtml
+0148:fixme:mshtml:process_meta_element Unsupported document mode L"chrome=1"
+0148:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000001
+0148:fixme:jscript:JScriptProperty_SetProperty Unimplemented property 70000002
+0148:fixme:mshtml:ActiveScriptSite_OnScriptError (0343DC70)->(03445888)
 [ERROR] Lightroom cloud executable not found after install: /home/andre/.wine-lightroom-cc/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe
 ```
 
