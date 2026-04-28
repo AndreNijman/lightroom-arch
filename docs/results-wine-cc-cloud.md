@@ -1,6 +1,6 @@
 # Wine CC Cloud Results
 
-Status: in progress.
+Status: aborted - incomplete.
 
 ## Timing Log
 
@@ -11,6 +11,7 @@ Status: in progress.
 | Phase 2 attempt 1: bare Wine + bootstrapper | 2026-04-28T08:31:00+08:00 | 2026-04-28T08:32:59+08:00 | 2 hr phase budget | Failed. Bootstrapper produced Adobe OOBE/dunamis state only; no Creative Cloud app and no Lightroom executable. |
 | Phase 2 attempt 2: corefonts vcrun2019 dotnet48 + bootstrapper | 2026-04-28T08:33:28+08:00 | 2026-04-28T08:45:29+08:00 | 2 hr phase budget | Failed. Dependencies installed, but bootstrapper hit the same MSHTML/JScript failure and produced no Creative Cloud or Lightroom executable. |
 | Phase 2 attempt 3: add mshtml jscript ie8 + bootstrapper | 2026-04-28T08:46:40+08:00 | 2026-04-28T08:59:42+08:00 | 2 hr phase budget | Failed. Current winetricks does not provide `mshtml`; bootstrapper again hit the same MSHTML/JScript failure and produced no Creative Cloud or Lightroom executable. |
+| Abort decision | 2026-04-28T08:59:42+08:00 | 2026-04-28T09:00:31+08:00 | 6 hr total budget | Aborted after three consecutive commits with no measurable progress on the CC bootstrapper blocker. |
 
 ## Target
 
@@ -18,6 +19,17 @@ Status: in progress.
 - Not in scope: Lightroom Classic, Lightroom 6 standalone.
 - Prefix: `~/.wine-lightroom-cc`
 - Expected executable: `~/.wine-lightroom-cc/drive_c/Program Files/Adobe/Adobe Lightroom/Lightroom.exe`
+
+## Environment
+
+```text
+Linux ThinkpadL16 6.19.13-arch1-1 #1 SMP PREEMPT_DYNAMIC Tue, 21 Apr 2026 23:38:22 +0000 x86_64 GNU/Linux
+wine-staging 11.7-1
+winetricks 20260125-1
+wine-gecko 2.47.4-2
+wine-mono 11.0.0-1
+GPU: Advanced Micro Devices, Inc. [AMD/ATI] HawkPoint1
+```
 
 ## Phase 2: CC Bootstrapper Install
 
@@ -120,3 +132,18 @@ drive_c/users/andre/AppData/Roaming/com.adobe.dunamis
 drive_c/users/andre/AppData/Local/Temp/Adobe
 drive_c/users/andre/AppData/Local/Adobe
 ```
+
+## Criteria
+
+| Criterion | Status | Evidence |
+| --- | --- | --- |
+| Launches and stays open >=2 min idle | Not reached | Creative Cloud desktop did not install; Lightroom executable never appeared. |
+| Imports NEF | Not reached | Blocked before Lightroom install. |
+| Develop edit feedback <2s | Not reached | Blocked before Lightroom install. |
+| Export JPEG verified with `file` and `identify` | Not reached | Blocked before Lightroom install. |
+
+## Conclusion
+
+The branch was aborted in Phase 2. The Adobe CC bootstrapper consistently stops in Wine's IE/MSHTML/JScript path before installing Creative Cloud desktop. Attempts 1 and 2 reproduced the same unsupported document mode and unimplemented JScript property errors. Attempt 3 could not fully apply the requested browser-stack workaround because current winetricks has no `mshtml` verb, and the bootstrapper still reproduced the same failure signature.
+
+No OAuth/login, Creative Cloud launch, Lightroom install, Lightroom launch, or NEF criteria validation was reached. Further effort on this branch should not retry these same verbs; the next meaningful experiment would need either a different Adobe Creative Cloud installer package, a known-good archived Wine/Proton runtime from an external report, or an approach that avoids the bootstrapper's embedded IE/MSHTML dependency entirely.
