@@ -10,6 +10,7 @@ Status: in progress.
 | Phase 1: Research | 2026-04-28T09:08:03+08:00 | 2026-04-28T09:09:45+08:00 | 20 min | Selected `caffe` primary and `soda` fallback; no Lightroom-cloud-specific Bottles success report found. |
 | Phase 2 attempt 1: `caffe` default deps | 2026-04-28T09:14:46+08:00 | 2026-04-28T09:50:01+08:00 | 90 min | Bottle and dependencies installed after script fixes; Adobe bootstrapper launched, prompted for Gecko, then hung with no CC Desktop installation. |
 | Phase 2 attempt 2a: `caffe` browser deps | 2026-04-28T09:53:58+08:00 | 2026-04-28T10:45:00+08:00 | 90 min | Invalidated by script dependency-order bug: native `wininet` was enabled before `iertutil`, causing Wine to enter `winedbg` while setting the `urlmon` override. |
+| Phase 2 attempt 2b: `caffe` browser deps reordered | 2026-04-28T10:46:38+08:00 | 2026-04-28T11:13:02+08:00 | 90 min | Dependencies installed and Adobe bootstrapper launched with WebView2, but no visible window or Creative Cloud install appeared; process looped on WinRT/RPC/OLE errors. |
 
 ## Target
 
@@ -93,3 +94,54 @@ wine: Unimplemented function wininet.dll.InternetOpenA called ... starting debug
 ```
 
 Script fix: order browser DLL dependencies so `iertutil` is installed before `wininet` and `urlmon`. Re-run attempt 2 after this fix because the failure did not exercise the Adobe bootstrapper.
+
+### Attempt 2b: Primary Runner, Browser Deps, Reordered
+
+- Runner: `caffe`, normalized by the script to `caffe-9.7`.
+- Bottle: `LightroomCCCloudAttempt2b`.
+- Dependencies installed through Bottles backend: `arial32`, `times32`, `courie32`, `vcredist2019`, `dotnet48`, `gecko`, `mono`, `iertutil`, `wininet`, `urlmon`, `riched20`, `webview2`.
+- Log: `~/.local/state/lightroom-arch/bottles-cc-phase2-2b.log`.
+- Outcome: failed. Dependency installation completed and the Adobe bootstrapper launched with WebView2 available, but it did not create a visible installer window or install Creative Cloud Desktop.
+
+Commands:
+
+```sh
+BOTTLES_CC_BOTTLE=LightroomCCCloudAttempt2b \
+BOTTLES_CC_RUNNER=caffe \
+BOTTLES_CC_EXTRA_DEPS=gecko,mono,wininet,urlmon,iertutil,riched20,webview2 \
+LIGHTROOM_ARCH_LOG_PATH=/home/andre/.local/state/lightroom-arch/bottles-cc-phase2-2b-install.log \
+scripts/install.sh --approach bottles-cc-cloud --version cc-cloud --installer /home/andre/Downloads/Lightroom
+```
+
+Important observations:
+
+- The reordered dependency pass succeeded: `iertutil`, `wininet`, `urlmon`, `riched20`, and `webview2` all installed.
+- `riched20` required `W2KSP4_EN.EXE`; this was slow but completed.
+- `webview2` installed and the bootstrapper spawned `msedgewebview2.exe`, but the WebView2 process became defunct after launch.
+- Hyprland had no mapped Wine, Adobe, Bottles, Lightroom, or Creative Cloud window during the attempt.
+- The bootstrapper created only Adobe temporary/WAM state under `Temp/CreativeCloud`; no `Creative Cloud.exe`, `ACC*.exe`, or `Lightroom.exe` was found.
+- The WAM log reached Adobe telemetry with HTTP 200, then stopped; the process continued emitting WinRT/RPC/OLE errors.
+
+Representative log excerpts:
+
+```text
+dependency=iertutil status=installed
+dependency=wininet status=installed
+dependency=urlmon status=installed
+dependency=riched20 status=installed
+dependency=webview2 status=installed
+[INFO] run: bottles_cc::flatpak_env flatpak run --command=bottles-cli com.usebottles.bottles run -b LightroomCCCloudAttempt2b -e .../Lightroom_Set-Up_707q.exe
+0324:err:combase:RoGetActivationFactory Failed to find library for L"Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager"
+0334:err:combase:RoGetActivationFactory Failed to find library for L"Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager"
+0664:err:ole:ifproxy_release_public_refs IRemUnknown_RemRelease failed with error 0x800706be
+052c:err:rpc:RpcAssoc_BindConnection rejected bind for reason 0
+```
+
+Adobe WAM/Dunamis logs showed initialization and telemetry only:
+
+```text
+Application initialized successfully.
+HTTP Request Status code 200.
+```
+
+Decision for attempt 2: proceed to the single fallback runner attempt. The added browser stack improved dependency coverage but did not get past the Creative Cloud bootstrapper wall.
