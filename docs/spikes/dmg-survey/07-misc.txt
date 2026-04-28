@@ -1,0 +1,183 @@
+Phase 4.5 misc / unexpected findings
+====================================
+
+Standalone executable-looking files:
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library/LaunchServices/com.adobe.acc.installer.v2: Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install:                                     Mach-O 64-bit x86_64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|WEAK_DEFINES|BINDS_TO_WEAK|PIE>
+
+Embedded archive/package candidates:
+
+Adobe ExtendScript / JSX candidates:
+
+License/readme candidates:
+
+Installer config.xml:
+<config>
+	<sapCode>LRCC</sapCode>
+	<version>3.0</version>
+	<productName>Lightroom</productName>
+	<productNameForAnalytics>lightroom</productNameForAnalytics>
+	<actionList>CC-UI</actionList>
+	<contextID>WAM1_LRCC_3</contextID>
+	<productSize>1309135199</productSize>
+</config>
+
+Info.plist identifiers and privileged helper strings:
+NSHumanReadableCopyright\CFBundleNameZDTSDKBuild_
+CFBundleDevelopmentRegion_
+CFBundleVersion_
+CFBundleShortVersionString_
+CFBundlePackageType_
+CFBundleSupportedPlatforms_
+CFBundleIconFile_
+CFBundleInfoDictionaryVersion_
+CFBundleExecutableZDTCompiler_
+CFBundleIdentifier_
+DTPlatformVersion\DTXcodeBuild_
+CFBundleSignature_
+LSMinimumSystemVersion_
+SMPrivilegedExecutables_
+Lightroom InstallerV18E219WEnglishX5.3.5.13U19G73]NSApplicationXMainMenuTAPPL
+NSIncludesSubdomains		S6.0WInstall_
+com.adobe.InstallRGMW10E1001Q1T10.7
+com.adobe.acc.installer.v2_
+@anchor apple generic and identifier "com.adobe.acc.installer.v2"	
+
+Native bridge strings in HTML UI resources:
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:<html style="width: 100%; height: 100%; overflow:hidden;" ng-app="AdobeInstaller">
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html:                <div id="launchScreenText2" class="launchScreenText2">{{ Utils.getLocalizedString(mainCtrl.autoDeleteAfterInstall?"AppIsOpeningAndAutoDeleteInstaller":"AppIsOpening", mainCtrl.applicationName) }}</div>
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("overrideCrossButtonState", "false");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("overrideCrossButtonState", "true");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("quitConfirmationNoClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("quitConfirmationYesClicked", JSON.stringify(quitConfirmationFeedbackData));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("retryClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:            sendMessageToNative("locationRetryClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/overlayController.js:        sendMessageToNative("proxyAlertLoginButtonClicked", JSON.stringify(details));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:    self.autoDeleteAfterInstall = false;
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:        if (jsonData.autoDeleteAfterInstall == "true")
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:            self.autoDeleteAfterInstall = true;
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:	    sendMessageToNative("welcomeContinueButtonClick", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:        sendMessageToNative("surveyContinueButtonClicked", JSON.stringify(surveyResponse));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:	    sendMessageToNative("testAppContinueButtonClicked", JSON.stringify(jsonResponse));
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:	    sendMessageToNative("piiContinueButtonClicked", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:            jsonData.errorURL = 'MinimalisticKaizenInstaller';
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:                    sendMessageToNative("carouselLoadComplete", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/mainController.js:            sendMessageToNative("defaultContentShown", data);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:function sendMessageToNative(message, jsonData) {
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        if (window.JSObject) {
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:            var retVal = window.JSObject.messageFromHtml(message, jsonDataString);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("logMessage", message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:function messageFromNative(message, jsonDataString) {
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    logMessage("Start messageFromNativeToUI: " + message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    logMessage("End messageFromNativeToUI: " + message);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative(jsonData.message, e.data);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        sendMessageToNative("documentReady", "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:var appModule = angular.module('AdobeInstaller', []);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("openurl", event.target.href);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:        sendMessageToNative(analyticsMsg, "");
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("openFileURL", event.target.href);
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/js/main.js:    sendMessageToNative("locationChangeClicked", self.pathResponseData);
+
+URL/network-related strings from Mach-O files (first 100 unique):
+		<key>com.adobe.acc.installer.v2</key>
+		<string>anchor apple generic and identifier "com.Adobe.PDApp.CCP.Adobe-IT-Tools-Uninstaller" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.ACCC.Uninstaller" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.AdobeApplicationUpdater" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.HDInstall" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.Install" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.PDApp.CCP.setup" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.acc.AdobeDesktopService" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+		<string>anchor apple generic and identifier "com.adobe.cc.Install" and anchor trusted and (certificate leaf[subject.OU] = JQ525L2MZD)</string>
+	<string>com.adobe.acc.installer.v2</string>
+ 2013-2020 Adobe. All rights reserved.</string>
+"http://crl.apple.com/timestamp.crl0
+$http://ocsp.apple.com/ocsp03-devid080
+&redirect_uri=https://oobe.adobe.com/
+)http://www.apple.com/certificateauthority0
+.aamd
+.aamdownload
+.adobe.cH
+.adobeliH
+/../ElevationManager/AdobeServiceInstaller
+/../utils/Creative Cloud Installer.app
+/ACC
+/ACC/CreH
+/Adobe
+/Adobe Application Manager/
+/Adobe Creative Cloud/
+/Adobe DH
+/Adobe Desktop Common
+/Adobe/OOBE
+/AdobeApplicationManager/AAMRefs
+/Applications/Utilities/Adobe Creative Cloud
+/CreativeCloud
+/CreativeCloud/ACC
+/Library/Application Support/Adobe
+/Library/Logs/CreativeCloud/ACC
+/adobe-ffc-external
+/adobe-ffc-external/core/v2/context
+/adobe-ffc-external/core/v3/features
+/ims/authorize/v1/
+/ims/jumptoken/v1
+/ims/orgH
+/ims/social/v1/providers
+/ims/token/v1
+/package_installation_info/installed_package_element[name='ACCC']/version
+1Developer ID Application: Adobe Inc. (JQ525L2MZD)1
+1GetAdobeLanguageConversionTablev
+31GetAdobeLanguageConversionTablev
+5adobe22PackageDownloadManager
+6Convert1766ToAdobeLanguageRKNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEERS5_
+7VerifyAdobeChainCertificateERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+:7VerifyAdobeChainCertificateERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+AAM Helper: Process certificate didnt match to Adobe certificate!
+ACC Install Weightage calculated %s
+ACC Size calculated %s
+ACC VersH
+ACC installation is completed successfully
+ACC.log
+ACC/CreaH
+ACCC.EM.H
+ACCC_BOOH
+ACCC_BOOTSTRAP_DL_END
+ACCC_BOOTSTRAP_DL_FATAL_ERROR
+ACCC_BOOTSTRAP_INSTALL_END
+ACCC_BOOTSTRAP_INSTALL_FATAL_ERROR
+ACCC_BOOTSTRAP_INSTALL_START
+ACCC_DL_Complete_BefCancel
+ACCC_ELEL
+ACCC_Install_Mode
+ACCC_Install_Upgrade_BtnClickTime
+ACCC_LBSH
+ACCC_LBS_Version
+ACCC_OSBitness
+ACCC_SERH
+ACCC_TypH
+ACCC_Version_Downloading
+ACCC_Version_On_Machine
+ACCCf
+ACCDownloadExtractionError
+ACCEPTEDH
+ACCInstaH
+ACCInstallAGVFailed
+ACCInstallAdminError
+ACCInstallAdobeDetecPluginLoaded
+ACCInstallAnotherMSIRunning
+ACCInstallDownloadDiskSpaceErr
+ACCInstallDownloadPermisionErr
+ACCInstallDownloadResumableErr
+ACCInstallDownloadServerErr
+ACCInstallErrorDiskSpace
+ACCInstallErrorDownloadError
+ACCInstallFileAccessError
+ACCInstallFileAccessErrorInstall
+ACCInstallFileCopyErrorInstall
+ACCInstallFileCreateErrorInstall
+ACCInstallInvalidArchitectureMac
+ACCInstallNetworkUnavailable
+ACCInstallSegmentValidationFailed
+ACCInstallWaitOrCloseOtherInstances
+ACCInstallWaitOrCloseOtherInstancesACCC
+
+Conclusion: unexpected item is a privileged LaunchServices helper plus a native WebKit HTML UI. No embedded archives, ExtendScript, Java/Python runtime, or non-Mach-O standalone tool was found.
