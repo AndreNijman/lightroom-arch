@@ -1,0 +1,144 @@
+Phase 1 acquisition
+===================
+
+Acquired at: 2026-04-28T12:40:18+08:00
+Source: local cached DMG
+Original path: /home/andre/Downloads/Lightroom/Lightroom_Installer.dmg
+Copied to: /tmp/dmg-survey/source.dmg
+URL used: N/A - local cached Lightroom-specific DMG was found first
+HTTP response headers: N/A - no network download performed
+Size: 2442063 bytes
+SHA256: dd86c30c8cdc6600bfdffd47e8cd82282c11e97db2b49e35c9e6c92d89d92b90
+
+Phase 2 surface inspection
+==========================
+
+$ file /tmp/dmg-survey/source.dmg
+/tmp/dmg-survey/source.dmg: zlib compressed data
+
+$ 7z l /tmp/dmg-survey/source.dmg | head -100
+
+7-Zip 26.00 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-02-12
+ 64-bit locale=C.UTF-8 Threads:16 OPEN_MAX:524288, ASM
+
+Scanning the drive for archives:
+1 file, 2442063 bytes (2385 KiB)
+
+Listing archive: /tmp/dmg-survey/source.dmg
+
+--
+Path = /tmp/dmg-survey/source.dmg
+Type = Dmg
+Physical Size = 2442063
+Method = Zero2 ZLIB CRC
+Blocks = 14
+Cluster Size = 1048576
+Comment = 
+{
+unpack-size: 57053184
+ID: 23a98558392e463084384c024d45ba1a
+master-checksum: CRC: CA4DE1A5
+pack-checksum: CRC: 4DF67DDB
+pack-offset: 0
+pack-length: 2423736
+xml-offset: 2423736
+xml-length: 6584
+blob-offset: 2428622
+blob-length: 11231
+}
+----
+Path = 2.hfs
+Size = 57020416
+Packed Size = 2423571
+Comment = disk image (Apple_HFS : 2)
+Method = Zero2 ZLIB CRC
+Blocks = 12
+Cluster Size = 1048576
+Checksum = C8BA9281
+ID = 1
+--
+Path = 2.hfs
+Type = HFS
+Physical Size = 57020416
+Method = HFS+
+Cluster Size = 4096
+Free Space = 50708480
+Created = 2020-10-29 20:22:38
+Modified = 2020-10-30 11:22:43
+
+   Date      Time    Attr         Size   Compressed  Name
+------------------- ----- ------------ ------------  ------------------------
+2020-10-30 11:22:43 D....                            Lightroom Installer
+2020-10-30 11:12:09 .....        41750        45056  Lightroom Installer/.background.tiff
+2020-10-30 11:22:43 .....        10244        12288  Lightroom Installer/.DS_Store
+2020-10-30 11:22:38 D....                            Lightroom Installer/.HFS+ Private Directory Data
+2020-10-30 11:14:15 D....                            Lightroom Installer/Lightroom Installer.app
+2020-10-30 11:22:38 D....                            Lightroom Installer/[HFS+ Private Data]
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents
+2020-10-30 11:17:38 D....                            Lightroom Installer/Lightroom Installer.app/Contents/_CodeSignature
+2020-10-30 11:14:15 .....         1219         4096  Lightroom Installer/Lightroom Installer.app/Contents/Info.plist
+2020-10-30 11:14:15 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Library
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/MacOS
+2020-10-30 11:13:46 .....            8         4096  Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources
+2020-10-30 11:17:38 .....        30933        32768  Lightroom Installer/Lightroom Installer.app/Contents/_CodeSignature/CodeResources
+2020-10-30 11:17:39 .....      2936416      2936832  Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install
+2020-10-30 11:12:09 .....        57328        57344  Lightroom Installer/Lightroom Installer.app/Contents/Resources/app.icns
+2020-10-30 11:13:45 .....       718925       720896  Lightroom Installer/Lightroom Installer.app/Contents/Resources/clean.css
+2020-10-30 11:14:15 .....          275         4096  Lightroom Installer/Lightroom Installer.app/Contents/Resources/config.xml
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/cs.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/da.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/de.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/Dictionary
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/English.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/es.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/fi.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/fr.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/images
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/it.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/ja.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/js
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/ko.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/lib
+2020-10-30 11:13:45 .....        27317        28672  Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.css
+2020-10-30 11:13:45 .....        20487        24576  Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html
+2020-10-30 11:13:46 .....         8121         8192  Lightroom Installer/Lightroom Installer.app/Contents/Resources/MainMenu.nib
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/nb.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/nl.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/pl.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/pt.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/ru.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/sv.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/tr.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh-Hans.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh-Hant.lproj
+2020-10-30 11:20:40 D....                            Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh.lproj
+2020-10-30 11:13:45 .....            0            0  Lightroom Installer/Lightroom Installer.app/Contents/Resources/de.lproj/InfoPlist.strings
+2020-10-30 11:13:45 .....            0            0  Lightroom Installer/Lightroom Installer.app/Contents/Resources/zh-Hans.lproj/InfoPlist.strings
+2020-10-30 11:13:45 .....            0            0  Lightroom Installer/Lightroom Installer.app/Contents/Resources/ja.lproj/InfoPlist.strings
+2020-10-30 11:13:45 .....           92         4096  Lightroom Installer/Lightroom Installer.app/Contents/Resources/English.lproj/InfoPlist.strings
+
+$ dmg2img -V /tmp/dmg-survey/source.dmg
+SKIPPED: dmg2img is not installed and was unavailable via pacman on this host.
+
+$ xxd /tmp/dmg-survey/source.dmg | head -20
+00000000: 78da 730d 6262 6060 dcec c130 0a46 2400  x.s.bb``...0.F$.
+00000010: 0025 a801 9678 daed d131 0ac2 4010 05d0  .%...x...1..@...
+00000020: 8d36 1ec3 3b78 80c4 466c 8480 0708 0183  .6..;x..Fl......
+00000030: 2c1a 5d34 37f3 8259 6d6c 34b5 c27b f0ab  ,.]47..Yml4..{..
+00000040: 197e 3153 efc2 d32c a7c8 29d7 299d bbf0  .~1S...,..).)...
+00000050: dd6b dea4 f636 c421 5e2f 4ddf a64f 6b65  .k...6.!^/M..Oke
+00000060: ce3c f0f3 eaf7 ffab 503c 1687 783f 2d63  .<......P<..x?-c
+00000070: df1e bba9 ff6f 37fb a9d2 dc53 85b0 725d  .....o7....S..r]
+00000080: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+00000090: 0000 0000 0000 0000 0000 0000 0000 fecd  ................
+000000a0: 0854 3514 a678 daed dd7b 901c f561 27f0  .T5..x...{...a'.
+000000b0: dfcc cebe 1f12 2063 1002 84c0 b222 8402  ...... c....."..
+000000c0: 322f 139c c8e2 11a1 07c8 bc6c 0846 e8fd  2/.........l.F..
+000000d0: 7eb0 7a58 d858 1608 0b9c b2b9 3a8e 7351  ~.zX.X......:.sQ
+000000e0: b60b 731c 653b c4a1 b08f f325 392a 078e  ..s.e;.....%9*..
+000000f0: 2be5 c4c4 e7b2 2bfc 6138 92f2 a538 8e22  +.....+.a8...8."
+00000100: 57be 1495 935d 18ee f7eb 999d e9d9 9d95  W....]..........
+00000110: 76c5 6c3c f27e 3eaa d6f4 cefc 667a e6db  v.l<.~>.....fz..
+00000120: bfee e95f f7af 7b42 0026 abc5 e786 d281  ..._..{B.&......
+00000130: 5008 179c 3fff fcf4 f74b cffd ddc0 4bcf  P...?....K....K.
