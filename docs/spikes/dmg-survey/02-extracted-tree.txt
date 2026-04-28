@@ -1,0 +1,41 @@
+Phase 3 extraction
+==================
+
+$ 7z x /tmp/dmg-survey/source.dmg -o/tmp/dmg-survey/extracted/
+Result: success. See terminal extraction output in session; summary below.
+
+$ find /tmp/dmg-survey/extracted -maxdepth 4 -type d | head -50
+/tmp/dmg-survey/extracted
+/tmp/dmg-survey/extracted/Lightroom Installer
+/tmp/dmg-survey/extracted/Lightroom Installer/[HFS+ Private Data]
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Library
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/_CodeSignature
+/tmp/dmg-survey/extracted/Lightroom Installer/.HFS+ Private Directory Data
+
+$ find /tmp/dmg-survey/extracted -type f | wc -l
+93
+
+$ du -sh /tmp/dmg-survey/extracted
+5.7M	/tmp/dmg-survey/extracted
+
+$ find /tmp/dmg-survey/extracted -maxdepth 5 -type f | sort | head -100
+/tmp/dmg-survey/extracted/Lightroom Installer/.DS_Store
+/tmp/dmg-survey/extracted/Lightroom Installer/.background.tiff
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Info.plist
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/MacOS/Install
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeDirectory
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeRequirements
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeRequirements-1
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/PkgInfo:com.apple.cs.CodeSignature
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/MainMenu.nib
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/app.icns
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/clean.css
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/config.xml
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.css
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/Resources/main.html
+/tmp/dmg-survey/extracted/Lightroom Installer/Lightroom Installer.app/Contents/_CodeSignature/CodeResources
