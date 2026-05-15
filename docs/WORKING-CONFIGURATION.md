@@ -1,6 +1,6 @@
 # Working Configuration — Adobe Lightroom on Arch Linux via Wine
 
-After eleven attempts, Adobe Lightroom (Creative Cloud desktop app) is
+After thirteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
 usable under Wine on Arch Linux (Hyprland/Wayland). It launches, signs
 in, loads its full UI (crisp, 1:1), browses photos, and edits them
 without flashing. Run it with `./run-lightroom.sh`.
@@ -56,7 +56,7 @@ prefix's `system32`:
    in the bundled Wine loader. Normal imports skip the helper entirely.
    Patch: `installers/wine-patches/wine-d2d1-nondelay-imports.patch`
 
-## The journey (attempts 1-11)
+## The journey (attempts 1-13)
 
 1-3. Adobe CC installer under Wine — blue-screen CEF render failures.
 4. Patched d2d1 ColorManagement effect — got past the first D2D wall,
@@ -80,10 +80,20 @@ prefix's `system32`:
 11. Two display problems: the UI was bitmap-upscaled by an undersized
     Wine virtual desktop (fixed by sizing the desktop to the monitor),
     and the GPU Develop preview flashed between the image and an empty
-    canvas while editing (fixed by disabling GPU acceleration — the
-    preview renders on the CPU instead).
+    canvas while editing (worked around by disabling GPU acceleration —
+    the preview renders on the CPU instead).
+12. Root-caused the GPU-on flicker: Wine's `winex11` composites a D3D
+    child-window swapchain (CameraRaw's preview) offscreen and blits it
+    onto the parent X drawable on every present, which races Lightroom's
+    own parent-window repaints. Located in `needs_offscreen_rendering()`
+    / `X11DRV_vulkan_surface_presented()`.
+13. Built a patched `winex11` from the matching Wine commit to test a
+    fix. It loads ABI-clean, but the patch is a no-op — the preview is
+    genuinely clipped by sibling windows, so Wine correctly keeps it
+    offscreen. The real fix needs re-compositing the child surface after
+    each parent repaint; GPU stays off until then.
 
-See `docs/attempt-7-*` … `attempt-11-*` for detail.
+See `docs/attempt-7-*` … `attempt-13-*` for detail.
 
 ## Reproduce
 

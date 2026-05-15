@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Investigated — GPU-on develop-edit flicker
+
+- **Root cause located** (`docs/attempt-12`). The flicker is not in
+  `dxgi`/`d3d12` — traces show clean presents, no swapchain recreation.
+  It is in Wine's `winex11`: a D3D child-window swapchain (CameraRaw's
+  preview) is composited offscreen and blitted onto the parent X
+  drawable on every present, racing Lightroom's own parent-window
+  repaints during a slider drag.
+- **Fix attempted** (`docs/attempt-13`). Rebuilt Wine's `winex11` from
+  the bundled build's exact commit with a patch to
+  `needs_offscreen_rendering()`. The rebuilt driver loads ABI-clean but
+  the patch is a no-op: the preview window is genuinely clipped by
+  sibling windows, so Wine correctly keeps it on the offscreen path.
+  GPU acceleration stays off (the 2.1.0 workaround) until a deeper
+  `winex11` fix lands. No project files changed; the bundle is restored.
+
 ## [2.1.0] - 2026-05-15
 
 ### Fixed — display quality
