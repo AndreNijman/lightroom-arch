@@ -95,11 +95,50 @@ from the Windows partition into the prefix and point LR at it via
 `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER`. This is a Chromium-under-Wine
 problem and may not work cleanly.
 
+## WebView2 installed — LR UI renders
+
+Copied the WebView2 Evergreen runtime (148.0.3967.54, 658MB Chromium)
+from the Windows partition into `~/.wine_adobe/drive_c/webview2/` and
+pointed LR at it with `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER=C:\webview2`.
+
+Result — **Lightroom Classic 9.3.1's full UI renders under Wine**:
+- Title bar, menu bar (File/Edit/Photo/View/Help), search toolbar
+- Left panel: Cloud/Local, Assisted Culling, Favorites/Browse
+- The Adobe **Sign In page renders** — WebView2/Chromium content
+  displays inside LR (Chromium-under-Wine works)
+
+This is the furthest any attempt has reached: LR Classic boots and
+draws its complete interface.
+
+## Remaining blocker: AgKernel startup crash
+
+A worker thread still crashes during Lua startup:
+
+```
+EXCEPTION_ACCESS_VIOLATION addr=0x14028231C  (lightroom.exe code)
+all registers zero — null pointer / null vtable call
+stack: lightroom.exe+0x28231C
+     <- lightroom.exe+0x20FF56
+     <- lightroom.exe+0xA61157
+     <- AgKernel.dll (Lua VM recursion)
+     <- substrate.dll
+     <- kernel32 / ntdll thread start
+```
+
+Same crash address with and without WebView2 — independent of WebView2.
+LR's Lua startup runs a task that calls native LR code dereferencing a
+null pointer. Preceding Wine warnings: `readMonitorEdidFromKey` failed,
+`DXGI: Failed to parse display metadata + colorimetry info`, WMI
+(`wbemprox`) security stubs — suggests the display/color-management or
+system-info path. LR shows its "Sorry, an error occurred" dialog and
+closes after the crash.
+
 ## Launch command (current best)
 
 ```bash
 cd "$WINEPREFIX/drive_c/Program Files/Adobe/Adobe Lightroom CC"
 WINEPREFIX=~/.wine_adobe \
+WEBVIEW2_BROWSER_EXECUTABLE_FOLDER='C:\webview2' \
 WINEDLLOVERRIDES="winemenubuilder.exe=d;mscoree=d;mshtml=d;dwrite=b" \
 ~/opt/wine-adobe/files/bin/wine lightroom.exe
 ```
