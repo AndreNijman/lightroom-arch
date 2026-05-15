@@ -120,10 +120,13 @@ offscreen `StretchBlt` present) fires ~68 times during a one-second
 drag, and `needs_offscreen_rendering` is exercised — the offscreen
 client-surface present path is active throughout editing.
 
-(Source line numbers above are from a Valve-Wine checkout near the
-bundled build; the bundled Proton build is a slightly different commit,
-so exact lines may shift, but the `needs_offscreen_rendering` /
-`client_surface` offscreen-compositing structure is the same.)
+The function names above are from a Wine-11 checkout. The bundled build
+is Wine 10 (Proton commit `dbb32ff8`); attempt 13 verified the same
+mechanism there under different names — `needs_offscreen_rendering()`
+in `dlls/winex11.drv/init.c` (returns `TRUE` for any child window) and
+the per-present offscreen `StretchBlt` in `X11DRV_vulkan_surface_presented()`
+in `dlls/winex11.drv/vulkan.c`. The structure is identical; only the
+naming differs between Wine 10 and 11.
 
 ## What a real fix requires
 
