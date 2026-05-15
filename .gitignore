@@ -9,6 +9,7 @@
 *.rar
 .DS_Store
 /installers/
+/logs/
 /test-output/
 /tests/fixtures/*.NEF
 /tests/fixtures/*.CR2
