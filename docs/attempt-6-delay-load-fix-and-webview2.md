@@ -3,7 +3,7 @@
 ## Summary
 
 The D2D/dwrite graphics-init wall that blocked attempts 1-5 is **solved**.
-Lightroom Classic 9.3.1 now boots past graphics init, renders fonts and
+Lightroom 9.3.1 now boots past graphics init, renders fonts and
 D3D11 textures, reaches its version banner and networking/licensing
 stage. New blocker: missing WebView2 runtime.
 
@@ -70,7 +70,7 @@ prefix.
 
 ## Current state — graphics wall broken
 
-With non-delay `d2d1.dll` + builtin `dwrite`, LR Classic 9.3.1:
+With non-delay `d2d1.dll` + builtin `dwrite`, LR 9.3.1:
 - Boots past D2D + dwrite init (no crash)
 - DXVK 2.7.1 initializes, finds AMD Radeon 780M via Vulkan
 - Renders fonts (`dwritefontface5` calls) and D3D11 textures
@@ -88,7 +88,7 @@ EXCEPTION_ACCESS_VIOLATION addr=0x14028231C  (lightroom.exe code)
 
 LR can't find the Microsoft Edge WebView2 runtime, then its
 WebView2-handling code dereferences a null/invalid pointer and faults.
-LR Classic needs WebView2 for its account/login UI.
+LR needs WebView2 for its account/login UI.
 
 Fix in progress: copy the WebView2 Evergreen runtime (148.0.3967.54)
 from the Windows partition into the prefix and point LR at it via
@@ -101,13 +101,13 @@ Copied the WebView2 Evergreen runtime (148.0.3967.54, 658MB Chromium)
 from the Windows partition into `~/.wine_adobe/drive_c/webview2/` and
 pointed LR at it with `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER=C:\webview2`.
 
-Result — **Lightroom Classic 9.3.1's full UI renders under Wine**:
+Result — **Lightroom 9.3.1's full UI renders under Wine**:
 - Title bar, menu bar (File/Edit/Photo/View/Help), search toolbar
 - Left panel: Cloud/Local, Assisted Culling, Favorites/Browse
 - The Adobe **Sign In page renders** — WebView2/Chromium content
   displays inside LR (Chromium-under-Wine works)
 
-This is the furthest any attempt has reached: LR Classic boots and
+This is the furthest any attempt has reached: LR boots and
 draws its complete interface.
 
 ## Remaining blocker: AgKernel startup crash
@@ -133,12 +133,36 @@ null pointer. Preceding Wine warnings: `readMonitorEdidFromKey` failed,
 system-info path. LR shows its "Sorry, an error occurred" dialog and
 closes after the crash.
 
-## Launch command (current best)
+## AgKernel crash resolved — it was DXVK
+
+The `lightroom.exe+0x28231C` crash was DXVK-specific. DXVK 2.7.1
+(Direct3D → Vulkan) was the d3d11/dxgi provider; LR's display/color
+path crashed through it. Switching to Wine's built-in WineD3D removed
+the crash:
+
+```
+WINEDLLOVERRIDES="...;d3d11=b;dxgi=b;d3d10core=b;d3d9=b"
+```
+
+With WineD3D, LR runs stable — render loop presents frames
+continuously, no crash.
+
+## Result — Lightroom works
+
+LR launches, renders its full UI, runs a stable render loop, connects
+to Adobe over TLS (`lcs-cops.adobe.io` licensing endpoint), and
+displays an interactive Adobe sign-in page (WebView2/Chromium). The
+user signs in with a Creative Cloud account to activate.
+
+See `docs/WORKING-CONFIGURATION.md` for the final recipe and
+`run-lightroom.sh` for the launch script.
+
+## Final launch command
 
 ```bash
 cd "$WINEPREFIX/drive_c/Program Files/Adobe/Adobe Lightroom CC"
 WINEPREFIX=~/.wine_adobe \
 WEBVIEW2_BROWSER_EXECUTABLE_FOLDER='C:\webview2' \
-WINEDLLOVERRIDES="winemenubuilder.exe=d;mscoree=d;mshtml=d;dwrite=b" \
+WINEDLLOVERRIDES="winemenubuilder.exe=d;mscoree=d;mshtml=d;dwrite=b;d3d11=b;dxgi=b;d3d10core=b;d3d9=b" \
 ~/opt/wine-adobe/files/bin/wine lightroom.exe
 ```
