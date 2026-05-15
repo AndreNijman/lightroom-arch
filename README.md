@@ -1,28 +1,39 @@
-# Adobe Lightroom on Arch Linux via Wine — Working
+# Adobe Lightroom on Arch Linux via Wine
 
 Running Adobe Lightroom (the Creative Cloud desktop app) on Arch Linux
-under Wine. As of 2026-05-15 it **works**: Lightroom launches, renders
-its full UI, runs a stable render loop, connects to Adobe over TLS, and
-presents a working Adobe sign-in page. Sign in with a Creative Cloud
-account to activate.
+under Wine. As of 2026-05-15 Lightroom launches, signs in,
+authenticates against Adobe Creative Cloud, and **loads its complete
+main UI** — the Local library workspace. One Wine bug remains: a COM
+worker thread crashes shortly after the UI finishes loading.
 
-![Lightroom running on Arch via Wine](docs/screenshots/lr-running-signin.png)
+![Lightroom main UI loaded on Arch via Wine](docs/screenshots/lr-main-ui-loaded.png)
 
-## Status: working
+## Status
 
 | Stage | State |
 |-------|-------|
 | Launch + Wine boot | works |
 | Direct2D / graphics init | works (patched `d2d1.dll`) |
 | DirectWrite font rendering | works (Wine builtin dwrite) |
-| Direct3D render loop | works (WineD3D) |
+| Direct3D render loop | works (WineD3D, not DXVK) |
 | WebView2 / Chromium UI | works (Edge WebView2 runtime in prefix) |
-| Adobe sign-in page | renders, interactive |
-| Account activation | user signs in with their Creative Cloud account |
+| Adobe sign-in + activation | works (with the AdobeGrowthSDK patch) |
+| Media Foundation init | works (rebuilt `mf`/`mfplat`/`mfreadwrite`) |
+| Main library UI | loads fully |
+| Stable session | **not yet** — a COM wrong-thread crash (`RPC_E_WRONG_THREAD` → null deref at `lightroom.exe+0x28231C`) crashes a worker thread after the UI loads |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
 libraries and Assisted Culling. That is the intended app.
+
+### The remaining bug
+
+After the full UI loads, a background worker thread makes a COM call
+that returns `RPC_E_WRONG_THREAD` (an interface used from the wrong
+apartment — Wine's COM apartment-threading model differs from
+Windows). LR's own code does not null-check the failed result and
+crashes. Fixing it needs Wine COM-apartment work or a binary patch to
+`lightroom.exe`. See `docs/attempt-7-signin-and-media-foundation.md`.
 
 ## Run it
 
@@ -75,14 +86,16 @@ bundled Wine ships separate `wine`+`wine64`; do not rebuild WoW64-style.
 
 ## The journey
 
-Six attempts, fully documented in `docs/`:
+Seven attempts, fully documented in `docs/`:
 
 - `docs/attempt-2-*` — PhialsBasement patched Wine, CC installer (CEF
   blue-screen failures)
 - `docs/attempt-4-*` — first `d2d1` ColorManagement patch; dwrite crash
 - `docs/attempt-5-*` — full Wine rebuild dead end
-- `docs/attempt-6-*` — delay-load fix, WebView2, WineD3D — **working**
-- `docs/WORKING-CONFIGURATION.md` — the final recipe
+- `docs/attempt-6-*` — delay-load fix, WebView2, WineD3D — UI renders
+- `docs/attempt-7-*` — sign-in (SetThreadpoolTimerEx), Media Foundation,
+  COM wrong-thread crash
+- `docs/WORKING-CONFIGURATION.md` — the recipe
 
 Wine patches: `installers/wine-patches/`.
 
