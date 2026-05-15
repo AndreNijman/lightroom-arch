@@ -18,3 +18,4 @@
 /tests/fixtures/*.CR2
 /tests/fixtures/*.ARW
 /tests/fixtures/*.DNG
+backups/
