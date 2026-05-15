@@ -1,5 +1,11 @@
 # Attempt 9: Opening and Editing Photos — the D3D12/vkd3d Crash
 
+> **Superseded by attempt 10.** The GPU-off workaround below was a
+> stop-gap. The crash was caused by this attempt copying vkd3d-proton's
+> `d3d12core.dll` into the prefix, which is incompatible with Wine's
+> builtin `dxgi.dll`. Keeping the D3D12 stack all-builtin fixes it with
+> the GPU left **on**. See `docs/attempt-10-vkd3d-investigation.md`.
+
 ## Where attempt 8 left off
 
 The COM null-check patch made LR stable: full UI, browses the

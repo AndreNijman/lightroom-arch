@@ -25,7 +25,7 @@ them** — the develop sliders work and visibly change the image.
 | Browse filesystem + show photos | works — folder tree, thumbnail grid |
 | Open a photo (loupe / Compare) | works — full-size render |
 | Edit panel + develop sliders | works — Exposure slider darkens the photo |
-| GPU acceleration | **off** — Wine's D3D12/vkd3d crashes CameraRaw; LR edits on CPU |
+| GPU acceleration | works — Wine builtin D3D12 → Vulkan (RADV) |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
@@ -43,13 +43,17 @@ null-checks the pointer and, on NULL, routes to LR's own error/unwind
 path. See `docs/attempt-8-com-crash-fixed.md` and
 `scripts/patches/patch-lightroom-com-nullcheck.py`.
 
-**CameraRaw D3D12 crash — worked around.** Opening a photo crashed in
-`libvkd3d-1.dll` (Wine's D3D12→Vulkan layer) via
-CameraRaw → `dxgi` → D3D12. Neither disabling D3D12 nor swapping in
-vkd3d-proton avoided it (Wine's `dxgi` itself pulls in `libvkd3d`).
-Fixed by turning **GPU acceleration off** in LR's preferences
-(`gpu4setting="off"`) — CameraRaw then renders on the CPU and never
-touches D3D12. See `docs/attempt-9-photo-editing.md`.
+**CameraRaw D3D12 crash — was a misconfiguration, now resolved.**
+Opening a photo crashed in `libvkd3d-1.dll` via CameraRaw → `dxgi` →
+D3D12. Attempt 9 mistakenly worked around it by disabling the GPU. The
+real cause: attempt 9 had copied **vkd3d-proton**'s `d3d12core.dll`
+into the prefix, mixing it with Wine's builtin `dxgi.dll` — two
+incompatible D3D12 implementations. Wine's dxgi D3D12-swapchain code
+casts the device with raw struct arithmetic that is only valid for a
+Wine-libvkd3d device. With the whole D3D12 stack kept builtin
+(`d3d12=b;d3d12core=b`), GPU acceleration works and there is no crash.
+It is **not an upstream Wine bug**. See
+`docs/attempt-10-vkd3d-investigation.md`.
 
 ## Run it
 
@@ -62,10 +66,11 @@ sign-in page. To close Lightroom:
 `WINEPREFIX=$HOME/.wine_adobe ~/opt/wine-adobe/files/bin/wineserver -k9`
 (the Wine window does not honor the WM close button).
 
-> **Do not click "Enable" on the GPU banner.** LR shows a banner —
-> *"Enabling GPU … will improve performance"* — at the top of its UI.
-> Clicking it flips `gpu4setting` back to `"auto"` and the next photo
-> you open crashes in Wine's D3D12/vkd3d layer. Leave the GPU off.
+GPU acceleration is on and works. The whole D3D12 stack must stay
+Wine-builtin (`d3d12=b;d3d12core=b`, set in `run-lightroom.sh`) — do
+not drop vkd3d-proton's `d3d12core.dll` into the prefix, as it is
+incompatible with Wine's builtin `dxgi.dll` and crashes on swapchain
+creation.
 
 ## How it works
 
@@ -108,7 +113,7 @@ bundled Wine ships separate `wine`+`wine64`; do not rebuild WoW64-style.
 
 ## The journey
 
-Nine attempts, fully documented in `docs/`:
+Ten attempts, fully documented in `docs/`:
 
 - `docs/attempt-2-*` — PhialsBasement patched Wine, CC installer (CEF
   blue-screen failures)
@@ -117,8 +122,9 @@ Nine attempts, fully documented in `docs/`:
 - `docs/attempt-6-*` — delay-load fix, WebView2, WineD3D — UI renders
 - `docs/attempt-7-*` — sign-in (SetThreadpoolTimerEx), Media Foundation
 - `docs/attempt-8-*` — COM wrong-thread crash fixed; LR runs stable
-- `docs/attempt-9-*` — CameraRaw D3D12/vkd3d crash; GPU-off workaround —
-  photo editing works
+- `docs/attempt-9-*` — CameraRaw D3D12/vkd3d crash; GPU-off workaround
+- `docs/attempt-10-*` — vkd3d crash investigated: no upstream bug, it
+  was a vkd3d-proton/dxgi misconfiguration; GPU acceleration now works
 - `docs/WORKING-CONFIGURATION.md` — the recipe
 
 Wine patches: `installers/wine-patches/`.

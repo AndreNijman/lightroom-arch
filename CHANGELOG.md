@@ -27,16 +27,20 @@ change the image. Launch with `./run-lightroom.sh`.
   binary-patched to import `SetThreadpoolTimer` instead.
 - **Media Foundation crash** — rebuilt `mf`/`mfplat`/`mfreadwrite`.
 
-### Worked around
+### CameraRaw D3D12 crash — resolved (was a misconfiguration)
 
-- **CameraRaw D3D12 crash** in `libvkd3d-1.dll` on opening a photo —
-  GPU acceleration turned off in LR preferences
-  (`gpu4setting="off"`); CameraRaw renders on the CPU.
+- Opening a photo crashed in `libvkd3d-1.dll` via CameraRaw → `dxgi` →
+  D3D12. Investigation (attempt 10) found this was **not** an upstream
+  Wine bug: a vkd3d-proton `d3d12core.dll` had been dropped into the
+  prefix, mixing it with Wine's builtin `dxgi.dll` — incompatible D3D12
+  implementations. With the whole D3D12 stack kept builtin
+  (`d3d12=b;d3d12core=b`), GPU acceleration works and there is no
+  crash. GPU acceleration is **on**.
 
-### Known limitation
+### No known limitations
 
-- GPU acceleration is off (Wine's D3D12→Vulkan `libvkd3d-1.dll` faults
-  inside CameraRaw). Editing is CPU-rendered.
+- GPU acceleration works (Wine builtin D3D12 → Vulkan, RADV on the
+  AMD Radeon 780M).
 
 ## [1.0.0] - 2026-05-15
 

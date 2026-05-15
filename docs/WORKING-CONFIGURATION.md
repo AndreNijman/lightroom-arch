@@ -16,9 +16,10 @@ work and visibly change the image.
 **Requires the user:** sign in with an Adobe Creative Cloud account on
 first launch (WebView2 sign-in page).
 
-**Known limitation:** GPU acceleration is off — Wine's D3D12→Vulkan
-layer (`libvkd3d-1.dll`) faults inside CameraRaw's GPU pipeline.
-Editing is CPU-rendered (slower, but fully functional).
+**GPU acceleration:** on and working — Wine builtin D3D12 → Vulkan
+(RADV on the AMD Radeon 780M). The whole D3D12 stack must stay
+Wine-builtin; mixing vkd3d-proton's `d3d12core.dll` with Wine's
+builtin `dxgi.dll` crashes on swapchain creation (see attempt 10).
 
 ## The stack
 
@@ -30,9 +31,9 @@ Editing is CPU-rendered (slower, but fully functional).
 | d2d1.dll | Patched (see below) | Wine's stock d2d1 lacks the ColorManagement effect and its delay-load helper crashes |
 | dwrite | Wine builtin (`dwrite=b`) | Native Windows DWrite.dll infinite-recurses under Wine |
 | Direct3D 9/10/11 | WineD3D (`d3d11=b;dxgi=b;d3d10core=b;d3d9=b`) | DXVK caused a null-pointer crash at `lightroom.exe+0x28231C` |
-| Direct3D 12 | vkd3d-proton copied into prefix (`d3d12=n;d3d12core=n`) | bundled d3d12core pulled the crashing standalone `libvkd3d-1` |
+| Direct3D 12 | Wine builtin (`d3d12=b;d3d12core=b`) | builtin D3D12 + builtin dxgi are a consistent stack; vkd3d-proton's d3d12core is incompatible with Wine's dxgi and crashes |
 | Media Foundation | Rebuilt `mf`/`mfplat`/`mfreadwrite` | Wine builtin MF null-derefs on `E_NOINTERFACE` |
-| GPU acceleration | **off** — `gpu4setting="off"` in `Lightroom CC Preferences.agprefs` | CameraRaw's D3D12 path crashes in `libvkd3d-1.dll`; CPU rendering is stable |
+| GPU acceleration | on — Wine builtin D3D12 → Vulkan | CameraRaw renders/edits photos GPU-accelerated |
 | WebView2 | Edge WebView2 runtime copied into prefix | LR's account/sign-in UI requires it |
 | X11 | `UseXVidMode=N` in `user.reg` | XVidMode assertion crash on Hyprland/XWayland |
 
@@ -69,10 +70,14 @@ prefix's `system32`:
 8. COM `RPC_E_WRONG_THREAD` crash at `lightroom.exe+0x28231C` → binary
    code-cave null-check patch. LR runs stable; browses photos.
 9. Opening a photo crashed in `libvkd3d-1.dll` (CameraRaw's D3D12 path)
-   → GPU acceleration turned off in LR preferences. Photo editing
-   works on the CPU.
+   → GPU temporarily disabled as a stop-gap.
+10. Investigated the vkd3d crash: it was caused by attempt 9's own
+    vkd3d-proton `d3d12core.dll` mixed with Wine's builtin `dxgi.dll`.
+    Not an upstream bug. Kept the D3D12 stack all-builtin
+    (`d3d12=b;d3d12core=b`), re-enabled the GPU — photo editing works
+    GPU-accelerated.
 
-See `docs/attempt-7-*`, `attempt-8-*`, `attempt-9-*` for detail.
+See `docs/attempt-7-*` … `attempt-10-*` for detail.
 
 ## Reproduce
 
