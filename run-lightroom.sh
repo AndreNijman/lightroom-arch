@@ -19,9 +19,11 @@
 #  - rebuilt mf/mfplat/mfreadwrite in the prefix (Media Foundation)
 #  - Microsoft Edge WebView2 runtime copied into the prefix (sign-in UI)
 #  - X11 driver: UseXVidMode=N (XVidMode assertion crash on Hyprland)
-#  - GPU acceleration is OFF in LR's preferences. Wine's D3D12 preview
-#    present path flashes between the image and an empty canvas while
-#    editing; CameraRaw renders on the CPU instead (see attempt 11).
+#  - GPU acceleration is ON. Wine's winex11 is patched (wine-patches/) so
+#    the parent window-surface flush no longer overpaints CameraRaw's
+#    offscreen D3D child swapchain -- that race was the develop-edit
+#    flicker. This script installs the patched winex11.so (see attempts
+#    12-14). If you ever need to revert, restore winex11.so.orig.
 #  - The Wine virtual desktop is sized to the monitor and fullscreened
 #    so its framebuffer maps 1:1 to physical pixels (crisp UI).
 
@@ -40,6 +42,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # not enough on its own -- Lightroom leaks orphaned explorer.exe helpers
 # that survive it and accumulate across launches. See scripts/kill-wine.sh.
 WINE_ROOT=~/opt/wine-adobe bash "$SCRIPT_DIR/scripts/kill-wine.sh"
+
+# Install the patched winex11.so (D3D child-swapchain flicker fix). The
+# stock driver overpaints CameraRaw's offscreen preview during a parent
+# UI repaint, flickering GPU-on edits. See wine-patches/. Idempotent:
+# only acts when the installed driver differs from the patched one, and
+# keeps the stock driver as winex11.so.orig.
+PATCHED_WINEX11="$SCRIPT_DIR/wine-patches/winex11.so"
+TARGET_WINEX11=~/opt/wine-adobe/files/lib/wine/x86_64-unix/winex11.so
+if [ -f "$PATCHED_WINEX11" ] && [ -f "$TARGET_WINEX11" ] \
+   && ! cmp -s "$PATCHED_WINEX11" "$TARGET_WINEX11"; then
+    [ -f "$TARGET_WINEX11.orig" ] || cp "$TARGET_WINEX11" "$TARGET_WINEX11.orig"
+    chmod u+w "$TARGET_WINEX11" 2>/dev/null || true
+    cp "$PATCHED_WINEX11" "$TARGET_WINEX11"
+    echo "run-lightroom: installed patched winex11.so (flicker fix)"
+fi
 
 # Match Wine's virtual desktop to the active monitor's pixel resolution.
 # If the desktop is smaller than the host window, Wine bitmap-upscales

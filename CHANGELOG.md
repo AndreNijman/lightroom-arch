@@ -5,23 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.2.0] - 2026-05-15
 
-### Investigated — GPU-on develop-edit flicker
+### Fixed — GPU-on develop-edit flicker (the real fix)
 
-- **Root cause located** (`docs/attempt-12`). The flicker is not in
-  `dxgi`/`d3d12` — traces show clean presents, no swapchain recreation.
-  It is in Wine's `winex11`: a D3D child-window swapchain (CameraRaw's
-  preview) is composited offscreen and blitted onto the parent X
-  drawable on every present, racing Lightroom's own parent-window
-  repaints during a slider drag.
-- **Fix attempted** (`docs/attempt-13`). Rebuilt Wine's `winex11` from
-  the bundled build's exact commit with a patch to
-  `needs_offscreen_rendering()`. The rebuilt driver loads ABI-clean but
-  the patch is a no-op: the preview window is genuinely clipped by
-  sibling windows, so Wine correctly keeps it on the offscreen path.
-  GPU acceleration stays off (the 2.1.0 workaround) until a deeper
-  `winex11` fix lands. No project files changed; the bundle is restored.
+- **GPU acceleration is back on, flicker-free.** The 2.1.0 release
+  worked around the develop-edit flicker by disabling Lightroom's GPU
+  acceleration. This release fixes the bug at its source.
+- **Root cause** (`docs/attempt-12`): not in `dxgi`/`d3d12` — traces
+  show clean presents, no swapchain recreation. It is in Wine's
+  `winex11`. CameraRaw's Develop preview is a D3D12 swapchain on a child
+  window; `winex11` composites that child offscreen and `StretchBlt`s it
+  onto the parent X drawable every present, while the parent
+  window-surface flush repaints the *same* drawable — the two race and
+  the preview flashes against Lightroom's grey canvas during a drag.
+- **Fix** (`docs/attempt-14`, `wine-patches/`): `winex11` now tracks the
+  rects of offscreen Vulkan child surfaces and excludes them from the
+  parent window-surface flush, so a parent UI repaint no longer
+  overpaints the preview. The per-present `StretchBlt` is left as the
+  sole writer of that region. Patch confined to `dlls/winex11.drv/`,
+  no ABI change. Verified: **0 blank frames across 700+ captured frames**
+  of GPU-on slider editing (was ~65/293).
+- `run-lightroom.sh` installs the patched `winex11.so` on launch
+  (idempotent; keeps the stock driver as `winex11.so.orig`). Lightroom's
+  GPU acceleration is re-enabled in the prefix preferences.
+- An intermediate `needs_offscreen_rendering()` patch (`docs/attempt-13`)
+  was tried first and proved a no-op — kept documented for the record.
 
 ## [2.1.0] - 2026-05-15
 

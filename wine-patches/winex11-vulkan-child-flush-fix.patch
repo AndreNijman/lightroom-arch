@@ -1,0 +1,236 @@
+diff --git a/dlls/winex11.drv/bitblt.c b/dlls/winex11.drv/bitblt.c
+index dd9ddb27..4eb99d21 100644
+--- a/dlls/winex11.drv/bitblt.c
++++ b/dlls/winex11.drv/bitblt.c
+@@ -1866,10 +1866,77 @@ static BOOL x11drv_surface_flush( struct window_surface *window_surface, const R
+ #endif /* HAVE_LIBXSHAPE */
+     }
+ 
+-    if (!put_shm_image( ximage, &surface->image->shminfo, surface->window, surface->gc, &rect, dirty ))
+-        XPutImage( gdi_display, surface->window, surface->gc, ximage, dirty->left,
+-                   dirty->top, rect.left + dirty->left, rect.top + dirty->top,
+-                   dirty->right - dirty->left, dirty->bottom - dirty->top );
++    /* An offscreen Vulkan child swapchain (e.g. Adobe CameraRaw's Develop
++     * preview) is composited onto this same drawable by a StretchBlt on
++     * every present. Exclude those rects from this flush so the parent
++     * UI repaint does not overpaint the child between presents -- that
++     * race is what makes the GPU preview flicker. */
++    {
++        RECT vk_rects[16];
++        unsigned int vk_count = x11drv_get_offscreen_vk_rects( surface->window, vk_rects, 16 );
++        BOOL excluded = FALSE;
++
++        if (vk_count)
++        {
++            Region rgn = XCreateRegion();
++            unsigned int i;
++
++            if (surface->clip_rect_count)
++            {
++                for (i = 0; i < surface->clip_rect_count; i++)
++                {
++                    XRectangle xr;
++                    xr.x      = surface->clip_rects[i].left + surface->x_offset;
++                    xr.y      = surface->clip_rects[i].top + surface->y_offset;
++                    xr.width  = surface->clip_rects[i].right - surface->clip_rects[i].left;
++                    xr.height = surface->clip_rects[i].bottom - surface->clip_rects[i].top;
++                    XUnionRectWithRegion( &xr, rgn, rgn );
++                }
++            }
++            else
++            {
++                XRectangle xr = { rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top };
++                XUnionRectWithRegion( &xr, rgn, rgn );
++            }
++
++            for (i = 0; i < vk_count; i++)
++            {
++                XRectangle xr;
++                Region hole = XCreateRegion();
++                xr.x      = vk_rects[i].left;
++                xr.y      = vk_rects[i].top;
++                xr.width  = vk_rects[i].right - vk_rects[i].left;
++                xr.height = vk_rects[i].bottom - vk_rects[i].top;
++                XUnionRectWithRegion( &xr, hole, hole );
++                XSubtractRegion( rgn, hole, rgn );
++                XDestroyRegion( hole );
++            }
++
++            XSetRegion( gdi_display, surface->gc, rgn );
++            XDestroyRegion( rgn );
++            excluded = TRUE;
++        }
++
++        if (!put_shm_image( ximage, &surface->image->shminfo, surface->window, surface->gc, &rect, dirty ))
++            XPutImage( gdi_display, surface->window, surface->gc, ximage, dirty->left,
++                       dirty->top, rect.left + dirty->left, rect.top + dirty->top,
++                       dirty->right - dirty->left, dirty->bottom - dirty->top );
++
++        if (excluded)
++        {
++            if (surface->clip_rect_count)
++            {
++                XRectangle *xrects = xrectangles_from_rects( surface->clip_rects, surface->clip_rect_count,
++                                                             surface->x_offset, surface->y_offset );
++                if (xrects)
++                {
++                    XSetClipRectangles( gdi_display, surface->gc, 0, 0, xrects, surface->clip_rect_count, YXBanded );
++                    free( xrects );
++                }
++            }
++            else XSetClipMask( gdi_display, surface->gc, None );
++        }
++    }
+ 
+     XFlush( gdi_display );
+ 
+diff --git a/dlls/winex11.drv/vulkan.c b/dlls/winex11.drv/vulkan.c
+index 908066c1..98064de0 100644
+--- a/dlls/winex11.drv/vulkan.c
++++ b/dlls/winex11.drv/vulkan.c
+@@ -30,6 +30,7 @@
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <dlfcn.h>
++#include <pthread.h>
+ 
+ #include "ntstatus.h"
+ #define WIN32_NO_STATUS
+@@ -37,6 +38,7 @@
+ #include "winbase.h"
+ 
+ #include "wine/debug.h"
++#include "wine/list.h"
+ #include "x11drv.h"
+ #include "xcomposite.h"
+ 
+@@ -74,8 +76,11 @@ struct x11drv_vulkan_surface
+     BOOL other_process;
+ };
+ 
++static void offscreen_vk_clear( void *key );
++
+ static void vulkan_surface_destroy( HWND hwnd, struct x11drv_vulkan_surface *surface )
+ {
++    offscreen_vk_clear( surface );
+     destroy_client_window( hwnd, surface->window );
+     if (surface->hdc_dst) NtGdiDeleteObjectApp( surface->hdc_dst );
+     if (surface->hdc_src) NtGdiDeleteObjectApp( surface->hdc_src );
+@@ -202,6 +207,8 @@ static void X11DRV_vulkan_surface_detach( HWND hwnd, void *private )
+ 
+     TRACE( "%p %p\n", hwnd, private );
+ 
++    offscreen_vk_clear( surface );
++
+     if ((data = get_win_data( hwnd )))
+     {
+         detach_client_window( data, client_window );
+@@ -307,6 +314,72 @@ static int force_present_to_surface(void)
+     return cached;
+ }
+ 
++/* Offscreen Vulkan child surfaces are composited onto the parent X
++ * drawable by a StretchBlt on every present. The parent window-surface
++ * flush also writes that drawable and would overpaint the child between
++ * presents, flickering D3D child swapchains (Adobe CameraRaw preview).
++ * Track the offscreen child rects here so the parent flush (bitblt.c)
++ * can exclude them. */
++struct offscreen_vk_box
++{
++    struct list entry;
++    void       *key;
++    Window      toplevel;
++    RECT        rect;
++};
++static struct list offscreen_vk_boxes = LIST_INIT( offscreen_vk_boxes );
++static pthread_mutex_t offscreen_vk_lock = PTHREAD_MUTEX_INITIALIZER;
++
++static void offscreen_vk_set( void *key, Window toplevel, const RECT *rect )
++{
++    struct offscreen_vk_box *box;
++
++    pthread_mutex_lock( &offscreen_vk_lock );
++    LIST_FOR_EACH_ENTRY( box, &offscreen_vk_boxes, struct offscreen_vk_box, entry )
++    {
++        if (box->key != key) continue;
++        box->toplevel = toplevel;
++        box->rect = *rect;
++        pthread_mutex_unlock( &offscreen_vk_lock );
++        return;
++    }
++    if ((box = malloc( sizeof(*box) )))
++    {
++        box->key = key;
++        box->toplevel = toplevel;
++        box->rect = *rect;
++        list_add_tail( &offscreen_vk_boxes, &box->entry );
++    }
++    pthread_mutex_unlock( &offscreen_vk_lock );
++}
++
++static void offscreen_vk_clear( void *key )
++{
++    struct offscreen_vk_box *box, *next;
++
++    pthread_mutex_lock( &offscreen_vk_lock );
++    LIST_FOR_EACH_ENTRY_SAFE( box, next, &offscreen_vk_boxes, struct offscreen_vk_box, entry )
++    {
++        if (box->key != key) continue;
++        list_remove( &box->entry );
++        free( box );
++    }
++    pthread_mutex_unlock( &offscreen_vk_lock );
++}
++
++/* Called from bitblt.c's window-surface flush. */
++unsigned int x11drv_get_offscreen_vk_rects( Window toplevel, RECT *rects, unsigned int max )
++{
++    struct offscreen_vk_box *box;
++    unsigned int count = 0;
++
++    pthread_mutex_lock( &offscreen_vk_lock );
++    LIST_FOR_EACH_ENTRY( box, &offscreen_vk_boxes, struct offscreen_vk_box, entry )
++        if (box->toplevel == toplevel && count < max) rects[count++] = box->rect;
++    pthread_mutex_unlock( &offscreen_vk_lock );
++    return count;
++}
++
+ static void X11DRV_vulkan_surface_presented( HWND hwnd, void *private, VkResult result )
+ {
+     struct x11drv_vulkan_surface *surface = private;
+@@ -322,7 +395,11 @@ static void X11DRV_vulkan_surface_presented( HWND hwnd, void *private, VkResult
+     vulkan_surface_update_size( hwnd, surface );
+     vulkan_surface_update_offscreen( hwnd, surface );
+ 
+-    if (!surface->offscreen) return;
++    if (!surface->offscreen)
++    {
++        offscreen_vk_clear( surface );
++        return;
++    }
+ 
+     if (force_present_to_surface() && (win_surface = window_surface_get( hwnd )))
+     {
+@@ -359,6 +436,10 @@ static void X11DRV_vulkan_surface_presented( HWND hwnd, void *private, VkResult
+     NtGdiStretchBlt( surface->hdc_dst, 0, 0, rect_dst.right - rect_dst.left, rect_dst.bottom - rect_dst.top,
+                      surface->hdc_src, 0, 0, surface->rect.right, surface->rect.bottom, SRCCOPY, 0 );
+ 
++    /* record the composited rect so the parent window-surface flush
++     * does not overpaint it between presents */
++    offscreen_vk_set( surface, window, &rect_dst );
++
+     if (region) NtGdiDeleteObjectApp( region );
+     if (hdc) NtUserReleaseDC( hwnd, hdc );
+ }
+diff --git a/dlls/winex11.drv/x11drv.h b/dlls/winex11.drv/x11drv.h
+index 2e79e893..d116d534 100644
+--- a/dlls/winex11.drv/x11drv.h
++++ b/dlls/winex11.drv/x11drv.h
+@@ -694,6 +694,7 @@ extern void release_win_data( struct x11drv_win_data *data );
+ extern void set_window_parent( struct x11drv_win_data *data, Window parent );
+ extern Window X11DRV_get_whole_window( HWND hwnd );
+ extern Window get_dummy_parent(void);
++extern unsigned int x11drv_get_offscreen_vk_rects( Window toplevel, RECT *rects, unsigned int max );
+ 
+ extern void set_surface_window_rects( struct window_surface *window_surface, const struct window_rects *rects );
+ extern void sync_gl_drawable( HWND hwnd, BOOL known_child );

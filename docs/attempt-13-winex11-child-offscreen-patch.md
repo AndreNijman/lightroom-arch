@@ -1,5 +1,10 @@
 # Attempt 13: Patch winex11 to Fix the GPU-On Flicker
 
+> **Outcome: this patch was a no-op. The flicker was fixed in
+> [attempt 14](attempt-14-winex11-flush-fix.md) with a different
+> winex11 patch. This document is kept for the record.**
+
+
 Attempt 12 located the GPU-on develop-edit flicker precisely: Wine's
 `winex11` driver forces every child window onto the "offscreen" path
 (`needs_offscreen_rendering()` returns `TRUE` unconditionally for any

@@ -24,9 +24,9 @@ them** — the develop sliders work and visibly change the image.
 | Stable session | works — UI stays up, accepts input |
 | Browse filesystem + show photos | works — folder tree, thumbnail grid |
 | Open a photo (loupe / Compare) | works — full-size render |
-| Edit panel + develop sliders | works — edits apply with no flashing (CPU rendering) |
+| Edit panel + develop sliders | works — edits apply with no flashing |
 | Crisp UI | works — virtual desktop sized 1:1 to the monitor |
-| GPU acceleration | off — Wine's D3D12 preview path flickers while editing |
+| GPU acceleration | on — `winex11` patched so editing is flicker-free |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
@@ -55,15 +55,21 @@ is **not an upstream Wine bug**. See
 
 ### Display: crisp UI and no edit flashing
 
-Two display problems were fixed in attempt 11. The UI looked pixelly
-because the Wine virtual desktop was an undersized framebuffer
-bitmap-upscaled into the window — `run-lightroom.sh` now sizes the
-desktop to the monitor 1:1. And the Develop preview flashed between
-the image and an empty canvas while editing: CameraRaw renders the
-preview with Direct3D 12 and Wine's D3D12 present path blanks between
-renders. Disabling Lightroom's GPU acceleration moves preview
-rendering to the CPU — slightly slower, but flicker-free. See
-`docs/attempt-11-ui-scaling-and-flashing.md`.
+The UI looked pixelly because the Wine virtual desktop was an
+undersized framebuffer bitmap-upscaled into the window —
+`run-lightroom.sh` now sizes the desktop to the monitor 1:1
+(attempt 11).
+
+The Develop preview flashed between the image and an empty canvas
+while editing with the GPU on. Root cause (attempts 12–14): CameraRaw
+renders the preview into a Direct3D 12 swapchain on a child window;
+Wine's `winex11` composites that child offscreen and `StretchBlt`s it
+onto the parent X drawable every present, while the parent
+window-surface flush repaints the same drawable — the two race during
+a slider drag. Fixed by patching `winex11` to exclude the offscreen
+child's rect from the parent flush (`wine-patches/`, installed by
+`run-lightroom.sh`). Editing is now flicker-free with the GPU on. See
+`docs/attempt-14-winex11-flush-fix.md`.
 
 ## Run it
 
@@ -76,11 +82,13 @@ sign-in page. To close Lightroom, run `scripts/kill-wine.sh` (the Wine
 window does not honor the WM close button, and `wineserver -k9` alone
 leaves orphaned helper processes alive).
 
-GPU acceleration is off — Wine's D3D12 preview path flickers while
-editing, so CameraRaw renders on the CPU instead. The D3D12 stack is
-still kept Wine-builtin (`d3d12=b;d3d12core=b`, set in
-`run-lightroom.sh`) — do not drop vkd3d-proton's `d3d12core.dll` into
-the prefix, as it is incompatible with Wine's builtin `dxgi.dll`.
+GPU acceleration is on. `run-lightroom.sh` installs a patched
+`winex11.so` (`wine-patches/`) that stops the parent window-surface
+flush from overpainting CameraRaw's offscreen D3D preview — the
+develop-edit flicker. The D3D12 stack is kept Wine-builtin
+(`d3d12=b;d3d12core=b`, set in `run-lightroom.sh`) — do not drop
+vkd3d-proton's `d3d12core.dll` into the prefix, as it is incompatible
+with Wine's builtin `dxgi.dll`.
 
 ## How it works
 
@@ -123,7 +131,7 @@ bundled Wine ships separate `wine`+`wine64`; do not rebuild WoW64-style.
 
 ## The journey
 
-Ten attempts, fully documented in `docs/`:
+Fourteen attempts, fully documented in `docs/`:
 
 - `docs/attempt-2-*` — PhialsBasement patched Wine, CC installer (CEF
   blue-screen failures)
@@ -136,11 +144,16 @@ Ten attempts, fully documented in `docs/`:
 - `docs/attempt-10-*` — vkd3d crash investigated: no upstream bug, it
   was a vkd3d-proton/dxgi misconfiguration
 - `docs/attempt-11-*` — crisp UI (1:1 virtual desktop) and the
-  Develop-edit flashing (fixed by disabling GPU acceleration)
+  Develop-edit flashing (worked around by disabling GPU acceleration)
+- `docs/attempt-12-*` — GPU-on flicker root-caused to Wine's `winex11`
+  offscreen child-window compositing racing the parent repaint
+- `docs/attempt-13-*` — first `winex11` patch attempt (a no-op)
+- `docs/attempt-14-*` — GPU-on flicker fixed: `winex11` excludes the
+  offscreen D3D child rect from the parent window-surface flush
 - `docs/WORKING-CONFIGURATION.md` — the recipe
 
-Wine patches: `installers/wine-patches/`.
-Binary patch script: `scripts/patches/`.
+Wine patches: `wine-patches/` (winex11 flicker fix) and
+`installers/wine-patches/`. Binary patch script: `scripts/patches/`.
 
 ## Repo structure
 

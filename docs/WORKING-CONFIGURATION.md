@@ -1,6 +1,6 @@
 # Working Configuration — Adobe Lightroom on Arch Linux via Wine
 
-After thirteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
+After fourteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
 usable under Wine on Arch Linux (Hyprland/Wayland). It launches, signs
 in, loads its full UI (crisp, 1:1), browses photos, and edits them
 without flashing. Run it with `./run-lightroom.sh`.
@@ -16,12 +16,13 @@ work and visibly change the image.
 **Requires the user:** sign in with an Adobe Creative Cloud account on
 first launch (WebView2 sign-in page).
 
-**GPU acceleration:** off. Lightroom's CameraRaw engine renders the
-Develop preview with Direct3D 12; under Wine the D3D12 present path
-blanks between renders, so the preview flashes between the image and
-an empty canvas while editing. With the GPU disabled CameraRaw renders
-on the CPU — slightly slower, but the preview is stable (see
-attempt 11).
+**GPU acceleration:** on. CameraRaw renders the Develop preview with
+Direct3D 12 on a child window; Wine's `winex11` composites that child
+offscreen, and the parent window-surface flush used to overpaint it
+between presents — the develop-edit flicker. `winex11` is patched
+(`wine-patches/`, installed by `run-lightroom.sh`) to exclude the
+offscreen child's rect from the parent flush, so editing is
+flicker-free with the GPU on (see attempts 12–14).
 
 ## The stack
 
@@ -35,7 +36,7 @@ attempt 11).
 | Direct3D 9/10/11 | WineD3D (`d3d11=b;dxgi=b;d3d10core=b;d3d9=b`) | DXVK caused a null-pointer crash at `lightroom.exe+0x28231C` |
 | Direct3D 12 | Wine builtin (`d3d12=b;d3d12core=b`) | builtin D3D12 + builtin dxgi are a consistent stack; vkd3d-proton's d3d12core is incompatible with Wine's dxgi and crashes |
 | Media Foundation | Rebuilt `mf`/`mfplat`/`mfreadwrite` | Wine builtin MF null-derefs on `E_NOINTERFACE` |
-| GPU acceleration | off (CPU rendering) | Wine's D3D12 preview present path flashes between the image and an empty canvas while editing |
+| GPU acceleration | on | `winex11` patched (`wine-patches/`) so the parent window-surface flush excludes CameraRaw's offscreen D3D child swapchain — fixes the develop-edit flicker |
 | WebView2 | Edge WebView2 runtime copied into prefix | LR's account/sign-in UI requires it |
 | X11 | `UseXVidMode=N` in `user.reg` | XVidMode assertion crash on Hyprland/XWayland |
 
@@ -56,7 +57,7 @@ prefix's `system32`:
    in the bundled Wine loader. Normal imports skip the helper entirely.
    Patch: `installers/wine-patches/wine-d2d1-nondelay-imports.patch`
 
-## The journey (attempts 1-13)
+## The journey (attempts 1-14)
 
 1-3. Adobe CC installer under Wine — blue-screen CEF render failures.
 4. Patched d2d1 ColorManagement effect — got past the first D2D wall,
@@ -90,10 +91,14 @@ prefix's `system32`:
 13. Built a patched `winex11` from the matching Wine commit to test a
     fix. It loads ABI-clean, but the patch is a no-op — the preview is
     genuinely clipped by sibling windows, so Wine correctly keeps it
-    offscreen. The real fix needs re-compositing the child surface after
-    each parent repaint; GPU stays off until then.
+    offscreen.
+14. Fixed the GPU-on flicker. `winex11` now tracks offscreen Vulkan
+    child rects and excludes them from the parent window-surface flush,
+    so a parent UI repaint no longer overpaints CameraRaw's preview
+    between presents. Verified flicker-free with GPU on (0 blank frames
+    across 700+ captured frames). GPU acceleration is back on.
 
-See `docs/attempt-7-*` … `attempt-13-*` for detail.
+See `docs/attempt-7-*` … `attempt-14-*` for detail.
 
 ## Reproduce
 
