@@ -101,13 +101,18 @@ This single mechanism explains every observation:
   GDI content;
 - rootless and virtual-desktop flicker identically — the offscreen
   child compositing is the same in both;
-- vkd3d-proton + DXVK is permanently black — its `vkQueuePresentKHR`
-  presents into the offscreen redirected window, but does not drive the
-  `X11DRV_client_surface_present` `StretchBlt` the way the builtin path
-  does, so the preview never reaches the parent drawable at all;
 - GPU-off never flickers — with no D3D12 child swapchain, CameraRaw's
   CPU output is drawn straight into Lightroom's normal window surface;
   there is no offscreen child window and no `StretchBlt` race.
+
+The vkd3d-proton + DXVK stack being **permanently black** is a separate,
+unexplained observation. `win32u_vkQueuePresentKHR` calls
+`client_surface_present()` unconditionally for every swapchain, so the
+offscreen `StretchBlt` composite should run for the Proton stack too —
+the "black" is therefore *not* simply "the composite never runs". It may
+be a different child-window/DXVK interaction; it was not traced to a
+cause here and is noted only to record that the matched Proton stack is
+not a usable alternative.
 
 Confirmed against an `WINEDEBUG=+x11drv` trace of a drag: the
 `SET_DRAWABLE` escape (`set_dc_drawable`, the first step of the
