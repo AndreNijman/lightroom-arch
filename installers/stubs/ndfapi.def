@@ -1,0 +1,5 @@
+LIBRARY ndfapi.dll
+EXPORTS
+NdfCloseIncident @5
+NdfCreateWebIncident @14
+NdfExecuteDiagnosis @18

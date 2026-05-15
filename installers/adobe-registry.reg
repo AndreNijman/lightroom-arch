@@ -1,0 +1,787 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Adobe Genuine Service]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Adobe Genuine Service\Consent]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Adobe Genuine Service\Consent\Retail]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\InDesign]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\InDesign\21.0]
+"EPIC_SERIAL"="[SERIALNUMBER]"
+"EPIC_NAME"="[USERNAME]"
+"Installer Locale Setting"="en_US"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\LightroomCC]
+"language"=""
+"Locale"=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Photoshop]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Photoshop\200.0]
+"ApplicationPath"="C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\"
+"PluginPath"="C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Plug-Ins\\"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Photoshop\200.0\ApplicationPath]
+@="C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Adobe\Photoshop\200.0\PluginPath]
+@="C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Plug-Ins\\"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Color Book]
+@="Adobe Color Book"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Color Book\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967107"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Color Book Library]
+@="Adobe Color Book Library"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Color Book Library\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967107"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Color Settings]
+@="Color Settings"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Color Settings\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967110"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator]
+@="Adobe Illustrator Artwork 30.0"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator\CLSID]
+@="{C3D06A66-549F-4B75-BC44-93A66FBB367D}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator\CurVer]
+@="Adobe.Illustrator.30"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30]
+@="Adobe Illustrator Artwork 30.0"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.8bf]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.8bf\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,9"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.8bi]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.8bi\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,9"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.ai]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.ai\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,1"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.aia]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.aia\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,10"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.aip]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.aip\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,5"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.ase]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.ase\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,20"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.dct]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.dct\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,7"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.eps]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.eps\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,2"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.flt]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.flt\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,6"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.hyp]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.hyp\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,4"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.prf]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.prf\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,3"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.sbx]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\.sbx\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,8"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\CLSID]
+@="{C3D06A66-549F-4B75-BC44-93A66FBB367D}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,1"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\Initialized]
+@="0"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\Insertable]
+@=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\protocol]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\protocol\StdFileEditing]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\protocol\StdFileEditing\server]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell\edit]
+"extended"=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell\edit\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /e \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell\print]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.30\shell\print\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /p \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Action]
+@="Adobe Illustrator Action File"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Action\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,10"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.ColorBook]
+@="Adobe Color Book File"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.ColorBook\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,24"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.ColorSettings]
+@="Adobe Color Settings File"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.ColorSettings\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,24"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Dictionary]
+@="Adobe Illustrator Spelling Dictionary"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Dictionary\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,7"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\CLSID]
+@="{C0ED15F0-61BB-11d3-B6CA-00C04F6A0D06}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,12"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\shell\print]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dwg\shell\print\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /p \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\CLSID]
+@="{C0ED15F0-61BB-11d3-B6CA-00C04F6A0D06}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,13"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\shell\print]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.dxf\shell\print\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /p \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS]
+@="Encapsulated PostScript"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\CLSID]
+@="{C3D06A66-549F-4B75-BC44-93A66FBB367D}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,2"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\Insertable]
+@=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell\edit]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell\edit\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /e \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell\print]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.EPS\shell\print\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /p \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Filter]
+@="Adobe Illustrator Filter"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Filter\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,6"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Hyphen]
+@="Adobe Illustrator Hyphenation Dictionary"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Hyphen\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,4"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.idea]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.idea\CLSID]
+@="{C3D06A66-549F-4B75-BC44-93A66FBB367D}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.idea\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\idea.ico"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.idea\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.idea\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.idea\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Plugin]
+@="Adobe Illustrator Plugin"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Plugin\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,5"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.SwatchExchange]
+@="Adobe Illustrator Swatch Exchange File"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.SwatchExchange\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,20"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template]
+@="Adobe Illustrator Template"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,20"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template\shell\print]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Template\shell\print\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe\" /p \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Tsume]
+@="Adobe Illustrator Tsume File"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Illustrator.Tsume\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,8"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC]
+"DefaultIcon"="C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC\shell]
+@="open"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC\shell\open]
+@="&Open"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC\shell\open\command]
+@="C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe \"%L\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileAdobe.dng.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileAdobe.dng.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileAdobe.dng.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileAdobe.dng.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileApple.heic.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileApple.heic.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileApple.heic.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileApple.heic.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr2.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr2.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr2.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr2.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr3.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr3.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr3.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.cr3.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.crw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.crw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.crw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileCanon.crw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileDxO.dxo.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileDxO.dxo.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileDxO.dxo.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileDxO.dxo.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileEpson.erf.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileEpson.erf.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileEpson.erf.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileEpson.erf.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFoveon.x3f.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFoveon.x3f.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFoveon.x3f.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFoveon.x3f.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFujifilm.raf.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFujifilm.raf.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFujifilm.raf.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileFujifilm.raf.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.jpg.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.jpg.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.jpg.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.jpg.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.tif.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.tif.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.tif.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGeneric.tif.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGoPro.gpr.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGoPro.gpr.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGoPro.gpr.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileGoPro.gpr.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.3fr.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.3fr.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.3fr.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.3fr.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.fff.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.fff.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.fff.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileHasselblad.fff.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.dcr.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.dcr.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.dcr.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.dcr.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.kdc.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.kdc.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.kdc.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileKodak.kdc.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeaf.mos.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeaf.mos.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeaf.mos.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeaf.mos.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeica.rwl.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeica.rwl.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeica.rwl.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileLeica.rwl.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mef.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mef.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mef.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mef.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mfw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mfw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mfw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMamiya.mfw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMinolta.mrw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMinolta.mrw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMinolta.mrw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileMinolta.mrw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nef.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nef.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nef.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nef.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nrw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nrw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nrw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileNikon.nrw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.orf.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.orf.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.orf.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.orf.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.ori.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.ori.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.ori.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileOlympus.ori.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.raw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.raw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.raw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.raw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.rw2.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.rw2.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.rw2.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePanasonic.rw2.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePentax.pef.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePentax.pef.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePentax.pef.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePentax.pef.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePhaseOne.iiq.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePhaseOne.iiq.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePhaseOne.iiq.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFilePhaseOne.iiq.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSamsung.srw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSamsung.srw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSamsung.srw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSamsung.srw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arq.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arq.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arq.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arq.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arw.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arw.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arw.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.arw.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.sr2.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.sr2.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.sr2.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.sr2.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.srf.100]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.srf.100\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.srf.100\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.LightroomCC.CameraRawFileSony.srf.100\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Lightroom CC\\lightroom.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Media.Encoder.Project.26]
+@="Adobe Media Encoder Project File"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Media.Encoder.Project.26\DefaultIcon]
+@="\"C:\\Program Files\\Adobe\\Adobe Media Encoder 2026\\Adobe Media Encoder.exe\",0"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Media.Encoder.Project.26\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Media.Encoder.Project.26\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Media.Encoder.Project.26\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Media Encoder 2026\\Adobe Media Encoder.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.PDF Settings]
+@="PDF Settings"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.PDF Settings\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967094"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Photoshop.Plugin]
+@="Adobe Photoshop Plugin"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Photoshop.Plugin\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows\\Illustrator.exe,24"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Sangam Reader]
+@="Adobe Sangam Reader"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Sangam Reader\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967102"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Sangam Writer]
+@="Adobe Sangam Writer"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.Sangam Writer\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967102"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.UnifiedPluginInstallerAgent.1]
+@="Unified Plugin Installer Agent"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.UnifiedPluginInstallerAgent.1\Shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.UnifiedPluginInstallerAgent.1\Shell\Open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Adobe.UnifiedPluginInstallerAgent.1\Shell\Open\Command]
+@="\"UnifiedPluginInstallerAgent.exe\" /doubleClick \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\InDesign.Adobe Plug-in]
+@="InDesign Adobe Plug-in"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\InDesign.Adobe Plug-in\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967106"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\InDesign.Adobe Swatch Exchange]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\InDesign.Adobe Swatch Exchange\DefaultIcon]
+@="C:\\Program Files\\Common Files\\Adobe\\Shell\\CC.2026\\icons.dll,4294967108"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\PackageRepository\Packages\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc]
+"Path"="C:\\Program Files\\WindowsApps\\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\PackageRepository\Packages\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\AdobeNotificationClient_enpm4xejd91yc!CreativeCloud]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\PackageRepository\Packages\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\AdobeNotificationClient_enpm4xejd91yc!CreativeCloud\windows.protocol]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\PackageRepository\Packages\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\AdobeNotificationClient_enpm4xejd91yc!CreativeCloud\windows.protocol\accnc]
+"ACID"="CreativeCloud.AppXmzxbnh3hyb2vam0ztzvj3vd8gzygjr0k.mca"
+"DisplayName"="AdobeNotificationClient"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\ClassIndex\{559F1A79-1264-4219-9F15-F919BBBB2CA4}\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\Package\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\Package\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\Class]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\Package\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\Class\{559F1A79-1264-4219-9F15-F919BBBB2CA4}]
+"DllPath"="AdobeExplorerShellExtension.dll"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\Package\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\Server]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\PackagedCom\Package\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc\Server\0]
+"ApplicationId"="CreativeCloudNativeExtension"
+"ApplicationDisplayName"="Adobe OS Extension"
+"DisplayName"="Adobe Explorer Shell Extension"
+"SurrogateAppId"="{559F1A79-1264-4219-9F15-F919BBBB2CA4}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Photoshop.AdobePlugin]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Photoshop.AdobePlugin\DefaultIcon]
+@="C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Photoshop.exe,2"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Photoshop.AdobePlugin\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Photoshop.AdobePlugin\shell\open]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\Photoshop.AdobePlugin\shell\open\command]
+@="\"C:\\Program Files\\Adobe\\Adobe Photoshop 2026\\Photoshop.exe\" \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\NavigatorPluginsList\AdobeAAMDetect]
+@=""
+"application/x-adobeaamdetect"=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\RADAR\HeapLeakDetection\DiagnosedApplications\Adobe Premiere Pro.exe]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SecurityManager\CapAuthz\ApplicationsEx\AdobeNotificationClient_7.0.2.14_x64__enpm4xejd91yc]
+"PackageSid"="S-1-15-2-4093718959-1354680096-1313585452-397463664-3582186600-110472773-3282282767"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Adobe Media Encoder.exe]
+@="\"C:\\Program Files\\Adobe\\Adobe Media Encoder 2026\\Adobe Media Encoder.exe\""
+"Path"="C:\\Program Files\\Adobe\\Adobe Media Encoder 2026\\"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\PackageState\S-1-5-21-1486559695-636599316-1673474064-1001\AdobeNotificationClient_enpm4xejd91yc]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\Launch Adobe CCXProcess]
+"Id"="{74F46805-ECF8-4CBC-B2B6-7D3A9E04F5EB}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\adobe.com/AdobeAAMDetect]
+"Path"="C:\\Program Files (x86)\\Adobe\\Adobe Creative Cloud\\Utils\\npAdobeAAMDetect64.dll"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat\10.0]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat\10.0\FeatureLockDown]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat\11.0]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat\11.0\FeatureLockDown]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\APIP]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Adobe]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Adobe\CommonFiles]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Adobe\CommonFiles\Color]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Internet Explorer\NavigatorPluginsList\AdobeAAMDetect]
+@=""
+"application/x-adobeaamdetect"=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Adobe Creative Cloud]
+"DisplayName"="Adobe Creative Cloud"
+"UninstallString"="C:\\Program Files (x86)\\Adobe\\Adobe Creative Cloud\\Utils\\Creative Cloud Uninstaller.exe"
+"Publisher"="Adobe Inc."
+"DisplayIcon"="C:\\Program Files (x86)\\Adobe\\Adobe Creative Cloud\\Utils\\Creative Cloud Uninstaller.exe"
+"DisplayVersion"="6.9.1.1"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\MozillaPlugins\adobe.com/AdobeAAMDetect]
+"Path"="C:\\Program Files (x86)\\Adobe\\Adobe Creative Cloud\\Utils\\npAdobeAAMDetect32.dll"
+

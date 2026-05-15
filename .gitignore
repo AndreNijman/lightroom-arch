@@ -8,7 +8,9 @@
 *.7z
 *.rar
 .DS_Store
-/installers/
+/installers/*
+!/installers/stubs/
+!/installers/adobe-registry.reg
 /logs/
 /test-output/
 /tests/fixtures/*.NEF
