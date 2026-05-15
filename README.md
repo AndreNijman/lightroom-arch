@@ -2,11 +2,12 @@
 
 Running Adobe Lightroom (the Creative Cloud desktop app) on Arch Linux
 under Wine. As of 2026-05-15 Lightroom launches, signs in,
-authenticates against Adobe Creative Cloud, and **loads its complete
-main UI** — the Local library workspace. One Wine bug remains: a COM
-worker thread crashes shortly after the UI finishes loading.
+authenticates against Adobe Creative Cloud, **loads its complete main
+UI**, and runs **stable** — it browses the local filesystem, opens
+folders, and displays photos. The COM wrong-thread crash that ended
+every earlier session is fixed.
 
-![Lightroom main UI loaded on Arch via Wine](docs/screenshots/lr-main-ui-loaded.png)
+![Lightroom browsing photos on Arch via Wine](screenshots/lr-folder-photos-1778844782.png)
 
 ## Status
 
@@ -20,20 +21,28 @@ worker thread crashes shortly after the UI finishes loading.
 | Adobe sign-in + activation | works (with the AdobeGrowthSDK patch) |
 | Media Foundation init | works (rebuilt `mf`/`mfplat`/`mfreadwrite`) |
 | Main library UI | loads fully |
-| Stable session | **not yet** — a COM wrong-thread crash (`RPC_E_WRONG_THREAD` → null deref at `lightroom.exe+0x28231C`) crashes a worker thread after the UI loads |
+| COM wrong-thread crash | **fixed** (binary patch to `lightroom.exe`) |
+| Stable session | works — UI stays up, accepts input |
+| Browse filesystem + show photos | works — folder tree, thumbnail grid |
+| Open a photo in the edit/Develop module | not yet — LR exits cleanly when a photo is opened |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
 libraries and Assisted Culling. That is the intended app.
 
-### The remaining bug
+### The COM wrong-thread crash — fixed
 
-After the full UI loads, a background worker thread makes a COM call
-that returns `RPC_E_WRONG_THREAD` (an interface used from the wrong
+Every earlier session ended when a background worker made a COM call
+that returned `RPC_E_WRONG_THREAD` (an interface used from the wrong
 apartment — Wine's COM apartment-threading model differs from
-Windows). LR's own code does not null-check the failed result and
-crashes. Fixing it needs Wine COM-apartment work or a binary patch to
-`lightroom.exe`. See `docs/attempt-7-signin-and-media-foundation.md`.
+Windows); LR's own code dereferenced the NULL result and crashed at
+`lightroom.exe+0x28231C`.
+
+Fixed by a targeted binary patch: `0x28231C` is redirected into a code
+cave that null-checks the pointer and, on NULL, routes to LR's own
+existing error/unwind path. LR now runs crash-free.
+See `docs/attempt-8-com-crash-fixed.md` and
+`scripts/patches/patch-lightroom-com-nullcheck.py`.
 
 ## Run it
 
