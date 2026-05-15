@@ -46,6 +46,8 @@ WINE_ROOT=~/opt/wine-adobe bash "$SCRIPT_DIR/scripts/kill-wine.sh"
 # its framebuffer to fill the window -- the UI looks blurry and aliased.
 # Sizing the desktop to the monitor and fullscreening the host window
 # maps the framebuffer 1:1 to physical pixels, so the UI stays crisp.
+# Note: this reads the monitor once, at launch. If you later move
+# Lightroom to a different-resolution display, rerun this script.
 if command -v hyprctl >/dev/null 2>&1; then
     RES=$(hyprctl monitors -j 2>/dev/null | python3 -c '
 import json, sys

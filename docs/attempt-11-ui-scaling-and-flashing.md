@@ -69,10 +69,12 @@ with Direct3D 12. Under Wine that preview is presented through the
 builtin D3D12 path (`dxgi` + `libvkd3d`), and the present blanks
 between renders — the window shows Lightroom's empty loupe canvas
 until the next D3D12 frame lands. No vkd3d error is logged; it is a
-present/compositing timing problem, not a crash. (The bundled vkd3d
-also does not implement `ID3D12CommandQueueDownlevel`, the interface
-for presenting D3D12 to a window without a DXGI swapchain — vkd3d
-returns `E_NOINTERFACE` for it at startup.)
+present/compositing timing problem, not a crash. (Observation, not a
+confirmed diagnosis: the bundled vkd3d returns `E_NOINTERFACE` for
+`ID3D12CommandQueueDownlevel` at startup — the interface for
+presenting D3D12 to a window without a DXGI swapchain. CameraRaw then
+proceeds via the swapchain path; whether that path is the one
+blanking was not traced.)
 
 **Fix.** Disable Lightroom's GPU acceleration. In
 `Lightroom CC Preferences.agprefs` (with Lightroom closed):
@@ -94,6 +96,14 @@ path fixed; until then Lightroom edits on the CPU.
 
 ## Status
 
-Both reported issues are resolved. The Lightroom UI is crisp (1:1
-framebuffer) and photo editing no longer flashes (CPU rendering).
+Both reported symptoms are gone. The pixelly UI is genuinely fixed —
+the framebuffer maps 1:1. The flashing is **worked around, not fixed
+at the source**: GPU acceleration is disabled so CameraRaw renders the
+preview on the CPU. The underlying Wine D3D12 present bug remains; if
+GPU-accelerated editing is wanted back, that present path would need
+to be fixed.
+
+Verified flicker-free and responsive on a JPEG test image. CPU-side
+Develop performance on large RAW files (the user shoots Nikon D7000
+NEFs) is expected to be slower but was not separately benchmarked.
 
