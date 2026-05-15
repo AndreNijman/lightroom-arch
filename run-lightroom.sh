@@ -37,5 +37,32 @@ LR_DIR="$WINEPREFIX/drive_c/Program Files/Adobe/Adobe Lightroom CC"
 "$(dirname "$WINE")/wineserver" -k9 2>/dev/null || true
 sleep 2
 
+# Match Wine's virtual desktop to the active monitor's pixel resolution.
+# If the desktop is smaller than the host window, Wine bitmap-upscales
+# its framebuffer to fill the window -- the UI looks blurry and aliased.
+# Sizing the desktop to the monitor and fullscreening the host window
+# maps the framebuffer 1:1 to physical pixels, so the UI stays crisp.
+if command -v hyprctl >/dev/null 2>&1; then
+    RES=$(hyprctl monitors -j 2>/dev/null | python3 -c '
+import json, sys
+mons = json.load(sys.stdin)
+mon = next((m for m in mons if m.get("focused")), mons[0] if mons else None)
+if mon:
+    print("%dx%d" % (mon["width"], mon["height"]))
+' 2>/dev/null)
+    if [ -n "$RES" ]; then
+        "$WINE" reg add 'HKCU\Software\Wine\Explorer\Desktops' \
+            /v Adobe /t REG_SZ /d "$RES" /f >/dev/null 2>&1 || true
+        "$(dirname "$WINE")/wineserver" -k9 2>/dev/null || true
+        sleep 1
+    fi
+    # Fullscreen the Wine desktop window so the tiler never resizes it
+    # (a resized host window makes Wine scale its framebuffer again).
+    # Match on the window class -- it is set when the window is created,
+    # whereas the title is still empty at map time so a title rule misses.
+    hyprctl keyword windowrulev2 \
+        'fullscreen, class:^(steam_proton)$' >/dev/null 2>&1 || true
+fi
+
 cd "$LR_DIR" || exit 1
 exec "$WINE" lightroom.exe
