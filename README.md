@@ -1,13 +1,12 @@
 # Adobe Lightroom on Arch Linux via Wine
 
 Running Adobe Lightroom (the Creative Cloud desktop app) on Arch Linux
-under Wine. As of 2026-05-15 Lightroom launches, signs in,
-authenticates against Adobe Creative Cloud, **loads its complete main
-UI**, and runs **stable** — it browses the local filesystem, opens
-folders, and displays photos. The COM wrong-thread crash that ended
-every earlier session is fixed.
+under Wine. As of 2026-05-15 it **works**: Lightroom launches, signs
+in, authenticates against Adobe Creative Cloud, loads its full UI,
+browses the local filesystem, opens and displays photos, and **edits
+them** — the develop sliders work and visibly change the image.
 
-![Lightroom browsing photos on Arch via Wine](screenshots/lr-folder-photos-1778844782.png)
+![Lightroom editing a photo on Arch via Wine](screenshots/lr-edit-slider-1778846121.png)
 
 ## Status
 
@@ -21,28 +20,36 @@ every earlier session is fixed.
 | Adobe sign-in + activation | works (with the AdobeGrowthSDK patch) |
 | Media Foundation init | works (rebuilt `mf`/`mfplat`/`mfreadwrite`) |
 | Main library UI | loads fully |
-| COM wrong-thread crash | **fixed** (binary patch to `lightroom.exe`) |
+| COM wrong-thread crash | fixed (binary patch to `lightroom.exe`) |
 | Stable session | works — UI stays up, accepts input |
 | Browse filesystem + show photos | works — folder tree, thumbnail grid |
-| Open a photo in the edit/Develop module | not yet — LR exits cleanly when a photo is opened |
+| Open a photo (loupe / Compare) | works — full-size render |
+| Edit panel + develop sliders | works — Exposure slider darkens the photo |
+| GPU acceleration | **off** — Wine's D3D12/vkd3d crashes CameraRaw; LR edits on CPU |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
 libraries and Assisted Culling. That is the intended app.
 
-### The COM wrong-thread crash — fixed
+### The two crashes that blocked it
 
-Every earlier session ended when a background worker made a COM call
-that returned `RPC_E_WRONG_THREAD` (an interface used from the wrong
-apartment — Wine's COM apartment-threading model differs from
-Windows); LR's own code dereferenced the NULL result and crashed at
-`lightroom.exe+0x28231C`.
-
-Fixed by a targeted binary patch: `0x28231C` is redirected into a code
-cave that null-checks the pointer and, on NULL, routes to LR's own
-existing error/unwind path. LR now runs crash-free.
-See `docs/attempt-8-com-crash-fixed.md` and
+**COM wrong-thread crash — fixed.** Every earlier session ended when a
+background worker made a COM call that returned `RPC_E_WRONG_THREAD`
+(an interface used from the wrong apartment — Wine's COM
+apartment-threading model differs from Windows); LR dereferenced the
+NULL result and crashed at `lightroom.exe+0x28231C`. Fixed by a
+targeted binary patch: `0x28231C` is redirected into a code cave that
+null-checks the pointer and, on NULL, routes to LR's own error/unwind
+path. See `docs/attempt-8-com-crash-fixed.md` and
 `scripts/patches/patch-lightroom-com-nullcheck.py`.
+
+**CameraRaw D3D12 crash — worked around.** Opening a photo crashed in
+`libvkd3d-1.dll` (Wine's D3D12→Vulkan layer) via
+CameraRaw → `dxgi` → D3D12. Neither disabling D3D12 nor swapping in
+vkd3d-proton avoided it (Wine's `dxgi` itself pulls in `libvkd3d`).
+Fixed by turning **GPU acceleration off** in LR's preferences
+(`gpu4setting="off"`) — CameraRaw then renders on the CPU and never
+touches D3D12. See `docs/attempt-9-photo-editing.md`.
 
 ## Run it
 
@@ -95,18 +102,21 @@ bundled Wine ships separate `wine`+`wine64`; do not rebuild WoW64-style.
 
 ## The journey
 
-Seven attempts, fully documented in `docs/`:
+Nine attempts, fully documented in `docs/`:
 
 - `docs/attempt-2-*` — PhialsBasement patched Wine, CC installer (CEF
   blue-screen failures)
 - `docs/attempt-4-*` — first `d2d1` ColorManagement patch; dwrite crash
 - `docs/attempt-5-*` — full Wine rebuild dead end
 - `docs/attempt-6-*` — delay-load fix, WebView2, WineD3D — UI renders
-- `docs/attempt-7-*` — sign-in (SetThreadpoolTimerEx), Media Foundation,
-  COM wrong-thread crash
+- `docs/attempt-7-*` — sign-in (SetThreadpoolTimerEx), Media Foundation
+- `docs/attempt-8-*` — COM wrong-thread crash fixed; LR runs stable
+- `docs/attempt-9-*` — CameraRaw D3D12/vkd3d crash; GPU-off workaround —
+  photo editing works
 - `docs/WORKING-CONFIGURATION.md` — the recipe
 
 Wine patches: `installers/wine-patches/`.
+Binary patch script: `scripts/patches/`.
 
 ## Repo structure
 
