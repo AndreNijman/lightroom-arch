@@ -1,9 +1,9 @@
 # Working Configuration — Adobe Lightroom on Arch Linux via Wine
 
-After nine attempts, Adobe Lightroom (Creative Cloud desktop app) is
+After eleven attempts, Adobe Lightroom (Creative Cloud desktop app) is
 usable under Wine on Arch Linux (Hyprland/Wayland). It launches, signs
-in, loads its full UI, browses photos, and edits them. Run it with
-`./run-lightroom.sh`.
+in, loads its full UI (crisp, 1:1), browses photos, and edits them
+without flashing. Run it with `./run-lightroom.sh`.
 
 ## Status
 
@@ -16,10 +16,12 @@ work and visibly change the image.
 **Requires the user:** sign in with an Adobe Creative Cloud account on
 first launch (WebView2 sign-in page).
 
-**GPU acceleration:** on and working — Wine builtin D3D12 → Vulkan
-(RADV on the AMD Radeon 780M). The whole D3D12 stack must stay
-Wine-builtin; mixing vkd3d-proton's `d3d12core.dll` with Wine's
-builtin `dxgi.dll` crashes on swapchain creation (see attempt 10).
+**GPU acceleration:** off. Lightroom's CameraRaw engine renders the
+Develop preview with Direct3D 12; under Wine the D3D12 present path
+blanks between renders, so the preview flashes between the image and
+an empty canvas while editing. With the GPU disabled CameraRaw renders
+on the CPU — slightly slower, but the preview is stable (see
+attempt 11).
 
 ## The stack
 
@@ -33,7 +35,7 @@ builtin `dxgi.dll` crashes on swapchain creation (see attempt 10).
 | Direct3D 9/10/11 | WineD3D (`d3d11=b;dxgi=b;d3d10core=b;d3d9=b`) | DXVK caused a null-pointer crash at `lightroom.exe+0x28231C` |
 | Direct3D 12 | Wine builtin (`d3d12=b;d3d12core=b`) | builtin D3D12 + builtin dxgi are a consistent stack; vkd3d-proton's d3d12core is incompatible with Wine's dxgi and crashes |
 | Media Foundation | Rebuilt `mf`/`mfplat`/`mfreadwrite` | Wine builtin MF null-derefs on `E_NOINTERFACE` |
-| GPU acceleration | on — Wine builtin D3D12 → Vulkan | CameraRaw renders/edits photos GPU-accelerated |
+| GPU acceleration | off (CPU rendering) | Wine's D3D12 preview present path flashes between the image and an empty canvas while editing |
 | WebView2 | Edge WebView2 runtime copied into prefix | LR's account/sign-in UI requires it |
 | X11 | `UseXVidMode=N` in `user.reg` | XVidMode assertion crash on Hyprland/XWayland |
 
@@ -54,7 +56,7 @@ prefix's `system32`:
    in the bundled Wine loader. Normal imports skip the helper entirely.
    Patch: `installers/wine-patches/wine-d2d1-nondelay-imports.patch`
 
-## The journey (attempts 1-9)
+## The journey (attempts 1-11)
 
 1-3. Adobe CC installer under Wine — blue-screen CEF render failures.
 4. Patched d2d1 ColorManagement effect — got past the first D2D wall,
@@ -74,10 +76,14 @@ prefix's `system32`:
 10. Investigated the vkd3d crash: it was caused by attempt 9's own
     vkd3d-proton `d3d12core.dll` mixed with Wine's builtin `dxgi.dll`.
     Not an upstream bug. Kept the D3D12 stack all-builtin
-    (`d3d12=b;d3d12core=b`), re-enabled the GPU — photo editing works
-    GPU-accelerated.
+    (`d3d12=b;d3d12core=b`), re-enabled the GPU.
+11. Two display problems: the UI was bitmap-upscaled by an undersized
+    Wine virtual desktop (fixed by sizing the desktop to the monitor),
+    and the GPU Develop preview flashed between the image and an empty
+    canvas while editing (fixed by disabling GPU acceleration — the
+    preview renders on the CPU instead).
 
-See `docs/attempt-7-*` … `attempt-10-*` for detail.
+See `docs/attempt-7-*` … `attempt-11-*` for detail.
 
 ## Reproduce
 

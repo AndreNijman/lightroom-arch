@@ -24,8 +24,9 @@ them** — the develop sliders work and visibly change the image.
 | Stable session | works — UI stays up, accepts input |
 | Browse filesystem + show photos | works — folder tree, thumbnail grid |
 | Open a photo (loupe / Compare) | works — full-size render |
-| Edit panel + develop sliders | works — Exposure slider darkens the photo |
-| GPU acceleration | works — Wine builtin D3D12 → Vulkan (RADV) |
+| Edit panel + develop sliders | works — edits apply with no flashing (CPU rendering) |
+| Crisp UI | works — virtual desktop sized 1:1 to the monitor |
+| GPU acceleration | off — Wine's D3D12 preview path flickers while editing |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
@@ -45,15 +46,24 @@ path. See `docs/attempt-8-com-crash-fixed.md` and
 
 **CameraRaw D3D12 crash — was a misconfiguration, now resolved.**
 Opening a photo crashed in `libvkd3d-1.dll` via CameraRaw → `dxgi` →
-D3D12. Attempt 9 mistakenly worked around it by disabling the GPU. The
-real cause: attempt 9 had copied **vkd3d-proton**'s `d3d12core.dll`
-into the prefix, mixing it with Wine's builtin `dxgi.dll` — two
-incompatible D3D12 implementations. Wine's dxgi D3D12-swapchain code
-casts the device with raw struct arithmetic that is only valid for a
-Wine-libvkd3d device. With the whole D3D12 stack kept builtin
-(`d3d12=b;d3d12core=b`), GPU acceleration works and there is no crash.
-It is **not an upstream Wine bug**. See
+D3D12. The cause: attempt 9 had copied **vkd3d-proton**'s
+`d3d12core.dll` into the prefix, mixing it with Wine's builtin
+`dxgi.dll` — two incompatible D3D12 implementations. With the whole
+D3D12 stack kept builtin (`d3d12=b;d3d12core=b`) there is no crash. It
+is **not an upstream Wine bug**. See
 `docs/attempt-10-vkd3d-investigation.md`.
+
+### Display: crisp UI and no edit flashing
+
+Two display problems were fixed in attempt 11. The UI looked pixelly
+because the Wine virtual desktop was an undersized framebuffer
+bitmap-upscaled into the window — `run-lightroom.sh` now sizes the
+desktop to the monitor 1:1. And the Develop preview flashed between
+the image and an empty canvas while editing: CameraRaw renders the
+preview with Direct3D 12 and Wine's D3D12 present path blanks between
+renders. Disabling Lightroom's GPU acceleration moves preview
+rendering to the CPU — slightly slower, but flicker-free. See
+`docs/attempt-11-ui-scaling-and-flashing.md`.
 
 ## Run it
 
@@ -62,15 +72,15 @@ It is **not an upstream Wine bug**. See
 ```
 
 Then sign in with your Adobe Creative Cloud account in the WebView2
-sign-in page. To close Lightroom:
-`WINEPREFIX=$HOME/.wine_adobe ~/opt/wine-adobe/files/bin/wineserver -k9`
-(the Wine window does not honor the WM close button).
+sign-in page. To close Lightroom, run `scripts/kill-wine.sh` (the Wine
+window does not honor the WM close button, and `wineserver -k9` alone
+leaves orphaned helper processes alive).
 
-GPU acceleration is on and works. The whole D3D12 stack must stay
-Wine-builtin (`d3d12=b;d3d12core=b`, set in `run-lightroom.sh`) — do
-not drop vkd3d-proton's `d3d12core.dll` into the prefix, as it is
-incompatible with Wine's builtin `dxgi.dll` and crashes on swapchain
-creation.
+GPU acceleration is off — Wine's D3D12 preview path flickers while
+editing, so CameraRaw renders on the CPU instead. The D3D12 stack is
+still kept Wine-builtin (`d3d12=b;d3d12core=b`, set in
+`run-lightroom.sh`) — do not drop vkd3d-proton's `d3d12core.dll` into
+the prefix, as it is incompatible with Wine's builtin `dxgi.dll`.
 
 ## How it works
 
@@ -124,7 +134,9 @@ Ten attempts, fully documented in `docs/`:
 - `docs/attempt-8-*` — COM wrong-thread crash fixed; LR runs stable
 - `docs/attempt-9-*` — CameraRaw D3D12/vkd3d crash; GPU-off workaround
 - `docs/attempt-10-*` — vkd3d crash investigated: no upstream bug, it
-  was a vkd3d-proton/dxgi misconfiguration; GPU acceleration now works
+  was a vkd3d-proton/dxgi misconfiguration
+- `docs/attempt-11-*` — crisp UI (1:1 virtual desktop) and the
+  Develop-edit flashing (fixed by disabling GPU acceleration)
 - `docs/WORKING-CONFIGURATION.md` — the recipe
 
 Wine patches: `installers/wine-patches/`.

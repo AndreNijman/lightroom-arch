@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-05-15
+
+### Fixed — display quality
+
+- **Pixelly / aliased UI** — the Wine virtual desktop was a fixed
+  1280x800 framebuffer bitmap-upscaled 1.5x into the 1920x1200 host
+  window. `run-lightroom.sh` now sizes the virtual desktop to the
+  active monitor and fullscreens its window, so the framebuffer maps
+  1:1 to physical pixels and the UI is crisp.
+- **Develop-edit flashing** — while editing, the preview flashed
+  between the image and an empty canvas. CameraRaw renders the Develop
+  preview with Direct3D 12; Wine's D3D12 present path blanks between
+  renders. Disabling Lightroom's GPU acceleration (CPU rendering) fixes
+  it — verified flicker-free across 435 frames of aggressive editing,
+  versus constant flashing with the GPU on. This supersedes 2.0.0's
+  "GPU acceleration is on" claim.
+
+### Fixed — process hygiene
+
+- `wineserver -k9` left orphaned `explorer.exe` helpers alive (55 had
+  accumulated over one session), each owning a zombie virtual-desktop
+  window. `scripts/kill-wine.sh` kills every process whose executable
+  resolves into the bundled Wine install; `run-lightroom.sh` uses it.
+
+### Changed
+
+- GPU acceleration is **off** (`gpu4setting="off"`). Develop edits
+  render on the CPU — slightly slower, but with no flashing.
+
 ## [2.0.0] - 2026-05-15
 
 ### Working — full photo editing

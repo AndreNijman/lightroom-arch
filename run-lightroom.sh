@@ -12,15 +12,18 @@
 #    vkd3d-proton's d3d12core with Wine's builtin dxgi -- Wine's dxgi
 #    D3D12-swapchain code only understands Wine-libvkd3d device objects
 #    and crashes on a vkd3d-proton device. Keep the whole D3D12 stack
-#    builtin (d3d12=b;d3d12core=b) and GPU acceleration works.
+#    builtin (d3d12=b;d3d12core=b).
 #  - lightroom.exe binary-patched: COM null-deref at +0x28231C guarded
 #    (scripts/patches/patch-lightroom-com-nullcheck.py)
 #  - AdobeGrowthSDK.dll binary-patched: SetThreadpoolTimerEx import
 #  - rebuilt mf/mfplat/mfreadwrite in the prefix (Media Foundation)
 #  - Microsoft Edge WebView2 runtime copied into the prefix (sign-in UI)
 #  - X11 driver: UseXVidMode=N (XVidMode assertion crash on Hyprland)
-#  - GPU acceleration is ON in LR's preferences. Photos render and edit
-#    GPU-accelerated through Wine's builtin D3D12 -> Vulkan (RADV).
+#  - GPU acceleration is OFF in LR's preferences. Wine's D3D12 preview
+#    present path flashes between the image and an empty canvas while
+#    editing; CameraRaw renders on the CPU instead (see attempt 11).
+#  - The Wine virtual desktop is sized to the monitor and fullscreened
+#    so its framebuffer maps 1:1 to physical pixels (crisp UI).
 
 set -u
 
