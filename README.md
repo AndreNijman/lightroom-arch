@@ -58,8 +58,14 @@ touches D3D12. See `docs/attempt-9-photo-editing.md`.
 ```
 
 Then sign in with your Adobe Creative Cloud account in the WebView2
-sign-in page. To close Lightroom: `~/opt/wine-adobe/files/bin/wineserver -k9`
+sign-in page. To close Lightroom:
+`WINEPREFIX=$HOME/.wine_adobe ~/opt/wine-adobe/files/bin/wineserver -k9`
 (the Wine window does not honor the WM close button).
+
+> **Do not click "Enable" on the GPU banner.** LR shows a banner —
+> *"Enabling GPU … will improve performance"* — at the top of its UI.
+> Clicking it flips `gpu4setting` back to `"auto"` and the next photo
+> you open crashes in Wine's D3D12/vkd3d layer. Leave the GPU off.
 
 ## How it works
 
