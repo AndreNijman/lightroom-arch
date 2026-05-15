@@ -31,11 +31,12 @@ export WINEDLLOVERRIDES="winemenubuilder.exe=d;mscoree=d;mshtml=d;dwrite=b;d3d11
 export WINEDEBUG=-all
 
 LR_DIR="$WINEPREFIX/drive_c/Program Files/Adobe/Adobe Lightroom CC"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Kill any stale Wine processes from a previous run. WINEPREFIX is
-# exported above, so wineserver targets the right prefix.
-"$(dirname "$WINE")/wineserver" -k9 2>/dev/null || true
-sleep 2
+# Kill stale Wine processes left by previous runs. `wineserver -k9` is
+# not enough on its own -- Lightroom leaks orphaned explorer.exe helpers
+# that survive it and accumulate across launches. See scripts/kill-wine.sh.
+WINE_ROOT=~/opt/wine-adobe bash "$SCRIPT_DIR/scripts/kill-wine.sh"
 
 # Match Wine's virtual desktop to the active monitor's pixel resolution.
 # If the desktop is smaller than the host window, Wine bitmap-upscales
@@ -53,16 +54,38 @@ if mon:
     if [ -n "$RES" ]; then
         "$WINE" reg add 'HKCU\Software\Wine\Explorer\Desktops' \
             /v Adobe /t REG_SZ /d "$RES" /f >/dev/null 2>&1 || true
-        "$(dirname "$WINE")/wineserver" -k9 2>/dev/null || true
-        sleep 1
+        WINE_ROOT=~/opt/wine-adobe bash "$SCRIPT_DIR/scripts/kill-wine.sh"
     fi
-    # Fullscreen the Wine desktop window so the tiler never resizes it
-    # (a resized host window makes Wine scale its framebuffer again).
-    # Match on the window class -- it is set when the window is created,
-    # whereas the title is still empty at map time so a title rule misses.
-    hyprctl keyword windowrulev2 \
-        'fullscreen, class:^(steam_proton)$' >/dev/null 2>&1 || true
 fi
 
 cd "$LR_DIR" || exit 1
-exec "$WINE" lightroom.exe
+"$WINE" lightroom.exe &
+LR_PID=$!
+
+# Once the Wine desktop window maps, fullscreen it so the tiler never
+# resizes the host window -- a resized window re-triggers Wine's
+# framebuffer scaling. This is done as a dispatch on the live window
+# (not a windowrule): the window title is empty at map time, and a
+# static `fullscreen` windowrule is not supported by current Hyprland.
+if command -v hyprctl >/dev/null 2>&1; then
+    (
+        for _ in $(seq 1 60); do
+            addr=$(hyprctl clients -j 2>/dev/null | python3 -c '
+import json, sys
+wins = [c for c in json.load(sys.stdin)
+        if c.get("class") == "steam_proton"
+        and c.get("size", [0, 0])[0] > 200]
+if wins:
+    print(max(wins, key=lambda c: c["size"][0] * c["size"][1])["address"])
+' 2>/dev/null)
+            if [ -n "$addr" ]; then
+                hyprctl dispatch focuswindow "address:$addr" >/dev/null 2>&1
+                hyprctl dispatch fullscreen 0 >/dev/null 2>&1
+                break
+            fi
+            sleep 1
+        done
+    ) &
+fi
+
+wait "$LR_PID"
