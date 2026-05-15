@@ -125,7 +125,61 @@ CC Desktop / ccd-installer / Lightroom installer all initially contact:
 - `prod-rel-ffc.oobesaas.adobe.com/adobe-ffc-external/core/v1/applications`
   — application catalog. Reached after auth in healthy install.
 
-## 6. Wine prefix at `~/.wine_adobe` is a known-good baseline
+## 6. Copy-from-Windows path: works through D2D barrier
+
+After installer paths failed, copied LR install directly from mounted
+Windows partition `/mnt/windows/Program Files/Adobe/Adobe Lightroom CC/`
+to Wine prefix (3.3GB). Process:
+
+1. `rsync -a` LR install dir into prefix `Program Files/Adobe/Adobe Lightroom CC/`
+2. Selectively rsync `Common Files/Adobe/` (Desktop Common, OS Extension,
+   Keyfiles, Microsoft, Installers, Shell, HelpCfg ~926MB, skipping per-app
+   Photoshop/Premiere/Media Encoder dirs)
+3. rsync `ProgramData/Adobe/` (2.3GB)
+4. rsync user `AppData/Roaming|Local/Adobe` (Lightroom CC, OOBE, AdobeSync,
+   CoreSync, NGL, SLData, licflags, CAI)
+5. Extract Adobe registry from Windows SOFTWARE hive with `hivex`
+   (`hivexml`), Python convert to `.reg`, import via `wine regedit /S`
+6. Copy `ndfapi.dll`, `wkscli.dll`, `wdi.dll` from `/mnt/windows/Windows/System32`
+
+Hit: `wdi.dll` requires `ntdll.AlpcMaxAllowedMessageLength` — unimplemented
+in Wine 10.0 (and not in 11.8 staging either). Cascading failure: substrate.dll → ndfapi.dll → wdi.dll → unimpl ntdll → status `c0000135`.
+
+**Fix:** built stub `ndfapi.dll` (mingw-w64-gcc) exporting only the three
+functions substrate.dll imports (`NdfCloseIncident`, `NdfCreateWebIncident`,
+`NdfExecuteDiagnosis`) all returning `S_OK`/`E_NOTIMPL`. Bypasses wdi
+entirely. Source + binary at `installers/stubs/`.
+
+Result: `lightroom.exe` and `Adobe Crash Processor.exe` launch. DXVK 2.7.1
+Vulkan init succeeds. Lightroom window appears.
+
+## 7. Hard wall: D2D init fails on Wine 10.0
+
+`CreateD2DDeviceResources failed. HResult: 0x88990028`
+(`D2DERR_DISPLAY_FORMAT_NOT_SUPPORTED`). D2D tried to create a
+device-context on top of D3D11; underlying D3D11/DXGI surface doesn't
+support the format combination D2D needs.
+
+Tested approaches that did NOT fix:
+
+- Native `d2d1.dll` from Win11 system32 — fails on unimplemented
+  `ext-ms-win-ntuser-uicontext-ext-l1-1-0.dll.2521` (Windows API Set)
+- Wine builtin `d2d1.dll` from patched Wine `lib/wine/` — completes load
+  but D2D device creation fails inside Wine's d2d1 implementation
+- DXVK 2.7.1 d3d11.dll + dxgi.dll + d3d10core.dll override — Vulkan device
+  inits successfully, D2D still fails on top
+
+Root cause: Wine's d2d1 implementation has a feature gap around the
+D3D11-backed surface formats LR CC's UI rendering pipeline uses. This is
+a Wine engine limitation, not a prefix configuration issue. Native Win
+d2d1 would work but pulls in Win11 API sets Wine doesn't expose.
+
+WineHQ AppDB has rated LR CC "Garbage" for years specifically for this
+barrier. The progress documented in this repo (window paints + Crash
+Processor spawns + DXVK Vulkan init succeeds) is further than any public
+recipe for current LR CC.
+
+## 8. Wine prefix at `~/.wine_adobe` is a known-good baseline
 
 The prefix is currently configured with:
 
