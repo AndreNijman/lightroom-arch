@@ -26,6 +26,32 @@ make -j16 > ~/Projects/lightroom-arch/logs/wine-build.log 2>&1
 Incremental — picks up from current object state. Full clean build
 is 1-3h on 16-core ThinkPad.
 
+## winedmo build failure (PhialsBasement source bug)
+
+Build failed in `dlls/winedmo/libavcodec/pcm_byte_order_reverse_bsf.c`:
+
+```
+error: unknown type name 'AVBSFInternal'
+error: 'AVCodecParameters' has no member named 'channels'
+error: 'AVBitStreamFilter' has no member named 'filter'
+```
+
+PhialsBasement vendored an inconsistent libavcodec snapshot into
+`winedmo` — old `.c` bitstream-filter source against newer headers.
+`--without-ffmpeg` does NOT skip it (winedmo bundles its own libavcodec).
+
+winedmo = Windows Media DMO (video/audio codecs). Lightroom does not
+need it. Fix: build with `make -k -j16` — keep-going past winedmo,
+everything else (Wine core, d2d1, dwrite, ntdll) builds. winedmo.dll
+just won't exist; LR never loads it.
+
+Resume command updated:
+
+```bash
+cd ~/wine-build/wine-src/build
+make -k -j16 > ~/Projects/lightroom-arch/logs/wine-build.log 2>&1
+```
+
 ## After build finishes
 
 Run `~/Projects/lightroom-arch/scripts/approaches/install-rebuilt-wine-test-lr.sh`:
