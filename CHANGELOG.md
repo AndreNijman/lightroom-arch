@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-05-15
+
+### Working — full photo editing
+
+Adobe Lightroom (Creative Cloud desktop app, `Adobe Lightroom CC`
+v9.3.1) is usable on Arch Linux under Wine. It launches, signs in,
+authenticates against Adobe Creative Cloud, loads its full UI, browses
+the local filesystem, opens and displays photos (loupe + Compare
+views), and **edits them** — the develop sliders work and visibly
+change the image. Launch with `./run-lightroom.sh`.
+
+### Fixed
+
+- **COM wrong-thread crash** (`lightroom.exe+0x28231C`,
+  `RPC_E_WRONG_THREAD` → NULL deref) — every prior session crashed
+  here. Fixed with a binary patch: a code-cave null-check routing the
+  NULL case to LR's own error/unwind path
+  (`scripts/patches/patch-lightroom-com-nullcheck.py`).
+- **`SetThreadpoolTimerEx` abort after sign-in** — `AdobeGrowthSDK.dll`
+  binary-patched to import `SetThreadpoolTimer` instead.
+- **Media Foundation crash** — rebuilt `mf`/`mfplat`/`mfreadwrite`.
+
+### Worked around
+
+- **CameraRaw D3D12 crash** in `libvkd3d-1.dll` on opening a photo —
+  GPU acceleration turned off in LR preferences
+  (`gpu4setting="off"`); CameraRaw renders on the CPU.
+
+### Known limitation
+
+- GPU acceleration is off (Wine's D3D12→Vulkan `libvkd3d-1.dll` faults
+  inside CameraRaw). Editing is CPU-rendered.
+
 ## [1.0.0] - 2026-05-15
 
 ### Working
