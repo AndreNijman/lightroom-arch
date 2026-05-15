@@ -54,10 +54,12 @@ against the matching commit *is* ABI-compatible with the Proton-built
 `win32u`. That part is a genuine result: the rebuild path works.
 
 But the flicker remains. With `WINE_X11_CHILD_OFFSCREEN=0`, GPU on, a
-slider-drag flicker capture: **118/296 blank frames** — no better than
-the 65/293 baseline.
+slider-drag flicker capture still shows heavy blanking (**118/296 blank
+frames**; this was a different test photo from the 65/293 baseline so
+the counts are not directly comparable — the decisive evidence is the
+trace below, not the frame count).
 
-A `WINEDEBUG=+x11drv` trace explains why. During a one-second drag the
+A `WINEDEBUG=+x11drv` trace shows why. During a one-second drag the
 `SET_DRAWABLE` escape (the first step of the offscreen `StretchBlt`
 present) fires **65 times** — identical to the **68** in the unpatched
 trace. The offscreen path is *still active*. The patch is a **no-op**
