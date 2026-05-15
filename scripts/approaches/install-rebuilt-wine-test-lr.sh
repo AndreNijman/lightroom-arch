@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Install rebuilt Wine 10.0 + relaunch LR.
-# Prereq: /tmp/wine-src/build successfully built (make -j16 done).
+# Prereq: $HOME/wine-build/wine-src/build successfully built (make -j16 done).
 
 set -euo pipefail
 
-BUILD=/tmp/wine-src/build
+BUILD=$HOME/wine-build/wine-src/build
 INSTALL_PREFIX=$HOME/opt/wine-adobe-built
 WINEPREFIX=$HOME/.wine_adobe
 LR_EXE="$WINEPREFIX/drive_c/Program Files/Adobe/Adobe Lightroom Classic/Lightroom.exe"

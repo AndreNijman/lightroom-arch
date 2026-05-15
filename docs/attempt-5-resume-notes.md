@@ -1,24 +1,30 @@
-# Attempt 5: Resume Notes — Build Paused
+# Attempt 5: Resume Notes
 
-Build paused mid-compile per user. State preserved for resume.
+## Reboot wiped /tmp
 
-## Where build stopped
+First build attempt used `/tmp/wine-src` — `/tmp` is tmpfs, wiped on
+reboot. 628MB of compiled objects lost. Source re-cloned to a
+persistent location.
 
-- Source: `/tmp/wine-src` on `proton_10.0` branch
-- Build dir: `/tmp/wine-src/build` (~628MB of compiled objects)
-- Wine loader binary present at `/tmp/wine-src/build/wine`
-- d2d1 ColorManagement patch live in `dlls/d2d1/effect.c`
-- Generated request handlers refreshed via `tools/make_requests`
+## Current build location
 
-## To resume
+- Source: `~/wine-build/wine-src` on `proton_10.0` branch (shallow clone)
+- Build dir: `~/wine-build/wine-src/build`
+- d2d1 ColorManagement patch applied to `dlls/d2d1/effect.c`
+- `tools/make_requests` run to regenerate fsync/esync request handlers
+- `./autogen.sh` run (shallow clone has no `configure` script)
+- Configured: `--prefix=$HOME/opt/wine-adobe-built
+  --enable-archs=i386,x86_64 --disable-tests`
+
+## To resume build
 
 ```bash
-cd /tmp/wine-src/build
+cd ~/wine-build/wine-src/build
 make -j16 > ~/Projects/lightroom-arch/logs/wine-build.log 2>&1
 ```
 
-Incremental — picks up from current object state. 30-90 min remaining
-on 16-core ThinkPad (rough estimate based on what's done vs not).
+Incremental — picks up from current object state. Full clean build
+is 1-3h on 16-core ThinkPad.
 
 ## After build finishes
 
