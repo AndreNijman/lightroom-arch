@@ -103,7 +103,10 @@ preview on the CPU. The underlying Wine D3D12 present bug remains; if
 GPU-accelerated editing is wanted back, that present path would need
 to be fixed.
 
-Verified flicker-free and responsive on a JPEG test image. CPU-side
-Develop performance on large RAW files (the user shoots Nikon D7000
-NEFs) is expected to be slower but was not separately benchmarked.
+Verified flicker-free on both a JPEG and a real 18 MB Nikon D7000 NEF
+raw: 0 blank frames across 435 (JPEG) and 233 (NEF) captured frames of
+slider editing. The NEF decoded and displayed within a few seconds and
+its preview visibly tracked the Exposure drag — CPU rendering is
+slower than a working GPU path would be, but it keeps pace well enough
+to edit.
 
