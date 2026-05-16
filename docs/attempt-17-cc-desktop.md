@@ -436,11 +436,40 @@ library (`gnutls-cli` passes), or Adobe's servers.
 
 The networking wall is an **in-scope, reproducible 32-bit Wine `secur32`
 bug** — (c) Adobe-side is firmly ruled out. A minimal non-Adobe repro
-exists (`wine-patches/repro-winhttp-adobe/httptest32.exe`). The exact
-defective line is **not yet pinned**: 32-bit and 64-bit `secur32` move
-identical handshake bytes, so the corruption is subtle (record keying or
-content) and pinning it needs `gdb` on the 32-bit `secur32` unixlib or an
-`SSLKEYLOGFILE`-decrypted capture comparing the 32-bit vs 64-bit client
-`Finished`/CKE byte-for-byte. No patch and no faked value were applied —
-shipping an unverified guess at a Wine TLS fix would be worse than none.
+exists (`wine-patches/repro-winhttp-adobe/httptest32.exe`).
+
+### Step 5 — formally closed (route blocked at the networking wall)
+
+A Wine-side fix is **not shipped this attempt**, for two concrete reasons,
+not for want of trying:
+
+1. **The defect is not pinned and pinning it needs iterative byte-level
+   TLS debugging.** 32-bit and 64-bit `secur32` move *identical* handshake
+   byte counts, so the corruption is subtle — record keying or per-byte
+   content. Pinning it requires instrumenting `secur32`'s push/pull with
+   hex dumps (or `gdb` on the unixlib, or an `SSLKEYLOGFILE`-decrypted
+   capture) and a rebuild/compare loop against the passing 64-bit path.
+
+2. **The 32-bit unix `secur32` is not buildable in this environment.**
+   The 32-bit path is `i386-windows/secur32.dll` ↔ `i386-unix/secur32.so`.
+   The configured Wine source tree here (`~/wine-build/wine-src/build`)
+   builds **only** `x86_64-unix/secur32.so` — there is no `i386-unix`
+   build config. So even a correctly-pinned unix-side fix could not be
+   compiled into the prebuilt 32-bit `.so` the wine-patches/ pattern
+   requires; that needs a separate multilib 32-bit Wine unix build set up
+   first. (The PE side, `i386-windows/secur32.dll`, *is* buildable here —
+   but whether the defect is PE-side or unix-side is exactly what is not
+   yet pinned.)
+
+Shipping an unverified guess at Wine TLS code would be worse than shipping
+nothing. So the installer route is **formally blocked at the networking
+wall**: a reproduced, in-scope 32-bit Wine `secur32` bug whose fix is a
+scoped follow-up (set up an i386-unix Wine build, instrument
+`schannel*.c`, pin, patch, verify `httptest32.exe` passes, ship the
+patched 32-bit DLL). No patch and no faked value were applied.
 `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.
+
+What attempt 17 *did* deliver end-to-end: the `mshtml`
+`FEATURE_BROWSER_EMULATION` fix (the installer's React UI now parses and
+runs, Adobe binaries unmodified). The networking wall is the next, and
+separate, blocker.

@@ -58,6 +58,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   handshake bytes); no Wine patch is shipped for this wall — an unverified
   TLS-code guess would be worse than none. Minimal repro + harness in
   `wine-patches/repro-winhttp-adobe/`. Install script stays WORK IN PROGRESS.
+- **Installer route formally blocked at the networking wall.** A `secur32`
+  fix is a scoped follow-up, not done this attempt: pinning the defect
+  needs iterative byte-level TLS debugging, and the 32-bit unix
+  `i386-unix/secur32.so` is not buildable from the Wine tree configured
+  here (it builds `x86_64-unix` only) — so a prebuilt 32-bit patched DLL
+  cannot be produced without first setting up a multilib Wine unix build.
+  See `docs/attempt-17-cc-desktop.md` "Step 5 — formally closed". Attempt
+  17 delivered the `mshtml` fix end-to-end; the networking wall is the
+  next, separate blocker.
 
 ## [2.4.0] - 2026-05-16
 
