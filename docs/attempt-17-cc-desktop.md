@@ -68,4 +68,39 @@ but not enough for this bundle. Fix options under evaluation:
   moot.
 - **D** — transpile `CCDInstaller.js` to ES5 before `mshtml` loads it.
 
+## Breakthrough — the JS parse wall is cleared
+
+The blank screen was *not* a missing `jscript` feature. Wine's `mshtml`
+gates the `jscript` language version on the document's **compat mode**.
+`index.html` carries `<meta http-equiv='X-UA-Compatible'
+content='chrome=1'>`; Wine can't parse `chrome=1`, falls back to compat
+**mode 2** (IE7), and in mode 2 `jscript` rejects `class` / `let` /
+template literals — `SyntaxError 800a03ea`.
+
+Fix: rewrite that meta to `content='IE=11'`. Wine then uses compat
+**mode 6** (IE11), `jscript` runs in ES6 mode, and `CCDInstaller.js`
+parses with **zero syntax errors**. Confirmed: React mounts, React
+Spectrum initialises (`cci-root … react-spectrum-provider spectrum
+spectrum--light`), the app builds its DOM.
+
+`FEATURE_BROWSER_EMULATION` in the registry does **not** work — Wine
+`mshtml` ignores it; the `<meta>` is authoritative. The installer
+extracts `index.html` to `%TEMP%\{GUID}\` fresh each run, so the install
+script rewrites the meta in that file between extraction and the
+WebBrowser navigation (a short, reliable window).
+
+## Remaining walls (post-parse)
+
+With JS running, two issues remain before the installer is usable:
+
+1. **Rendered DOM does not paint** — the host window shows only its teal
+   background though React built the DOM. `ieframe:ViewObject_Draw` is a
+   Wine stub (fixme); the embedded WebBrowser ActiveX `IViewObject::Draw`
+   does nothing. Prime suspect for the blank paint.
+2. **Platform mis-detection** — the React app tags its root `cci-root
+   mac` and renders a `spectrum-CircleLoader` spinner; it sniffs the UA
+   for `\bMSIE\b` / `\bTrident\b` and `isWinPlatform`. Wine's IE11-mode
+   user-agent lacks `MSIE`, so the installer may think it is on macOS
+   (`cci.error.product.platformIneligible.macarm64`).
+
 (continued — see commits / changelog)
