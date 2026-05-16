@@ -596,8 +596,11 @@ watchdog times out after ~5 min: `CommBridge` "Number of retries to
 connect inPipe exhausted with latest err = 536" + "Error initializing
 OtherInstaller IPC", then a fresh `Workflow start`. Observed three full
 cycles (`16:40 → 16:46 → 16:53`). Named-pipe *creation* works in Wine
-(`create_named_pipe() = 0`); the IPC failure is the watchdog failing to
-reach the hung UI process — a consequence, not the cause.
+(`create_named_pipe() = 0`); the `inPipe` connect failure appears
+downstream of the UI hang (the watchdog cannot reach a UI process stuck
+on "Loading") — though pipe-connect timing was not separately
+discriminated from a Wine named-pipe semantics bug. Either way it is
+in-scope (a) Wine, and downstream of the `jscript` wall.
 
 ### Sub-finding — telemetry 400 (non-fatal, Wine bcrypt bug)
 
