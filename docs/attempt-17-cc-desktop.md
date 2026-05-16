@@ -148,3 +148,70 @@ The `chrome=1` → `IE=11` finding is a genuine, self-contained Wine
 interaction worth reporting upstream: Wine `mshtml` should not drop to
 IE7 compat mode (and thus ES5 `jscript`) for a document whose only
 `X-UA-Compatible` directive is the unrecognised `chrome=1`.
+
+## Primary-source check — the diagnosis above is wrong; the real fix is cleaner
+
+Re-checked against Wine 10.0 source (`~/wine-build/wine-src/dlls/mshtml`)
+before patching. The earlier "`chrome=1` forces IE7" story does not
+survive contact with the code.
+
+**1. `chrome=1` does not force anything — it is a parse no-op.**
+`parse_ua_compatible()` (`mutation.c:506`) returns `COMPAT_MODE_INVALID`
+for any content that does not start with `IE=`. `process_meta_element()`
+(`mutation.c:584`) then simply does *not* call `set_document_mode()` and
+logs the `FIXME("Unsupported document mode ...")`. The meta is ignored;
+it never lowers the mode.
+
+**2. IE7 is the *doctype default*, not a consequence of the meta.**
+The IE7 drop happens in the doctype-node handler
+(`mutation.c:919-948`): when a standards-mode doctype is seen and the
+mode is still `COMPAT_MODE_QUIRKS`, Wine sets `COMPAT_MODE_IE7` — and
+only bumps to IE11 if `is_iexplore()` *and* the URL is in the Internet
+zone. `Set-up.exe` is not `iexplore.exe`, so it gets IE7. A page with
+**no `X-UA-Compatible` meta at all** lands in IE7 exactly the same way.
+This is, in fact, Windows-faithful: a real embedded WebBrowser control
+in a non-`iexplore` host with no opt-in also defaults to IE7.
+
+Therefore the goal's literal step 4 ("make an unknown token keep IE11
+mode") would make Wine *diverge* from Windows, not match it — out of
+scope by the project's own rule.
+
+**3. The real Windows mechanism is `FEATURE_BROWSER_EMULATION`, and
+Wine ignores it.** `Set-up.exe` imports only `KERNEL32`, `urlmon`,
+`WS2_32` — it is a `urlmon`/`ieframe` WebBrowser-control host (confirmed:
+`WINEDEBUG=+loaddll` shows it loading `ieframe.dll` + `mshtml.dll` +
+`jscript.dll`, never `libcef.dll`). The `libcef.dll`/Chromium files in
+`installers/ACCCx_extracted/` are dated 2026-05-15 — leftover cruft from
+attempt-17's abandoned "option B", **not** part of the Adobe installer
+(original installer files are dated 2023-02-19: `Set-up.exe` +
+`packages/`).
+
+Decisive test — run `Set-up.exe` in a prefix with the
+`FEATURE_BROWSER_EMULATION` key removed entirely:
+
+```
+[Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION]
+"Set-up.exe"=dword:00002af9
+```
+
+`Set-up.exe` **writes that key for itself** (`0x2af9` = 11001 = IE11
+mode). This is the standard, documented Windows opt-in for embedded
+WebBrowser controls. On real Windows, IE honours it and the control
+runs in IE11 → the ES6 React bundle parses. Wine's `mshtml` reads
+`FEATURE_BROWSER_EMULATION` **nowhere** — the comment at
+`mutation.c:928-933` explicitly acknowledges the key is unimplemented.
+
+**Conclusion.** The Adobe installer already does the correct, standard
+Windows thing (sets `FEATURE_BROWSER_EMULATION` for itself). The Wine
+gap is that `mshtml` ignores that key. The Windows-faithful, in-scope
+fix is to **implement `FEATURE_BROWSER_EMULATION` in Wine `mshtml`**.
+That fix:
+
+- runs Adobe's installer completely unmodified (no `index.html`
+  rewrite — the `chrome=1`→`IE=11` crutch is deleted, not reimplemented);
+- needs no registry pre-seeding by the install script (`Set-up.exe`
+  writes the key itself);
+- makes Wine behave exactly as Windows does.
+
+This supersedes step 4's stated approach. Awaiting confirmation before
+implementing — see journal / report.
