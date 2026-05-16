@@ -335,3 +335,83 @@ back rather than improvising a network workaround or a forced value.**
 it gets a clean machine to a CC installer whose React UI runs (JS parse
 wall solved) but which cannot complete sign-in until the Wine networking
 gap is addressed.
+
+## Networking wall — diagnosed (Wine-side TLS, NOT Adobe-side)
+
+Followed the "diagnose before patching" rule: classify the `-1` /
+`HTTP_Status:0` failure as (a) Wine TLS/cert gap, (b) Wine winhttp
+protocol gap, or (c) Adobe-side rejection — *before* touching Wine source.
+
+### What the `-1` actually is
+
+`WINEDEBUG=+winhttp,+secur32` on `Set-up.exe`: **every** TLS connection
+the installer opens fails in `netconn_secure_connect` — 0 succeed. Two
+shapes, both at handshake-completion time:
+
+- `recv 7 bytes` → `InitializeSecurityContext ret 0x80090304`
+  (`SEC_E_INTERNAL_ERROR`). The 7 bytes are a TLS record header + a
+  2-byte payload, i.e. the server sent a **TLS alert**.
+- `recv error 10054` (`WSAECONNRESET`) → `0x2f7d`
+  (`ERROR_WINHTTP_SECURE_CHANNEL_ERROR`). The server **RST**s the socket.
+
+Both happen *after* the client's second flight (CKE+CCS+Finished) is sent
+— the server rejects the completed handshake. A server alert / RST right
+after the client `Finished` is the signature of a **bad Finished MAC**:
+the handshake transcript the client hashed differs from the server's.
+
+### Ruling out (c) — Adobe-side rejection
+
+Decisive, and it rules (c) out:
+
+- `gnutls-cli` from the host — using **the exact `libgnutls` 3.8.13 that
+  Wine's `secur32` loads** — completes the handshake to
+  `cc-api-data.adobe.io` and `ccmdls.adobe.com`, TLS 1.2 and TLS 1.3,
+  "certificate is trusted, Handshake was completed". The servers accept
+  this TLS stack.
+- A minimal non-Adobe WinHTTP client (`wine-patches/repro-winhttp-adobe/`,
+  `httptest.c`) — plain Wine `winhttp` — completes the HTTPS request to
+  **every** endpoint the installer uses (`cc-api-data.adobe.io`,
+  `lcs-cops.adobe.io`, `ccmdls.adobe.com`) and gets a real HTTP response
+  (403 — same status the host `curl` gets; 403 is just an unauthenticated
+  bare GET). Tested single, 8-way concurrent, and async (`WINHTTP_FLAG_
+  ASYNC`, `httptest-async.c`) — 100% success.
+
+So Adobe's servers, Wine's TLS library, and Wine's `winhttp` in isolation
+all work. **(c) is ruled out** — the wall is not geo/integrity/auth
+rejection, and (correcting attempt 2) it is not a dead TLS stack either.
+
+### Classification: (b) — a Wine bug, in scope
+
+`Set-up.exe`'s WinHTTP connections fail **100%**; byte-identical
+handshakes from the minimal clients succeed **100%**. The
+`+secur32` traces confirm the installer and `httptest` send the **same
+231-byte ClientHello with the same 24 TLS extensions** and receive the
+**same server flight** (same `recv` chunk sizes), yet the installer's
+`Finished` is rejected and `httptest`'s is accepted. That is Wine
+corrupting the TLS handshake transcript for the installer's connections —
+an in-scope Wine `secur32`/`winhttp` bug.
+
+### Not yet pinned — honest status
+
+The exact defect is **not** isolated. It was not reproduced by any
+minimal client: `httptest` (sync), `httptest-async` (async), and both
+under 6–8-way concurrency all succeed. The corruption only appears inside
+`Set-up.exe`'s own process — so the trigger is some aspect of that
+process's runtime state (its thread count, COM apartment use, memory
+layout, or a `secur32`/`gnutls` interaction) that black-box log analysis
+could not narrow down. winhttp option `77` the installer sets is
+`WINHTTP_OPTION_AUTOLOGON_POLICY` — unrelated to TLS.
+
+Pinning it needs in-process evidence stock log channels do not give:
+an `SSLKEYLOGFILE` + `tcpdump` wire capture of a failing installer
+connection vs. a passing `httptest` one, decrypted and compared
+record-by-record to find where Wine's transcript diverges. That is the
+next step; no Wine patch is shipped for this wall yet.
+
+### Outcome
+
+The networking wall is an **in-scope Wine bug** (not Adobe-side — (c) is
+firmly ruled out), localised to Wine's `secur32`/`winhttp` TLS handshake
+path, but not yet pinned to a fixable defect. No patch and no faked value
+were applied. `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.
+Diagnostic harness kept in `wine-patches/repro-winhttp-adobe/`.
