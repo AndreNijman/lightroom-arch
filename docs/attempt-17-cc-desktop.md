@@ -89,18 +89,47 @@ extracts `index.html` to `%TEMP%\{GUID}\` fresh each run, so the install
 script rewrites the meta in that file between extraction and the
 WebBrowser navigation (a short, reliable window).
 
-## Remaining walls (post-parse)
+## Remaining wall (post-parse)
 
-With JS running, two issues remain before the installer is usable:
+With JS running, the installer window still shows only the teal
+splash. The decisive observations:
 
-1. **Rendered DOM does not paint** — the host window shows only its teal
-   background though React built the DOM. `ieframe:ViewObject_Draw` is a
-   Wine stub (fixme); the embedded WebBrowser ActiveX `IViewObject::Draw`
-   does nothing. Prime suspect for the blank paint.
-2. **Platform mis-detection** — the React app tags its root `cci-root
-   mac` and renders a `spectrum-CircleLoader` spinner; it sniffs the UA
-   for `\bMSIE\b` / `\bTrident\b` and `isWinPlatform`. Wine's IE11-mode
-   user-agent lacks `MSIE`, so the installer may think it is on macOS
-   (`cci.error.product.platformIneligible.macarm64`).
+- React mounts, React Spectrum initialises, the DOM is built (2.6 M
+  lines of `mshtml`/`jscript` trace, `HTMLDocument7_createElement
+  "div"`, `react-spectrum-provider`).
+- The app renders a `spectrum-CircleLoader` — a **loading spinner** — and
+  tags its root `cci-root mac`. It sniffs the user agent (`\bMSIE\b`,
+  `\bTrident\b`, `isWinPlatform`) and carries
+  `cci.error.product.platformIneligible.macarm64` strings.
+- A static `position:fixed` red `<div>` injected into `<body>` (a paint
+  probe) is **also** invisible.
 
-(continued — see commits / changelog)
+Best diagnosis: `Set-up.exe` paints a native teal splash window, embeds
+the WebBrowser behind it, and only lifts the splash once the React app
+signals "UI ready". The app is **stuck in its loading state** — most
+likely platform mis-detection (Wine's IE11 user-agent does not look like
+Windows IE to the app) and/or the product-catalog fetch — so the "ready"
+signal never fires and the splash never lifts. The embedded WebBrowser
+(and the red probe inside it) stay covered. It is *not* a Wine paint
+bug: the DOM renders, it is simply occluded.
+
+So the chain still to break: platform detection → catalog fetch →
+sign-in → the actual install. Each is its own step; then the installed
+**CC Desktop app** has its *own* (CEF, not mshtml) render path, and a
+freshly-installed Lightroom needs its binary patches re-derived against
+the new build. This is multi-session work — see the status note below.
+
+## What this attempt ships
+
+`scripts/install-cc-desktop.sh` — a clean, rsync-free, one-command setup:
+builds `~/.wine_cc`, applies the XVidMode / vkd3d / patched-DLL fixes,
+sets the registry tweaks, and launches the CC Desktop installer with the
+`index.html` meta rewritten to `IE=11` via an `inotifywait` watcher (no
+polling race). It gets a user from a clean machine to a *running* CC
+installer with no Windows partition involved — the JS parse wall is
+gone. The loading-state wall above is not yet solved.
+
+The `chrome=1` → `IE=11` finding is a genuine, self-contained Wine
+interaction worth reporting upstream: Wine `mshtml` should not drop to
+IE7 compat mode (and thus ES5 `jscript`) for a document whose only
+`X-UA-Compatible` directive is the unrecognised `chrome=1`.

@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### In progress — installer-driven Creative Cloud (no rsync)
+
+- Working toward a one-command, rsync-free install: anyone who clones the
+  repo runs `scripts/install-cc-desktop.sh` and the Adobe Creative Cloud
+  Desktop installer runs under Wine — no Windows partition, no copying an
+  existing install.
+- **Corrected attempt 2's diagnosis.** The blank teal CC installer window
+  is *not* a TLS failure. The Adobe analytics POST completes its TLS
+  handshake; the installer's UI assets are extracted locally, not
+  downloaded. (`docs/attempt-17-cc-desktop.md`)
+- **Root-caused the blank installer.** `Set-up.exe`'s UI is a modern
+  (ES6+) React/webpack bundle hosted in Wine's `mshtml` WebBrowser
+  control. Wine's `mshtml` runs JavaScript through `jscript.dll` (an
+  ES5-era engine), not Gecko's SpiderMonkey. `index.html` carries
+  `<meta http-equiv='X-UA-Compatible' content='chrome=1'>`; Wine cannot
+  parse `chrome=1`, drops to IE7 compat mode, and `jscript` rejects the
+  ES6 syntax with `SyntaxError 800a03ea` — React never mounts.
+- **Cleared the JS parse wall.** Rewriting that meta to `content='IE=11'`
+  puts Wine `mshtml` in IE11 compat mode; `jscript` runs in ES6 mode and
+  the bundle parses with zero syntax errors — React mounts and React
+  Spectrum initialises. `scripts/install-cc-desktop.sh` performs this
+  rewrite automatically via an `inotifywait` watcher on the installer's
+  temp directory.
+- **Known remaining wall:** the React installer runs but stays in its
+  loading state (platform mis-detection / catalog fetch), so the native
+  teal splash never lifts to reveal the WebBrowser. Multi-session work;
+  tracked in `docs/attempt-17-cc-desktop.md`.
+
 ## [2.4.0] - 2026-05-16
 
 ### Fixed — UI shapes render correctly (Direct2D arc fix)
