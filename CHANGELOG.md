@@ -85,6 +85,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   end-to-end: the `mshtml` `FEATURE_BROWSER_EMULATION` fix and the
   `lib32-nettle` fix. `scripts/install-cc-desktop.sh` stays WORK IN
   PROGRESS — next step is a full `Set-up.exe` run with both walls down.
+- **Full `Set-up.exe` run — reaches the sign-in step, blocked at a new
+  Wine `jscript` wall.** With both fixes in place the installer's native
+  workflow runs clean to `START_SIGNIN_WORKFLOW`, NGL's `GetSUSIURL`
+  succeeds, and the embedded WebBrowser fetches Adobe's entire sign-in
+  module (`darq/qr` delegated-auth bundle, messaging client, polyfills)
+  and identity/licensing endpoints — **61× HTTP 200**. The networking
+  wall is gone. New, distinct wall: the React OOBE/sign-in app renders
+  its shell but stalls on "Loading" — Wine's `jscript` (ES5-era) engine
+  cannot run the modern app (`mshtml:ActiveScriptSite_OnScriptError` ×2,
+  `jscript:exprval_call invoke undefined` ×4, `JScriptProperty` 70000001/2
+  unimplemented, `createHTMLDocument`→null). The native bootstrapper's
+  watchdog then loops (`CommBridge inPipe err 536`, `Workflow start` ×3,
+  ~5 min apart). Classified **(a) Wine**: (c) Adobe-side ruled out (every
+  substantive endpoint 200; the lone 4xx is non-fatal telemetry `/ingest`
+  400, itself a Wine `BCryptExportKey 0xC0000023` bug). Fixing Wine
+  `jscript` to run a modern React app is open-ended engine work — a
+  scoped Wine follow-up, not a one-session fix. `Set-up.exe` ran
+  unmodified; no value faked. See `docs/attempt-17-cc-desktop.md` "Full
+  Set-up.exe run".
 
 ## [2.4.0] - 2026-05-16
 

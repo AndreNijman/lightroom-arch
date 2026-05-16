@@ -539,3 +539,99 @@ Attempt 17 delivered, end-to-end: the `mshtml` `FEATURE_BROWSER_EMULATION`
 fix (React UI parses and runs) **and** the `lib32-nettle` fix (32-bit TLS
 works). `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS — the next
 step is a full `Set-up.exe` run now that both walls are down.
+
+## Full Set-up.exe run (2026-05-16, session 5)
+
+Ran `Set-up.exe` end to end on the now-fixed system, with `+winhttp`,
+`+wininet`, and `+server` traces and the installer's own logs
+(`WAM.log`, dunamis).
+
+### The networking wall is GONE
+
+This is the headline. The installer's native workflow runs cleanly:
+`ACQUIRE_LOCKS → CHECK_GENERAL_SYSTEM_REQUIREMENTS → CHECK_FOR_PROXY →
+CHECK_FOR_NETWORK (NetworkState 1) → CHECK_ALREADY_INSTALLED_PRODUCT →
+SHOW_WELCOME_SCREEN → START_SIGNIN_WORKFLOW`, and NGL's `GetSUSIURL`
+**succeeds** — it fetches a real Sign-Up/Sign-In URL. The embedded
+WebBrowser then fetches the entire Adobe sign-in module — the `darq/qr`
+delegated-auth bundle (`index.js`, `DelegatedAuthRequest.js`,
+`QRCodeRequest.js`, `PollingService.js`, `TokenRequest.js`, …), the
+messaging client, polyfills — and hits `ims-na1.adobelogin.com`,
+`delegated.identity.adobe.com` (×326), `lcs-cops.adobe.io`,
+`resources.licenses.adobe.com`. **61× HTTP 200**, one 302. Attempt 17's
+old `-1`/`HTTP_Status:0` wall is gone — the `lib32-nettle` + `mshtml`
+fixes hold.
+
+### The new wall — Wine `jscript`/`mshtml` cannot run the OOBE app
+
+The embedded WebBrowser's React OOBE/sign-in app **renders its shell but
+stalls on "Loading"** — it never shows the sign-in form. Its resources
+all download (HTTP 200); the failure is at JavaScript *runtime* inside
+Wine's IE-emulated engine. Trace evidence (`+winhttp,+wininet`, jscript
+`warn`/`fixme` on by default):
+
+- `mshtml:ActiveScriptSite_OnScriptError` — fires **twice**: the page's
+  JS raised script errors.
+- `jscript:exprval_call invoke undefined` ×4 — JS calling an undefined
+  value as a function (a thrown `TypeError`).
+- `jscript:JScriptProperty_SetProperty Unimplemented property
+  70000001 / 70000002` — the app tries to configure the script engine
+  (JS versioning); Wine `jscript` does not implement those properties.
+- `mshtml:HTMLDOMImplementation2_createHTMLDocument (…)->((null) …)` —
+  `document.implementation.createHTMLDocument()` returns null.
+- `mshtml:HTMLWindow2_put_onerror … semi-stub` — the app's own
+  `window.onerror` handler is not fully wired.
+
+Wine's `mshtml` uses Wine-Gecko for the DOM but **Wine's own `jscript`
+(an ES5-era engine) for `<script>` execution**. The modern Adobe OOBE /
+delegated-auth app is past what `jscript` implements. The
+`FEATURE_BROWSER_EMULATION` fix got the installer's *own* React bundle to
+parse; the separate, newer sign-in app hits runtime gaps `jscript`
+cannot satisfy.
+
+### Downstream symptom — the restart loop
+
+Because the OOBE UI never reaches "ready", the native bootstrapper's
+watchdog times out after ~5 min: `CommBridge` "Number of retries to
+connect inPipe exhausted with latest err = 536" + "Error initializing
+OtherInstaller IPC", then a fresh `Workflow start`. Observed three full
+cycles (`16:40 → 16:46 → 16:53`). Named-pipe *creation* works in Wine
+(`create_named_pipe() = 0`); the IPC failure is the watchdog failing to
+reach the hung UI process — a consequence, not the cause.
+
+### Sub-finding — telemetry 400 (non-fatal, Wine bcrypt bug)
+
+`dunamis` and the WAM `DunamisIngestHttpHandler` POST to
+`cc-api-data.adobe.io/ingest` and get **HTTP 400** ("Error 1011: Missing
+keys in the events array"). Cause: `bcrypt:BCryptExportKey` returns
+`0xC0000023` (`STATUS_BUFFER_TOO_SMALL`) under Wine, so `dunamis` cannot
+encrypt its events — they serialize empty, Adobe rejects the batch. This
+is **analytics only**; Adobe tolerates telemetry failure and the
+installer continues. Not pursued (a separate, minor Wine `bcrypt` bug).
+
+### Classification — (a) Wine
+
+- **(c) Adobe-side: ruled out.** Every substantive Adobe endpoint
+  returned HTTP 200; sign-in resources, identity, licensing all served.
+  The only 4xx is the non-fatal telemetry `/ingest` 400, itself caused
+  by a Wine `bcrypt` bug — not an Adobe refusal of the install.
+- **(b) host config: ruled out.** Wine-Gecko present, prefix builds,
+  network/TLS verified.
+- **(a) Wine: confirmed.** Wine's `jscript` engine cannot run the modern
+  Adobe OOBE/sign-in React application to its ready state.
+
+### Outcome — route reaches sign-in, blocked at the Wine jscript wall
+
+`Set-up.exe` now gets all the way to the **sign-in step** — a genuine
+advance: the networking wall that closed attempts 2 and 17 is gone. It
+is blocked at a *new*, distinct wall: Wine's `jscript` engine is too old
+for Adobe's modern OOBE app. Fixing that is open-ended Wine
+engine-modernisation work (implementing modern JS runtime features in
+`jscript.dll`), **not a fix that can be made or shipped in one session**
+— and out of proportion to installing one app. It is a scoped Wine
+follow-up.
+
+No Adobe file was modified; no value was faked. `Set-up.exe` ran
+completely unmodified. `scripts/install-cc-desktop.sh` stays WORK IN
+PROGRESS — the installer route is honestly blocked at the Wine
+`jscript` OOBE wall.
