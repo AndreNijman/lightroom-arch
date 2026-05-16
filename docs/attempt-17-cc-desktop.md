@@ -119,6 +119,21 @@ sign-in → the actual install. Each is its own step; then the installed
 freshly-installed Lightroom needs its binary patches re-derived against
 the new build. This is multi-session work — see the status note below.
 
+### Platform detection — why `cci-root mac`
+
+Decompiling `CCDInstaller.js`: the root class is
+`"cci-root ".concat(a?"win":"mac")` where `a = isWinPlatform`, and
+`isWinPlatform` is set once from the init context as
+`"win" === t.platform`. `t.platform` is **not** read from
+`navigator.platform` — it is data the *native* `Set-up.exe` host feeds
+into the React app as init context. WAM logs `Embedded json data not
+found in the binary`. So the native→JS init bridge (the
+`window.external` / WAM embedded-config mechanism that Wine `mshtml`
+implements differently from IE) is not delivering `platform`, the React
+app defaults to `mac`, and it parks on the spinner. This bridge — not a
+paint bug, not the UA string — is the real wall, and it is a deep Wine
+`mshtml` host-object gap.
+
 ## What this attempt ships
 
 `scripts/install-cc-desktop.sh` — a clean, rsync-free, one-command setup:
