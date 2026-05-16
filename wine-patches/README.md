@@ -10,6 +10,7 @@ backing up each stock file as `<name>.orig`.
 | `winex11-wm-close-fix.patch` | `winex11.so` | Hyprland close shortcut a no-op |
 | `uiautomationcore-disconnect-all-providers.patch` | `uiautomationcore.dll` | Lightroom stalls on exit |
 | `../installers/wine-patches/wine-d2d1-addarc.patch` | `d2d1.dll` | rounded UI shapes render as polygons |
+| `mshtml-feature-browser-emulation.patch` | `mshtml-i386.dll`, `mshtml-x86_64.dll` | CC installer's ES6 React bundle is a `jscript` SyntaxError (mshtml ignores `FEATURE_BROWSER_EMULATION`, defaults to IE7) |
 
 ## winex11 — D3D child-swapchain flicker fix
 
@@ -150,3 +151,77 @@ git apply /path/to/uiautomationcore-disconnect-all-providers.patch
 make -j"$(nproc)" dlls/uiautomationcore/x86_64-windows/uiautomationcore.dll
 # copy it over wine-patches/uiautomationcore.dll
 ```
+
+## mshtml — FEATURE_BROWSER_EMULATION (CC installer ES6 bundle)
+
+`mshtml-feature-browser-emulation.patch` + the prebuilt `mshtml-i386.dll`
+and `mshtml-x86_64.dll`.
+
+### The bug
+
+The Adobe Creative Cloud Desktop installer (`Set-up.exe`) is a
+`urlmon`/`ieframe` host: its UI is a modern (`let`/`const`) React/webpack
+bundle rendered in an embedded IE **WebBrowser control**, i.e. Wine's
+`mshtml`. `mshtml` runs JavaScript through `jscript.dll`, whose accepted
+language depends on the document's *compat mode*.
+
+`Set-up.exe` is not `iexplore.exe`, so Wine's `mshtml` doctype handler
+(`dlls/mshtml/mutation.c`) defaults its document to **IE7** compat mode.
+In IE7 mode `jscript` rejects `let`/`const` — the React bundle dies with
+`SyntaxError 800a03ea`, React never mounts, the installer paints only its
+teal splash.
+
+On real Windows this works because `Set-up.exe` opts itself into IE11 by
+writing the standard **`FEATURE_BROWSER_EMULATION`** registry value for
+its own executable (`HKCU\…\Internet Explorer\Main\FeatureControl\
+FEATURE_BROWSER_EMULATION` → `"Set-up.exe"=dword:00002af9`, 11001 = IE11).
+Windows IE honours that key for embedded WebBrowser controls. **Wine's
+`mshtml` reads `FEATURE_BROWSER_EMULATION` nowhere** — the key is ignored,
+so the installer stays stuck at IE7.
+
+The `chrome=1` in `index.html`'s `<meta http-equiv='X-UA-Compatible'>` is
+a red herring: `parse_ua_compatible()` returns `COMPAT_MODE_INVALID` for
+any non-`IE=` token, so the meta is a no-op — it never forces IE7, and a
+page with no meta at all lands in IE7 the same way.
+
+### The fix
+
+The patch adds `get_feature_browser_emulation()` to `mutation.c`: it reads
+the `FEATURE_BROWSER_EMULATION` DWORD for the current process executable
+(HKCU then HKLM) and maps it to a compat mode (7000→IE7 … 11000/11001→
+IE11). The doctype handler consults it *before* the `iexplore` heuristic —
+an explicit per-exe opt-in wins. If the key is absent, behaviour is byte
+-for-byte unchanged (still IE7 for a non-`iexplore` host).
+
+This is the documented Windows mechanism, so Adobe's installer runs
+**completely unmodified** — no `index.html` rewrite, no registry
+pre-seeding (`Set-up.exe` writes the key itself). Result: `Set-up.exe`'s
+WebBrowser runs in IE11, the React bundle parses with zero `jscript`
+syntax errors. Genuine upstream Wine gap — self-contained, upstreamable.
+
+### Repro
+
+`repro-feature-browser-emulation/` is a minimal, non-Adobe repro: a tiny
+WebBrowser-control host (`wbhost.c` → `wbhost.exe`) navigates to
+`test.html` (`<!DOCTYPE html>` + a `let`/`const` snippet) and prints the
+resulting `document.title`.
+
+| `mshtml` | `FEATURE_BROWSER_EMULATION\wbhost.exe` | Output |
+|----------|----------------------------------------|--------|
+| stock    | `0x2af9` set        | `TITLE=ES5-RAN` (key ignored → IE7) |
+| patched  | `0x2af9` set        | `TITLE=ES6-OK` (→ IE11) |
+| patched  | absent              | `TITLE=ES5-RAN` (unchanged IE7 default) |
+
+### Rebuilding
+
+```sh
+git apply /path/to/mshtml-feature-browser-emulation.patch
+make -j"$(nproc)" dlls/mshtml/i386-windows/mshtml.dll \
+                  dlls/mshtml/x86_64-windows/mshtml.dll
+i686-w64-mingw32-strip   dlls/mshtml/i386-windows/mshtml.dll
+x86_64-w64-mingw32-strip dlls/mshtml/x86_64-windows/mshtml.dll
+# copy to wine-patches/mshtml-i386.dll and wine-patches/mshtml-x86_64.dll
+```
+
+`Set-up.exe` is a 32-bit PE, so `mshtml-i386.dll` is the one that matters
+for the installer; `mshtml-x86_64.dll` is shipped for 64-bit hosts.

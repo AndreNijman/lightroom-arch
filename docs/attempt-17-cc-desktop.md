@@ -213,5 +213,45 @@ That fix:
   writes the key itself);
 - makes Wine behave exactly as Windows does.
 
-This supersedes step 4's stated approach. Awaiting confirmation before
-implementing — see journal / report.
+This supersedes step 4's stated approach.
+
+## Implemented — Wine mshtml honours FEATURE_BROWSER_EMULATION
+
+`wine-patches/mshtml-feature-browser-emulation.patch` (prebuilt
+`mshtml-i386.dll` + `mshtml-x86_64.dll`).
+
+`dlls/mshtml/mutation.c` gains `get_feature_browser_emulation()`: it reads
+the `FEATURE_BROWSER_EMULATION` DWORD for the current process executable
+(HKCU then HKLM) and maps it to a compat mode (7000→IE7 … 11000/11001→
+IE11). The doctype-node handler now consults it *before* the `iexplore`
+heuristic — an explicit per-exe opt-in wins. With no key present the
+behaviour is byte-for-byte unchanged (a non-`iexplore` host still
+defaults to IE7).
+
+### Verification
+
+Minimal non-Adobe repro — `wine-patches/repro-feature-browser-emulation/`
+(a `urlmon` WebBrowser-control host `wbhost.exe` loading a `<!DOCTYPE
+html>` page with a `let`/`const` snippet, printing `document.title`):
+
+| `mshtml` | `FEATURE_BROWSER_EMULATION\wbhost.exe` | Output |
+|----------|----------------------------------------|--------|
+| stock    | `0x2af9` set | `TITLE=ES5-RAN` (key ignored → IE7, ES6 `SyntaxError`) |
+| patched  | `0x2af9` set | `TITLE=ES6-OK` (→ IE11) |
+| patched  | absent       | `TITLE=ES5-RAN` (unchanged IE7 default) |
+
+Real installer — `Set-up.exe` on a prefix with the key *not* pre-seeded:
+`Set-up.exe` writes `FEATURE_BROWSER_EMULATION\Set-up.exe=0x2af9` for
+itself; patched `mshtml` logs `get_feature_browser_emulation … -> compat
+mode 6`, `set_document_mode … 6`, and the React/webpack bundle parses
+with **0** `jscript` syntax errors (stock: `set_document_mode … 2`, 6
+syntax errors). First run is deterministic — `Set-up.exe` writes the key
+before its WebBrowser navigates, so no registry pre-seeding is needed.
+
+`scripts/install-cc-desktop.sh` now installs the patched `mshtml.dll` and
+launches `Set-up.exe` with **no Adobe-shipped file touched**: the
+`index.html` `chrome=1`→`IE=11` rewrite and its `inotifywait` watcher are
+deleted, and `FEATURE_BROWSER_EMULATION` is no longer pre-seeded.
+
+The post-parse loading-spinner wall (platform detection) is unchanged by
+this fix — see below.

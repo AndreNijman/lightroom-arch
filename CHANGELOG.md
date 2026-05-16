@@ -18,22 +18,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   handshake; the installer's UI assets are extracted locally, not
   downloaded. (`docs/attempt-17-cc-desktop.md`)
 - **Root-caused the blank installer.** `Set-up.exe`'s UI is a modern
-  (ES6+) React/webpack bundle hosted in Wine's `mshtml` WebBrowser
-  control. Wine's `mshtml` runs JavaScript through `jscript.dll` (an
-  ES5-era engine), not Gecko's SpiderMonkey. `index.html` carries
-  `<meta http-equiv='X-UA-Compatible' content='chrome=1'>`; Wine cannot
-  parse `chrome=1`, drops to IE7 compat mode, and `jscript` rejects the
-  ES6 syntax with `SyntaxError 800a03ea` — React never mounts.
-- **Cleared the JS parse wall.** Rewriting that meta to `content='IE=11'`
-  puts Wine `mshtml` in IE11 compat mode; `jscript` runs in ES6 mode and
-  the bundle parses with zero syntax errors — React mounts and React
-  Spectrum initialises. `scripts/install-cc-desktop.sh` performs this
-  rewrite automatically via an `inotifywait` watcher on the installer's
-  temp directory.
+  (`let`/`const`) React/webpack bundle hosted in an embedded IE
+  **WebBrowser control**, i.e. Wine's `mshtml`, whose JavaScript runs
+  through `jscript.dll`. Wine's `mshtml` defaults a non-`iexplore` host's
+  document to **IE7** compat mode, where `jscript` rejects `let`/`const`
+  with `SyntaxError 800a03ea` — React never mounts. (The `chrome=1` in
+  `index.html`'s `X-UA-Compatible` meta is a no-op, not the cause: Wine
+  ignores any non-`IE=` token, and a page with no meta lands in IE7 too.)
+- **Fixed — Wine `mshtml` honours `FEATURE_BROWSER_EMULATION`.** On
+  Windows, `Set-up.exe` opts itself into IE11 by writing the standard
+  `FEATURE_BROWSER_EMULATION` registry value for its own executable;
+  Wine's `mshtml` ignored that key entirely. The patch
+  (`wine-patches/mshtml-feature-browser-emulation.patch`, prebuilt
+  `mshtml-i386.dll` / `mshtml-x86_64.dll`) makes `mshtml` read the key
+  in its doctype handler. The Adobe installer now runs **completely
+  unmodified** — `Set-up.exe`'s WebBrowser reaches IE11 and the bundle
+  parses with zero `jscript` syntax errors. `scripts/install-cc-desktop.sh`
+  installs the patched DLL; the previous `index.html` `chrome=1`→`IE=11`
+  rewrite (an Adobe-side hack) and its `inotifywait` watcher are removed.
+  Verified with a minimal non-Adobe repro
+  (`wine-patches/repro-feature-browser-emulation/`).
 - **Known remaining wall:** the React installer runs but stays in its
   loading state (platform mis-detection / catalog fetch), so the native
-  teal splash never lifts to reveal the WebBrowser. Multi-session work;
-  tracked in `docs/attempt-17-cc-desktop.md`.
+  teal splash never lifts to reveal the WebBrowser. Tracked in
+  `docs/attempt-17-cc-desktop.md`.
 
 ## [2.4.0] - 2026-05-16
 

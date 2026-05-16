@@ -1,0 +1,98 @@
+diff --git a/dlls/mshtml/mutation.c b/dlls/mshtml/mutation.c
+index 11e31d38968..42959aa8947 100644
+--- a/dlls/mshtml/mutation.c
++++ b/dlls/mshtml/mutation.c
+@@ -67,6 +67,50 @@ static BOOL is_iexplore(void)
+     return ret;
+ }
+ 
++/* FEATURE_BROWSER_EMULATION lets a host process opt its embedded WebBrowser
++ * controls into a specific document mode via a per-executable DWORD under
++ * HKCU/HKLM ...\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION.
++ * It is the documented Windows mechanism for a non-iexplore host (the Adobe
++ * Creative Cloud installer is one example - it sets the key for itself) to get
++ * a newer engine than the IE7 default. Honour it so such a host's browser runs
++ * in the mode it requests. */
++static BOOL get_feature_browser_emulation(compat_mode_t *r)
++{
++    static const WCHAR keypathW[] =
++        L"Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION";
++    const WCHAR *exe_name, *p;
++    DWORD value = 0, type, size;
++    unsigned int i;
++    HKEY key;
++
++    exe_name = NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer;
++    if((p = wcsrchr(exe_name, '/'))) exe_name = p + 1;
++    if((p = wcsrchr(exe_name, '\\'))) exe_name = p + 1;
++
++    for(i = 0; i < 2; i++) {
++        if(RegOpenKeyExW(i ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER,
++                         keypathW, 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
++            continue;
++        size = sizeof(value);
++        if(RegQueryValueExW(key, exe_name, NULL, &type, (BYTE*)&value, &size) == ERROR_SUCCESS
++           && type == REG_DWORD) {
++            RegCloseKey(key);
++            /* MSDN FEATURE_BROWSER_EMULATION values: 7000 IE7, 8000/8888 IE8,
++             * 9000/9999 IE9, 10000/10001 IE10, 11000/11001 IE11. */
++            if(value >= 11000)      *r = COMPAT_MODE_IE11;
++            else if(value >= 10000) *r = COMPAT_MODE_IE10;
++            else if(value >= 9000)  *r = COMPAT_MODE_IE9;
++            else if(value >= 8000)  *r = COMPAT_MODE_IE8;
++            else if(value >= 7000)  *r = COMPAT_MODE_IE7;
++            else return FALSE;
++            TRACE("FEATURE_BROWSER_EMULATION %s -> compat mode %u\n", debugstr_w(exe_name), *r);
++            return TRUE;
++        }
++        RegCloseKey(key);
++    }
++    return FALSE;
++}
++
+ static PRUnichar *handle_insert_comment(HTMLDocumentNode *doc, const PRUnichar *comment)
+ {
+     unsigned majorv = 0, minorv = 0, compat_version;
+@@ -925,21 +969,27 @@ static void NSAPI nsDocumentObserver_BindToDocument(nsIDocumentObserver *iface,
+ 
+             TRACE("doctype node\n");
+ 
+-            /* Native mshtml hardcodes special behavior for iexplore.exe here. The feature control registry
+-               keys under HKLM or HKCU\Software\Microsoft\Internet Explorer\Main\FeatureControl are not used
+-               in this case (neither in Wow6432Node), although FEATURE_BROWSER_EMULATION does override this,
+-               but it is not set by default on native, and the behavior is still different. This was tested
+-               by removing all iexplore.exe values from any FeatureControl subkeys, and renaming the test
+-               executable to iexplore.exe, which changed its default compat mode in such cases. */
+-            if(This->window && This->window->base.outer_window && is_iexplore()) {
+-                HTMLOuterWindow *window = This->window->base.outer_window;
+-                DWORD zone;
+-                HRESULT hres;
+-
+-                /* Internet URL zone is treated differently and defaults to the latest supported mode. */
+-                hres = IInternetSecurityManager_MapUrlToZone(get_security_manager(), window->url, &zone, 0);
+-                if(SUCCEEDED(hres) && zone == URLZONE_INTERNET)
+-                    mode = COMPAT_MODE_IE11;
++            /* A host process can opt its embedded WebBrowser controls into a
++               specific document mode via FEATURE_BROWSER_EMULATION; that
++               explicit per-exe opt-in takes precedence over the iexplore
++               heuristic below. */
++            if(!get_feature_browser_emulation(&mode)) {
++                /* Native mshtml hardcodes special behavior for iexplore.exe here. The feature control registry
++                   keys under HKLM or HKCU\Software\Microsoft\Internet Explorer\Main\FeatureControl are not used
++                   in this case (neither in Wow6432Node), although FEATURE_BROWSER_EMULATION does override this,
++                   but it is not set by default on native, and the behavior is still different. This was tested
++                   by removing all iexplore.exe values from any FeatureControl subkeys, and renaming the test
++                   executable to iexplore.exe, which changed its default compat mode in such cases. */
++                if(This->window && This->window->base.outer_window && is_iexplore()) {
++                    HTMLOuterWindow *window = This->window->base.outer_window;
++                    DWORD zone;
++                    HRESULT hres;
++
++                    /* Internet URL zone is treated differently and defaults to the latest supported mode. */
++                    hres = IInternetSecurityManager_MapUrlToZone(get_security_manager(), window->url, &zone, 0);
++                    if(SUCCEEDED(hres) && zone == URLZONE_INTERNET)
++                        mode = COMPAT_MODE_IE11;
++                }
+             }
+ 
+             set_document_mode(This, mode, FALSE, FALSE);

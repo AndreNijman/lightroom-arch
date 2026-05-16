@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>NOSCRIPT</title>
+</head><body>
+<script type="text/javascript">document.title="ES5-RAN";</script>
+<script type="text/javascript">
+/* let / const are valid in IE11-mode JScript and a hard SyntaxError in
+   IE7-mode JScript. (Deliberately avoids arrow functions, class and
+   template literals: real IE11 does not support those either, so they
+   would fail in both modes and not isolate the compat-mode change.) */
+let v = 2;
+const w = 3;
+document.title = (v + w === 5) ? "ES6-OK" : "ES6-BAD";
+</script>
+</body></html>
