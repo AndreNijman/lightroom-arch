@@ -1,9 +1,9 @@
 # Working Configuration — Adobe Lightroom on Arch Linux via Wine
 
-After fourteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
+After fifteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
 usable under Wine on Arch Linux (Hyprland/Wayland). It launches, signs
-in, loads its full UI (crisp, 1:1), browses photos, and edits them
-without flashing. Run it with `./run-lightroom.sh`.
+in, loads its full UI (crisp, 1:1), browses photos, edits them without
+flashing, and quits cleanly. Run it with `./run-lightroom.sh`.
 
 ## Status
 
@@ -37,6 +37,7 @@ flicker-free with the GPU on (see attempts 12–14).
 | Direct3D 12 | Wine builtin (`d3d12=b;d3d12core=b`) | builtin D3D12 + builtin dxgi are a consistent stack; vkd3d-proton's d3d12core is incompatible with Wine's dxgi and crashes |
 | Media Foundation | Rebuilt `mf`/`mfplat`/`mfreadwrite` | Wine builtin MF null-derefs on `E_NOINTERFACE` |
 | GPU acceleration | on | `winex11` patched (`wine-patches/`) so the parent window-surface flush excludes CameraRaw's offscreen D3D child swapchain — fixes the develop-edit flicker |
+| Window close | `winex11` + `uiautomationcore` patched (`wine-patches/`) | a WM close request is routed to the focused app window (not a vetoable logoff), and `UiaDisconnectAllProviders` is exported as a no-op so shutdown does not abort |
 | WebView2 | Edge WebView2 runtime copied into prefix | LR's account/sign-in UI requires it |
 | X11 | `UseXVidMode=N` in `user.reg` | XVidMode assertion crash on Hyprland/XWayland |
 
@@ -97,8 +98,15 @@ prefix's `system32`:
     so a parent UI repaint no longer overpaints CameraRaw's preview
     between presents. Verified flicker-free with GPU on (0 blank frames
     across 700+ captured frames). GPU acceleration is back on.
+15. Fixed clean exit. The Hyprland close shortcut was a no-op (`winex11`
+    turned the virtual-desktop close into a vetoable session logoff
+    Lightroom stalls); patched `winex11` to route it to the focused app
+    window instead. Shutdown then aborted on the unimplemented
+    `UiaDisconnectAllProviders`; patched `uiautomationcore` to export it
+    as a no-op. Both the titlebar button and the close shortcut now quit
+    Lightroom with no leftover processes.
 
-See `docs/attempt-7-*` … `attempt-14-*` for detail.
+See `docs/attempt-7-*` … `attempt-15-*` for detail.
 
 ## Reproduce
 
@@ -106,5 +114,7 @@ See `docs/attempt-7-*` … `attempt-14-*` for detail.
 ./run-lightroom.sh
 ```
 
-Sign in with an Adobe Creative Cloud account on first launch. To
-close LR: `WINEPREFIX=$HOME/.wine_adobe ~/opt/wine-adobe/files/bin/wineserver -k9`.
+Sign in with an Adobe Creative Cloud account on first launch. Close
+Lightroom normally — its titlebar close button or the Hyprland close
+shortcut both quit it cleanly (attempt 15); `run-lightroom.sh` then
+tears down any leftover Wine processes.

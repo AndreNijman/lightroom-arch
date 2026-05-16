@@ -22,8 +22,12 @@
 #  - GPU acceleration is ON. Wine's winex11 is patched (wine-patches/) so
 #    the parent window-surface flush no longer overpaints CameraRaw's
 #    offscreen D3D child swapchain -- that race was the develop-edit
-#    flicker. This script installs the patched winex11.so (see attempts
-#    12-14). If you ever need to revert, restore winex11.so.orig.
+#    flicker. The same patched winex11.so also fixes window-manager close:
+#    a WM close request on the virtual desktop is now routed to the focused
+#    application window (so the Hyprland close shortcut quits Lightroom)
+#    instead of triggering a vetoable session logoff Lightroom stalls. This
+#    script installs the patched winex11.so (see attempts 12-15). If you
+#    ever need to revert, restore winex11.so.orig.
 #  - The Wine virtual desktop is sized to the monitor and fullscreened
 #    so its framebuffer maps 1:1 to physical pixels (crisp UI).
 
@@ -38,16 +42,27 @@ export WINEDEBUG=-all
 LR_DIR="$WINEPREFIX/drive_c/Program Files/Adobe/Adobe Lightroom CC"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Clean up every bundled-Wine process when this script exits -- including
+# the explorer.exe desktop host and the service helpers that linger after
+# lightroom.exe itself quits. Lightroom can be closed three ways (its
+# titlebar close button, the Hyprland close shortcut, or this script being
+# interrupted); in each case `wait` below returns once lightroom.exe is
+# gone, and this trap then tears down the leftovers so no zombie
+# virtual-desktop window or stale wineserver survives into the next run.
+trap 'WINE_ROOT=~/opt/wine-adobe bash "$SCRIPT_DIR/scripts/kill-wine.sh" >/dev/null 2>&1' EXIT INT TERM HUP
+
 # Kill stale Wine processes left by previous runs. `wineserver -k9` is
 # not enough on its own -- Lightroom leaks orphaned explorer.exe helpers
 # that survive it and accumulate across launches. See scripts/kill-wine.sh.
 WINE_ROOT=~/opt/wine-adobe bash "$SCRIPT_DIR/scripts/kill-wine.sh"
 
-# Install the patched winex11.so (D3D child-swapchain flicker fix). The
-# stock driver overpaints CameraRaw's offscreen preview during a parent
-# UI repaint, flickering GPU-on edits. See wine-patches/. Idempotent:
-# only acts when the installed driver differs from the patched one, and
-# keeps the stock driver as winex11.so.orig.
+# Install the patched winex11.so. It carries two fixes (see wine-patches/
+# and docs/attempt-14 / attempt-15): the D3D child-swapchain flicker fix
+# (the stock driver overpaints CameraRaw's offscreen preview during a
+# parent UI repaint) and the window-manager close fix (a close request on
+# the virtual desktop is routed to the focused app window). Idempotent:
+# only acts when the installed driver differs, keeps the stock one as
+# winex11.so.orig.
 PATCHED_WINEX11="$SCRIPT_DIR/wine-patches/winex11.so"
 TARGET_WINEX11=~/opt/wine-adobe/files/lib/wine/x86_64-unix/winex11.so
 if [ -f "$PATCHED_WINEX11" ] && [ -f "$TARGET_WINEX11" ] \
@@ -55,8 +70,26 @@ if [ -f "$PATCHED_WINEX11" ] && [ -f "$TARGET_WINEX11" ] \
     [ -f "$TARGET_WINEX11.orig" ] || cp "$TARGET_WINEX11" "$TARGET_WINEX11.orig"
     chmod u+w "$TARGET_WINEX11" 2>/dev/null || true
     cp "$PATCHED_WINEX11" "$TARGET_WINEX11"
-    echo "run-lightroom: installed patched winex11.so (flicker fix)"
+    echo "run-lightroom: installed patched winex11.so (flicker + close fix)"
 fi
+
+# Install the patched uiautomationcore.dll. Lightroom calls
+# UiaDisconnectAllProviders() during shutdown; stock Wine never exported
+# it, so the call hit an unimplemented-stub abort and Lightroom failed to
+# terminate -- the close button and close shortcut would stall. The patched
+# DLL exports it as a no-op returning S_OK. See docs/attempt-15. Idempotent;
+# keeps the stock DLL as uiautomationcore.dll.orig at each target.
+PATCHED_UIA="$SCRIPT_DIR/wine-patches/uiautomationcore.dll"
+for TARGET_UIA in ~/opt/wine-adobe/files/lib/wine/x86_64-windows/uiautomationcore.dll \
+                  "$WINEPREFIX/drive_c/windows/system32/uiautomationcore.dll"; do
+    if [ -f "$PATCHED_UIA" ] && [ -f "$TARGET_UIA" ] \
+       && ! cmp -s "$PATCHED_UIA" "$TARGET_UIA"; then
+        [ -f "$TARGET_UIA.orig" ] || cp "$TARGET_UIA" "$TARGET_UIA.orig"
+        chmod u+w "$TARGET_UIA" 2>/dev/null || true
+        cp "$PATCHED_UIA" "$TARGET_UIA"
+        echo "run-lightroom: installed patched uiautomationcore.dll (close fix)"
+    fi
+done
 
 # Match Wine's virtual desktop to the active monitor's pixel resolution.
 # If the desktop is smaller than the host window, Wine bitmap-upscales

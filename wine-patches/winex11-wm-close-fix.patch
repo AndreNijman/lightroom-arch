@@ -1,0 +1,24 @@
+diff --git a/dlls/winex11.drv/event.c b/dlls/winex11.drv/event.c
+index 82ee4deb..de4af266 100644
+--- a/dlls/winex11.drv/event.c
++++ b/dlls/winex11.drv/event.c
+@@ -745,7 +745,18 @@ static void handle_wm_protocols( HWND hwnd, XClientMessageEvent *event )
+         {
+             /* The desktop window does not have a close button that we can
+              * pretend to click. Therefore, we simply send it a close command. */
+-            send_message( hwnd, WM_SYSCOMMAND, SC_CLOSE, 0 );
++            /* lightroom-arch: in a virtual desktop, a window-manager close
++             * request (e.g. Hyprland's killactive) lands on the desktop
++             * window. Sending SC_CLOSE there triggers desktop_wnd_proc's
++             * ExitWindows() -- a vetoable session logoff that apps such as
++             * Lightroom stall indefinitely, so the WM close shortcut becomes
++             * a no-op. Route the request to the focused application window
++             * instead (Alt+F4 semantics), which closes the app directly. */
++            HWND fg = NtUserGetForegroundWindow();
++            if (is_virtual_desktop() && fg && fg != hwnd)
++                send_message( fg, WM_SYSCOMMAND, SC_CLOSE, 0 );
++            else
++                send_message( hwnd, WM_SYSCOMMAND, SC_CLOSE, 0 );
+             return;
+         }
+ 

@@ -1,5 +1,15 @@
 # Wine patches
 
+The prebuilt `winex11.so` and `uiautomationcore.dll` carry three fixes
+(attempts 12–15, see `docs/`). `run-lightroom.sh` installs both on launch,
+backing up each stock file as `<name>.orig`.
+
+| Patch | File | Fixes |
+|-------|------|-------|
+| `winex11-vulkan-child-flush-fix.patch` | `winex11.so` | GPU-on Develop-edit flicker |
+| `winex11-wm-close-fix.patch` | `winex11.so` | Hyprland close shortcut a no-op |
+| `uiautomationcore-disconnect-all-providers.patch` | `uiautomationcore.dll` | Lightroom stalls on exit |
+
 ## winex11 — D3D child-swapchain flicker fix
 
 `winex11-vulkan-child-flush-fix.patch` + the prebuilt `winex11.so` fix the
@@ -53,3 +63,57 @@ strip dlls/winex11.drv/winex11.so   # optional
 
 The driver ABI is fixed per Wine commit, so the rebuilt `winex11.so` must
 come from the commit the bundled build uses (`~/opt/wine-adobe/version`).
+The same rebuild produces the close-fix `winex11.so` — both patches touch
+only `dlls/winex11.drv/`, so apply both before `make`.
+
+## winex11 — window-manager close fix
+
+`winex11-wm-close-fix.patch` (also baked into the prebuilt `winex11.so`).
+
+### The bug
+
+Lightroom runs inside a Wine *virtual desktop*. A window-manager close
+request (Hyprland's `killactive`, bound to the close shortcut) lands on the
+desktop window. Stock `winex11` (`handle_wm_protocols` in `event.c`) turns
+that into `SC_CLOSE` on the desktop window, whose proc calls `ExitWindows()`
+— a session logoff that broadcasts `WM_QUERYENDSESSION`. Lightroom vetoes /
+stalls that broadcast, so the logoff is cancelled and the close shortcut
+does nothing at all.
+
+### The fix
+
+In a virtual desktop, `handle_wm_protocols` now routes a `WM_DELETE_WINDOW`
+on the desktop to `SC_CLOSE` on the *focused application window* (Alt+F4
+semantics) instead of the desktop. That closes Lightroom directly, the same
+path its own titlebar close button uses — no vetoable logoff.
+
+## uiautomationcore — UiaDisconnectAllProviders
+
+`uiautomationcore-disconnect-all-providers.patch` + the prebuilt
+`uiautomationcore.dll`.
+
+### The bug
+
+During shutdown Lightroom calls `UiaDisconnectAllProviders()`. Stock Wine's
+`uiautomationcore` never exported it (the spec line was commented out), so
+the call resolved to an unimplemented stub and Wine aborted — Lightroom
+failed to terminate cleanly. With the winex11 close fix in place this was
+the next wall: the close shortcut and titlebar button reached shutdown but
+stalled here.
+
+### The fix
+
+`uiautomationcore` now exports `UiaDisconnectAllProviders` as a no-op that
+returns `S_OK` (`uia_provider.c`, `.spec`, header). Per-process UI
+Automation provider state is torn down at process exit anyway, so doing
+nothing is safe and lets Lightroom's shutdown finish.
+
+### Rebuilding
+
+`uiautomationcore.dll` is a PE DLL; build it from the same configured tree:
+
+```sh
+git apply /path/to/uiautomationcore-disconnect-all-providers.patch
+make -j"$(nproc)" dlls/uiautomationcore/x86_64-windows/uiautomationcore.dll
+# copy it over wine-patches/uiautomationcore.dll
+```

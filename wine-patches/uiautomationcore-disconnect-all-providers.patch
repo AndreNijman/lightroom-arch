@@ -1,0 +1,50 @@
+diff --git a/dlls/uiautomationcore/uia_provider.c b/dlls/uiautomationcore/uia_provider.c
+index ce4aa0b5..ad857e5f 100644
+--- a/dlls/uiautomationcore/uia_provider.c
++++ b/dlls/uiautomationcore/uia_provider.c
+@@ -2338,3 +2338,20 @@ HRESULT WINAPI UiaDisconnectProvider(IRawElementProviderSimple *elprov)
+ 
+     return S_OK;
+ }
++
++/***********************************************************************
++ *          UiaDisconnectAllProviders (uiautomationcore.@)
++ *
++ * lightroom-arch: Lightroom calls this during shutdown. Wine never
++ * exported it, so the call hit an unimplemented-stub abort and the
++ * process failed to terminate cleanly (the window-manager close
++ * shortcut and the titlebar close button both stalled here). The
++ * runtime keeps per-process provider state that is torn down at
++ * process exit anyway, so a no-op that reports success is safe and
++ * lets Lightroom's shutdown path finish normally.
++ */
++HRESULT WINAPI UiaDisconnectAllProviders(void)
++{
++    FIXME("() stub\n");
++    return S_OK;
++}
+diff --git a/dlls/uiautomationcore/uiautomationcore.spec b/dlls/uiautomationcore/uiautomationcore.spec
+index 69e1f0ba..ebde5ea0 100644
+--- a/dlls/uiautomationcore/uiautomationcore.spec
++++ b/dlls/uiautomationcore/uiautomationcore.spec
+@@ -55,7 +55,7 @@
+ @ stub TransformPattern_Rotate
+ @ stdcall UiaAddEvent(ptr long ptr long ptr long ptr ptr)
+ @ stdcall UiaClientsAreListening()
+-#@ stub UiaDisconnectAllProviders
++@ stdcall UiaDisconnectAllProviders()
+ @ stdcall UiaDisconnectProvider(ptr)
+ @ stdcall UiaEventAddWindow(ptr long)
+ @ stdcall UiaEventRemoveWindow(ptr long)
+diff --git a/include/uiautomationcoreapi.h b/include/uiautomationcoreapi.h
+index fbfbc46b..96058848 100644
+--- a/include/uiautomationcoreapi.h
++++ b/include/uiautomationcoreapi.h
+@@ -547,6 +547,7 @@ HRESULT WINAPI UiaNodeFromHandle(HWND hwnd, HUIANODE *huianode);
+ HRESULT WINAPI UiaGetRootNode(HUIANODE *huianode);
+ HRESULT WINAPI UiaNodeFromFocus(struct UiaCacheRequest *cache_req, SAFEARRAY **out_req, BSTR *tree_struct);
+ HRESULT WINAPI UiaDisconnectProvider(IRawElementProviderSimple *elprov);
++HRESULT WINAPI UiaDisconnectAllProviders(void);
+ HRESULT WINAPI UiaGetUpdatedCache(HUIANODE huianode, struct UiaCacheRequest *cache_req, enum NormalizeState normalize_state,
+         struct UiaCondition *normalize_cond, SAFEARRAY **out_req, BSTR *tree_struct);
+ HRESULT WINAPI UiaNavigate(HUIANODE huianode, enum NavigateDirection dir, struct UiaCondition *nav_condition,

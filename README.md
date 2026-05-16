@@ -27,6 +27,7 @@ them** — the develop sliders work and visibly change the image.
 | Edit panel + develop sliders | works — edits apply with no flashing |
 | Crisp UI | works — virtual desktop sized 1:1 to the monitor |
 | GPU acceleration | on — `winex11` patched so editing is flicker-free |
+| Quit | works — closes cleanly via the titlebar button and the Hyprland close shortcut |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
@@ -78,9 +79,10 @@ child's rect from the parent flush (`wine-patches/`, installed by
 ```
 
 Then sign in with your Adobe Creative Cloud account in the WebView2
-sign-in page. To close Lightroom, run `scripts/kill-wine.sh` (the Wine
-window does not honor the WM close button, and `wineserver -k9` alone
-leaves orphaned helper processes alive).
+sign-in page. To close Lightroom, use its titlebar close button or the
+Hyprland close shortcut — both quit it cleanly (see attempt 15). The
+`winex11` and `uiautomationcore` close fixes plus a `trap` in
+`run-lightroom.sh` make sure no Wine processes or zombie windows survive.
 
 GPU acceleration is on. `run-lightroom.sh` installs a patched
 `winex11.so` (`wine-patches/`) that stops the parent window-surface
@@ -131,7 +133,7 @@ bundled Wine ships separate `wine`+`wine64`; do not rebuild WoW64-style.
 
 ## The journey
 
-Fourteen attempts, fully documented in `docs/`:
+Fifteen attempts, fully documented in `docs/`:
 
 - `docs/attempt-2-*` — PhialsBasement patched Wine, CC installer (CEF
   blue-screen failures)
@@ -150,6 +152,9 @@ Fourteen attempts, fully documented in `docs/`:
 - `docs/attempt-13-*` — first `winex11` patch attempt (a no-op)
 - `docs/attempt-14-*` — GPU-on flicker fixed: `winex11` excludes the
   offscreen D3D child rect from the parent window-surface flush
+- `docs/attempt-15-*` — clean exit: `winex11` routes the WM close request
+  to Lightroom's window, and `uiautomationcore` exports the
+  `UiaDisconnectAllProviders` shutdown call Lightroom was aborting on
 - `docs/WORKING-CONFIGURATION.md` — the recipe
 
 Wine patches: `wine-patches/` (winex11 flicker fix) and

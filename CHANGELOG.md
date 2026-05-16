@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-05-16
+
+### Fixed — Lightroom now exits cleanly
+
+Lightroom ran fine but would not *quit* properly. Two fixes, both Wine
+patches (`docs/attempt-15`):
+
+- **Hyprland close shortcut did nothing.** Lightroom runs in a Wine
+  virtual desktop; `killactive` sends `WM_DELETE_WINDOW` to the desktop
+  window, which stock `winex11` turns into a session logoff
+  (`ExitWindows`). Lightroom vetoes the logoff, so the shortcut was a
+  total no-op. `winex11-wm-close-fix.patch` routes a virtual-desktop
+  close request to the focused application window instead (Alt+F4
+  semantics) — the same direct close the titlebar button uses.
+- **Shutdown aborted on `UiaDisconnectAllProviders`.** Lightroom calls
+  it during shutdown; stock Wine's `uiautomationcore` never exported the
+  function, so the call hit an unimplemented-stub abort and Lightroom
+  failed to terminate reliably. `uiautomationcore-disconnect-all-providers.patch`
+  exports it as a no-op returning `S_OK`.
+- `run-lightroom.sh` installs the patched `uiautomationcore.dll`
+  (idempotent; keeps the stock DLL as `uiautomationcore.dll.orig`) and
+  has a `trap` that runs `scripts/kill-wine.sh` on exit, draining the
+  `explorer.exe` desktop host and helper processes left after
+  `lightroom.exe` quits.
+- Verified both close paths: `Super+Q` and the titlebar close button
+  each end with 0 Wine processes, 0 windows, no abort.
+
+The patched `winex11.so` now carries both the attempt-14 flicker fix and
+the attempt-15 close fix.
+
 ## [2.2.0] - 2026-05-15
 
 ### Fixed — GPU-on develop-edit flicker (the real fix)
