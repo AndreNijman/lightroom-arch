@@ -391,27 +391,56 @@ handshakes from the minimal clients succeed **100%**. The
 corrupting the TLS handshake transcript for the installer's connections —
 an in-scope Wine `secur32`/`winhttp` bug.
 
-### Not yet pinned — honest status
+### Reproduced — the bug is 32-bit-specific
 
-The exact defect is **not** isolated. It was not reproduced by any
-minimal client: `httptest` (sync), `httptest-async` (async), and both
-under 6–8-way concurrency all succeed. The corruption only appears inside
-`Set-up.exe`'s own process — so the trigger is some aspect of that
-process's runtime state (its thread count, COM apartment use, memory
-layout, or a `secur32`/`gnutls` interaction) that black-box log analysis
-could not narrow down. winhttp option `77` the installer sets is
-`WINHTTP_OPTION_AUTOLOGON_POLICY` — unrelated to TLS.
+The first minimal clients (`httptest`, `httptest-async`) were built
+**x86_64** and all succeeded — so the failure looked process-specific.
+It is not. `Set-up.exe` is a **`PE32 i386`** binary; Wine ships a
+*separate* `i386-windows` `secur32`/`winhttp` from the `x86_64-windows`
+one. Rebuilding the same probe 32-bit (`i686-w64-mingw32-gcc`) reproduces
+it cleanly:
 
-Pinning it needs in-process evidence stock log channels do not give:
-an `SSLKEYLOGFILE` + `tcpdump` wire capture of a failing installer
-connection vs. a passing `httptest` one, decrypted and compared
-record-by-record to find where Wine's transcript diverges. That is the
-next step; no Wine patch is shipped for this wall yet.
+| probe | bitness | result |
+|-------|---------|--------|
+| `httptest.exe` / `httptest-async.exe` | x86_64 | HTTP 200/403 — 100% pass (sync, async, 8-way concurrent) |
+| `httptest32.exe` / `httptest-async32.exe` | **i386** | `WinHttpSendRequest err=12157` — **100% fail** |
+
+`httptest32.exe` is an 8-line non-Adobe WinHTTP `GET` and fails every
+time — a minimal repro of the installer's wall.
+
+### Localised — 32-bit Wine secur32 corrupts the client handshake
+
+`+secur32` trace of the failing 32-bit handshake ends with:
+
+```
+schan_handshake FATAL ALERT: 20 Bad record MAC
+```
+
+`bad_record_mac` (alert 20) is a TLS **record-layer** failure: the server
+could not decrypt/authenticate the client's first encrypted record. The
+server's handshake messages reach the 32-bit client intact (the
+ServerKeyExchange RSA-PSS signature verifies — inbound is fine), and the
+`secur32` push/pull adapters move the *same byte counts* as the passing
+64-bit run (`Push 231 … Push 42 … Push 6 … Push 37` — identical). Yet the
+server rejects the 32-bit client's `Finished`.
+
+Same byte counts, opposite outcome, only on 32-bit ⇒ the 32-bit
+`secur32` path produces a handshake the server cannot authenticate —
+either the ClientKeyExchange / record keying or the encrypted record is
+corrupted. The bug lives in Wine's `i386-windows` `secur32` (the
+PE↔unix `wow64_*` marshalling in `dlls/secur32/schannel_gnutls.c` and the
+32-bit `schannel.c` path are the suspects), **not** in `mshtml`, the TLS
+library (`gnutls-cli` passes), or Adobe's servers.
 
 ### Outcome
 
-The networking wall is an **in-scope Wine bug** (not Adobe-side — (c) is
-firmly ruled out), localised to Wine's `secur32`/`winhttp` TLS handshake
-path, but not yet pinned to a fixable defect. No patch and no faked value
-were applied. `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.
-Diagnostic harness kept in `wine-patches/repro-winhttp-adobe/`.
+The networking wall is an **in-scope, reproducible 32-bit Wine `secur32`
+bug** — (c) Adobe-side is firmly ruled out. A minimal non-Adobe repro
+exists (`wine-patches/repro-winhttp-adobe/httptest32.exe`). The exact
+defective line is **not yet pinned**: 32-bit and 64-bit `secur32` move
+identical handshake bytes, so the corruption is subtle (record keying or
+content) and pinning it needs `gdb` on the 32-bit `secur32` unixlib or an
+`SSLKEYLOGFILE`-decrypted capture comparing the 32-bit vs 64-bit client
+`Finished`/CKE byte-for-byte. No patch and no faked value were applied —
+shipping an unverified guess at a Wine TLS fix would be worse than none.
+`scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.

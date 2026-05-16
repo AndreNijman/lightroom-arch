@@ -44,16 +44,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its OOBE/NGL libraries make returns `-1` / `HTTP_Status:0` inside Wine,
   while the same endpoints return `200` from the host. Not an `mshtml`/
   platform-detection problem (corrected in `docs/attempt-17-cc-desktop.md`).
-- **Networking wall diagnosed — Wine-side TLS bug, not Adobe-side.** Every
-  `Set-up.exe` WinHTTP connection fails in `netconn_secure_connect` (server
-  sends a TLS alert / RST after the client `Finished`). Adobe-side rejection
-  ((c)) is ruled out: `gnutls-cli` (Wine's own `libgnutls`) and a minimal
-  non-Adobe WinHTTP client both complete TLS to every endpoint and get real
-  HTTP responses — sync, async, and concurrent. So it is an in-scope Wine
-  `secur32`/`winhttp` bug (the installer's byte-identical handshake has its
-  transcript corrupted), but the exact defect is **not yet pinned** — no
-  minimal client reproduces it. No patch shipped for this wall; needs an
-  `SSLKEYLOGFILE`+`tcpdump` wire capture next. Diagnostic harness in
+- **Networking wall diagnosed and reproduced — a 32-bit Wine `secur32`
+  bug, not Adobe-side.** Every `Set-up.exe` WinHTTP connection fails in
+  `netconn_secure_connect`. Adobe-side rejection ((c)) is ruled out:
+  `gnutls-cli` (Wine's own `libgnutls`) completes TLS to every endpoint.
+  The trigger is **bitness**: `Set-up.exe` is `PE32 i386`, and a minimal
+  non-Adobe WinHTTP probe reproduces the failure when built 32-bit
+  (`WinHttpSendRequest err=12157`, `schan_handshake FATAL ALERT: 20 Bad
+  record MAC`) while the identical 64-bit probe passes 100%. So it is an
+  in-scope, reproducible bug in Wine's `i386-windows` `secur32` — the
+  32-bit client handshake is corrupted so the server rejects it. The exact
+  defective line is not yet pinned (32- and 64-bit `secur32` move identical
+  handshake bytes); no Wine patch is shipped for this wall — an unverified
+  TLS-code guess would be worse than none. Minimal repro + harness in
   `wine-patches/repro-winhttp-adobe/`. Install script stays WORK IN PROGRESS.
 
 ## [2.4.0] - 2026-05-16
