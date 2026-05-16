@@ -6,8 +6,10 @@ crypto stack, not in Wine.
 
 ## The bug
 
-`nettle 4.0` / `lib32-nettle 4.0` (`libnettle.so.9`) is broken on `i386`.
-A 32-bit process doing any TLS handshake through GnuTLS aborts:
+The Arch `lib32-nettle 4.0` package is mis-built: a stale
+`--with-include-path` configure flag (deleted in nettle 4.0) makes the
+32-bit build generate ECC tables for 64-bit limbs. A 32-bit process
+doing any NIST-curve TLS handshake through GnuTLS then aborts:
 
 ```
 ecc-random.c:62: _nettle_ecc_mod_random: Assertion `nbytes <= m->size * sizeof (mp_limb_t)' failed.
@@ -17,14 +19,16 @@ ecc-random.c:62: _nettle_ecc_mod_random: Assertion `nbytes <= m->size * sizeof (
 wrong outbound AEAD tag → server `bad_record_mac` alert. Same root cause.)
 
 64-bit is fine — same `nettle`/`gnutls` upstream versions. The only
-variable is ILP32 vs LP64.
+variable is ILP32 vs LP64. Full root cause + fix: `patches/nettle/`.
 
 ## Build & run
 
 ```sh
 make                       # builds ntls-handshake64 and ntls-handshake32
 ./ntls-handshake64 www.microsoft.com           # HANDSHAKE OK
-LD_LIBRARY_PATH=/usr/lib32 ./ntls-handshake32 www.microsoft.com   # aborts in nettle
+LD_LIBRARY_PATH=/usr/lib32 ./ntls-handshake32 www.microsoft.com
+#   stock lib32-nettle 4.0-1 -> aborts in nettle
+#   rebuilt with patches/nettle/ -> HANDSHAKE OK
 ```
 
 `ntls-handshake32` needs `gcc` multilib + `lib32-gnutls` (Arch multilib
@@ -35,8 +39,10 @@ repo). Binaries are gitignored.
 The attempt-17 installer wall (`Set-up.exe`, a `PE32 i386` binary, fails
 every HTTPS request inside Wine) was first misdiagnosed as a 32-bit Wine
 `secur32` bug. This native reproducer removes Wine entirely and the crash
-is identical — so the defect is upstream `nettle`/`lib32-nettle`, nothing
-Wine or Adobe ships. See `docs/attempt-17-cc-desktop.md`.
+is identical — so the defect is the host's `lib32-nettle` package,
+nothing Wine or Adobe ships. Fixed in `patches/nettle/`; see
+`docs/attempt-17-cc-desktop.md`.
 
-Report destination: upstream `nettle` (`nettle-bugs` list /
-`gitlab.com/gnutls/nettle`) and/or an Arch `lib32-nettle` packaging bug.
+Report destination: the Arch `lib32-nettle` package (`bugs.archlinux.org`
+/ `gitlab.archlinux.org`) — **not** nettle upstream (nettle removed the
+option deliberately and documented the `CFLAGS`/`LDFLAGS` replacement).

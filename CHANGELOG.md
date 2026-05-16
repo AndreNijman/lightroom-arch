@@ -60,21 +60,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   32-bit (`i386`) build of `nettle 4.0` (`lib32-nettle 4.0`); 64-bit is
   fine on the same upstream versions. `secur32`/`winhttp` are faithful
   passthroughs — Wine is exonerated.
-- **Installer route blocked at the networking wall — a host/distro
-  issue, no longer a Wine task.** There is nothing for Wine to patch; the
-  earlier "build i386-unix Wine, patch `secur32`" follow-up is void (it
-  would have patched innocent code). The wall stays until the host's
-  32-bit `nettle` is fixed — upstream `nettle`/Arch ship a corrected
-  `lib32-nettle`, or `lib32-nettle` is downgraded to a 3.x that passes
-  `repro/nettle-i386/ntls-handshake.c` 32-bit. No filed upstream report
-  found for this exact `i386` signature; report destination is `nettle`
-  (`gitlab.com/gnutls/nettle`, `nettle-bugs` list) and/or Arch
-  `lib32-nettle`. Repros: `repro/nettle-i386/` (Wine-free root-cause) and
-  `wine-patches/repro-winhttp-adobe/` (the installer's symptom path).
-  See `docs/attempt-17-cc-desktop.md` "Re-diagnosis". Attempt 17
-  delivered the `mshtml` fix end-to-end; the networking wall is a
-  separate, host-environment blocker. Install script stays WORK IN
-  PROGRESS.
+- **Networking wall FIXED — the real defect was a stale flag in the Arch
+  `lib32-nettle` PKGBUILD.** Pinned: that PKGBUILD configures nettle with
+  `--with-include-path=/usr/lib32/gmp`, an option **nettle 4.0 deleted**
+  (`NEWS`: "use CFLAGS and LDFLAGS"). `configure` silently ignores it, so
+  the 32-bit build reads the 64-bit `/usr/include/gmp.h`, detects
+  `NUMB_BITS=64`, and `eccdata` generates the ECC constant tables for
+  64-bit limbs — `ecc_modulo.size` ends up half the real 32-bit limb
+  count, and `ecc-random.c:62` aborts on every NIST-curve key gen. Fix
+  (`patches/nettle/`): pass the 32-bit `gmp.h` via `CPPFLAGS`, as nettle
+  4.0 documents. No nettle source changed; no assertion or bounds check
+  weakened — the rebuilt 32-bit library passes nettle's **full testsuite
+  (All 116 tests passed)**, every `ecc-*`/`ecdsa-*`/`eddsa-*` test. Built
+  with `makepkg` from the corrected PKGBUILD and installed. Verified:
+  `repro/nettle-i386/` → `HANDSHAKE OK`; `httptest32.exe` against Adobe
+  → `HTTP 403`/`404` (was `err=12157`). The 32-bit ECC TLS handshake
+  works — `Set-up.exe`'s HTTPS requests now reach Adobe.
+- **This is an Arch packaging bug** — report destination
+  `bugs.archlinux.org` / the `lib32-nettle` package on
+  `gitlab.archlinux.org`; *not* nettle upstream (nettle removed the
+  option deliberately and documented the replacement), *not* Wine, *not*
+  Adobe. The earlier "build i386-unix Wine, patch `secur32`" follow-up is
+  void — it would have patched innocent code. Attempt 17 delivered, both
+  end-to-end: the `mshtml` `FEATURE_BROWSER_EMULATION` fix and the
+  `lib32-nettle` fix. `scripts/install-cc-desktop.sh` stays WORK IN
+  PROGRESS — next step is a full `Set-up.exe` run with both walls down.
 
 ## [2.4.0] - 2026-05-16
 

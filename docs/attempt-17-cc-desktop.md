@@ -464,37 +464,78 @@ and so is `mshtml`. The defect is in the host's 32-bit crypto stack.
   Pinning which one needs a `nettle` 4.0 i386 build with symbols — a
   task for the upstream maintainer, not this repo.
 
-### Upstream status
+### Pinned — the exact defect (re-diagnosed 2026-05-16, session 4)
 
-No filed report found for this exact signature (`_nettle_ecc_mod_random`
-`nbytes` assertion on `i386`) — searched the Wine GitLab/Bugzilla, the
-`nettle` tracker, and `bugs.archlinux.org`. The *class* of bug — a
-`lib32-nettle`/`lib32-gnutls` update breaking 32-bit TLS — is recurring on
-Arch (e.g. historical FS#44828). **This belongs upstream in `nettle`**
-(report to the `nettle-bugs` list / `gitlab.com/gnutls/nettle`) and/or as
-an Arch `lib32-nettle` packaging bug — **not** in Wine and **not** in
-Adobe. `repro/nettle-i386/ntls-handshake.c` is the self-contained,
+The defect is **not in `nettle` source** and **not in Wine**. It is the
+Arch **`lib32-nettle` PKGBUILD**.
+
+That PKGBUILD configures nettle with `--with-include-path=/usr/lib32/gmp`.
+**nettle 4.0 deleted that option** — nettle `NEWS`: *"The unusual
+configure options `--with-lib-path` and `--with-include-path` has been
+deleted. Use CFLAGS and LDFLAGS."* `configure` silently ignores the
+unknown flag (`WARNING: unrecognized options: --with-include-path`).
+
+So the 32-bit build never sees the 32-bit `gmp.h` (`GMP_LIMB_BITS == 32`)
+that `lib32-gmp` ships at `/usr/lib32/gmp/gmp.h`. nettle's `configure`
+runs `AC_COMPUTE_INT(GMP_NUMB_BITS, [#include <gmp.h>])`, reads the
+**64-bit** `/usr/include/gmp.h` instead, and sets `NUMB_BITS=64`. The
+`eccdata` build tool then generates every ECC constant table for 64-bit
+limbs. In the 32-bit library `struct ecc_modulo.size` is half the real
+limb count (P-256: 4, not 8), so at `ecc-random.c:62`
+`nbytes=32 > m->size*sizeof(mp_limb_t)=16` → the assertion aborts.
+
+Verified directly: `configure` with `--with-include-path` →
+`checking for GMP limb size... 64 bits`; with `CPPFLAGS=-I/usr/lib32/gmp`
+→ `... 32 bits`.
+
+### The fix — `patches/nettle/`
+
+Pass the 32-bit gmp include directory via `CPPFLAGS`, as nettle 4.0
+documents. `patches/nettle/lib32-nettle-cppflags-gmp32.patch` (and the
+full corrected `patches/nettle/PKGBUILD`):
+
+```
+-    --enable-shared --with-include-path=/usr/lib32/gmp
++    --enable-shared
++    # with: export CPPFLAGS="-I/usr/lib32/gmp${CPPFLAGS:+ $CPPFLAGS}"
+```
+
+No `nettle` source is changed. **No assertion or bounds check is
+weakened.** The fix only makes the 32-bit build a normal 32-bit nettle
+build — the configuration nettle ships and tests on every genuine 32-bit
+platform. The assertion is then *legitimately* satisfied (`32 <= 8*4`).
+
+`lib32-nettle 4.0-1` was rebuilt with the corrected PKGBUILD and
+installed (`makepkg` + `pacman -U`).
+
+### Verification — the wall is gone
+
+- nettle's own 32-bit testsuite on the rebuilt library: **All 116 tests
+  passed** — every `ecc-*`, `ecdsa-*`, `eddsa-*`, `curve*` test. The ECC
+  math is correct, not merely un-aborted.
+- `repro/nettle-i386/ntls-handshake.c` (Wine-free) against the installed
+  library: `HANDSHAKE OK` — P-256 and X25519. Was: abort.
+- `wine-patches/repro-winhttp-adobe/httptest32.exe` against Adobe:
+  `cc-api-data.adobe.io` → `HTTP 403`, `lcs-cops.adobe.io` → `HTTP 404`
+  (real responses; TLS completes). Was: `WinHttpSendRequest err=12157`.
+
+### Report destination
+
+This is an **Arch packaging bug** — report at `bugs.archlinux.org` / the
+`lib32-nettle` package on `gitlab.archlinux.org`. It is **not** a nettle
+upstream bug (nettle removed the option deliberately and documented the
+replacement) and **not** a Wine or Adobe bug. No prior filed report was
+found for the exact signature. `repro/nettle-i386/` is the self-contained
 Wine-free reproducer to attach.
 
-### Outcome — Step 5 closed
+### Outcome
 
-The networking wall is **not a Wine bug and not an Adobe rejection**. It
-is a broken 32-bit crypto library (`nettle` 4.0 on `i386`) on this host.
-Consequences:
+The attempt-17 networking wall is **fixed at its real root cause** — a
+stale flag in the Arch `lib32-nettle` PKGBUILD — with no Wine source
+changed, nothing Adobe touched, and no faked value. The 32-bit ECC TLS
+handshake works; `Set-up.exe`'s HTTPS requests now reach Adobe.
 
-- **There is nothing for Wine to patch.** The `wine-patches/` pattern
-  (source patch + prebuilt DLL) does not apply — `secur32`/`winhttp` are
-  faithful passthroughs to a `nettle` that is itself broken on `i386`.
-  The earlier "scoped follow-up: build i386-unix Wine, patch `schannel`"
-  plan is **void** — it would have patched innocent code.
-- The Adobe CC installer route stays **blocked at the networking wall**
-  until the host's 32-bit `nettle` is fixed: upstream `nettle`/Arch ship a
-  corrected `lib32-nettle`, or the user downgrades `lib32-nettle` to a
-  3.x release that passes `repro/nettle-i386/ntls-handshake.c` 32-bit.
-  Either is a host/distro action, outside this repo's scope.
-- `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.
-
-What attempt 17 *did* deliver end-to-end: the `mshtml`
-`FEATURE_BROWSER_EMULATION` fix (the installer's React UI now parses and
-runs, Adobe binaries unmodified). The networking wall is a separate,
-host-environment blocker — no longer a Wine task.
+Attempt 17 delivered, end-to-end: the `mshtml` `FEATURE_BROWSER_EMULATION`
+fix (React UI parses and runs) **and** the `lib32-nettle` fix (32-bit TLS
+works). `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS — the next
+step is a full `Set-up.exe` run now that both walls are down.

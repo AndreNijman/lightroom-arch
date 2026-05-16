@@ -1,0 +1,56 @@
+Fix lib32-nettle: 32-bit ECC TLS aborts in _nettle_ecc_mod_random
+
+The Arch `lib32-nettle` PKGBUILD configures nettle with the option
+`--with-include-path=/usr/lib32/gmp`. nettle 4.0 DELETED that option
+(nettle NEWS: "The unusual configure options --with-lib-path and
+--with-include-path has been deleted. Use CFLAGS and LDFLAGS");
+`configure` now silently ignores it ("WARNING: unrecognized options").
+
+Consequence: the 32-bit build no longer sees the 32-bit gmp.h
+(GMP_LIMB_BITS == 32) that lib32-gmp ships at /usr/lib32/gmp/gmp.h.
+configure's `AC_COMPUTE_INT(GMP_NUMB_BITS, [#include <gmp.h>])` reads
+the 64-bit /usr/include/gmp.h instead and sets NUMB_BITS=64. The
+`eccdata` build tool then generates every ECC constant table for
+64-bit limbs. In the resulting 32-bit library `struct ecc_modulo.size`
+is half the real 32-bit limb count (P-256: 4 instead of 8), so
+
+    ecc-random.c:62  assert (nbytes <= m->size * sizeof (mp_limb_t));
+
+fails -- nbytes=32, m->size*4 = 16 -- and the process ABORTS on every
+NIST-curve key generation. All 32-bit ECDSA/ECDH TLS is broken.
+
+Fix: pass the 32-bit gmp include directory via CPPFLAGS, as nettle 4.0
+documents. Then NUMB_BITS=32, eccdata generates correct 32-bit tables,
+ecc_modulo.size = 8 for P-256, and the assertion is legitimately
+satisfied (32 <= 8*4). No nettle source is changed; no assertion or
+bounds check is weakened. Verified: nettle's full 32-bit testsuite
+passes (All 116 tests passed).
+
+Report this to Arch (bugs.archlinux.org / the lib32-nettle package),
+not to nettle upstream -- nettle removed the option deliberately and
+documented the replacement.
+
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -25,9 +25,20 @@
+   export CC="gcc -m32"
+   export CXX="g++ -m32"
+   export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
++  # nettle >= 4.0 removed the --with-include-path configure option
++  # (see nettle NEWS: "use CFLAGS and LDFLAGS"). The 32-bit build must
++  # still reach the 32-bit gmp.h (GMP_LIMB_BITS == 32) shipped by
++  # lib32-gmp at /usr/lib32/gmp. Without it, configure picks up the
++  # 64-bit /usr/include/gmp.h, detects NUMB_BITS=64, and the eccdata
++  # tool generates the ECC constant tables for 64-bit limbs. The
++  # resulting 32-bit library has ecc_modulo.size at half the limb
++  # count and aborts in _nettle_ecc_mod_random() (ecc-random.c) on
++  # every NIST-curve key generation -- breaking all 32-bit ECDSA/ECDH
++  # TLS. Pass the include directory via CPPFLAGS, as nettle now expects.
++  export CPPFLAGS="-I/usr/lib32/gmp${CPPFLAGS:+ $CPPFLAGS}"
+
+   ./configure --prefix=/usr --libdir=/usr/lib32 \
+-    --enable-shared --with-include-path=/usr/lib32/gmp
++    --enable-shared
+   make
+ }
+
