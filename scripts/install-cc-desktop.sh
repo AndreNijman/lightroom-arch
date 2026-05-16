@@ -120,10 +120,10 @@ reg 'HKCU\Software\Wine\Explorer'          /v Desktop   /t REG_SZ /d CCInstall
 # Set-up.exe writes that key for itself ("Set-up.exe"=dword:00002af9), and
 # the patched mshtml.dll installed above now honours it — so the embedded
 # WebBrowser reaches IE11 compat mode with the Adobe installer unmodified.
-# Report an IE11 Windows user agent (the React installer sniffs the UA
-# for \bTrident\b / isWinPlatform to decide it is not on macOS).
-reg 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\User Agent' \
-    /ve /t REG_SZ /d 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
+# No User-Agent override either: step-5 evidence (docs/attempt-17-cc-desktop.md)
+# shows the installer's remaining wall is Wine networking, not UA/platform
+# sniffing — forcing a fake UA string would be exactly the crutch this
+# attempt set out to remove.
 "$WINESERVER" -w
 
 # --- 6. launch the installer --------------------------------------------
