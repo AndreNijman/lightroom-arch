@@ -380,25 +380,13 @@ So Adobe's servers, Wine's TLS library, and Wine's `winhttp` in isolation
 all work. **(c) is ruled out** — the wall is not geo/integrity/auth
 rejection, and (correcting attempt 2) it is not a dead TLS stack either.
 
-### Classification: (b) — a Wine bug, in scope
-
-`Set-up.exe`'s WinHTTP connections fail **100%**; byte-identical
-handshakes from the minimal clients succeed **100%**. The
-`+secur32` traces confirm the installer and `httptest` send the **same
-231-byte ClientHello with the same 24 TLS extensions** and receive the
-**same server flight** (same `recv` chunk sizes), yet the installer's
-`Finished` is rejected and `httptest`'s is accepted. That is Wine
-corrupting the TLS handshake transcript for the installer's connections —
-an in-scope Wine `secur32`/`winhttp` bug.
-
 ### Reproduced — the bug is 32-bit-specific
 
 The first minimal clients (`httptest`, `httptest-async`) were built
 **x86_64** and all succeeded — so the failure looked process-specific.
-It is not. `Set-up.exe` is a **`PE32 i386`** binary; Wine ships a
-*separate* `i386-windows` `secur32`/`winhttp` from the `x86_64-windows`
-one. Rebuilding the same probe 32-bit (`i686-w64-mingw32-gcc`) reproduces
-it cleanly:
+It is not. `Set-up.exe` is a **`PE32 i386`** binary; the 32-bit code
+path is exercised independently of the 64-bit one. Rebuilding the same
+probe 32-bit (`i686-w64-mingw32-gcc`) reproduces it cleanly:
 
 | probe | bitness | result |
 |-------|---------|--------|
@@ -406,70 +394,107 @@ it cleanly:
 | `httptest32.exe` / `httptest-async32.exe` | **i386** | `WinHttpSendRequest err=12157` — **100% fail** |
 
 `httptest32.exe` is an 8-line non-Adobe WinHTTP `GET` and fails every
-time — a minimal repro of the installer's wall.
+time — a minimal repro of the installer's wall. `+secur32` trace of the
+failing 32-bit handshake ends with `schan_handshake FATAL ALERT: 20 Bad
+record MAC`.
 
-### Localised — 32-bit Wine secur32 corrupts the client handshake
+> **NOTE — re-diagnosed 2026-05-16 (session 3). The earlier conclusion in
+> this section, "(b) a Wine `secur32` bug", was WRONG.** It is corrected
+> below. The Adobe-side ruling-out above still holds; the *attribution to
+> Wine* did not. (Goal rule: "DO NOT assume this is a Wine bug." The
+> earlier text broke that rule — see correction.)
 
-`+secur32` trace of the failing 32-bit handshake ends with:
+### Re-diagnosis — the wall is a 32-bit `nettle` bug, not Wine
+
+The "32-bit Wine `secur32` bug" claim was never confirmed against a
+non-Wine baseline. It was, and it collapses.
+
+**Test 1 — vary the cipher.** Pointing `httptest32.exe` at different
+hosts changes the negotiated suite. Two distinct, deterministic 32-bit
+failure modes appear, by curve:
+
+| host | suite / KX | 32-bit | 64-bit |
+|------|-----------|--------|--------|
+| `cc-api-data.adobe.io`, `example.com`, `google.com` | ECDHE **X25519** + ChaCha20-Poly1305 | `err=12157`, `bad_record_mac` | OK |
+| `www.microsoft.com`, `badssl.com` | ECDHE **NIST P-256/384** + AES-GCM | **hard abort** (see below) | OK |
+
+The AES-GCM/NIST-curve case does not return a WinHTTP error at all — the
+process **aborts** with a libc assertion:
 
 ```
-schan_handshake FATAL ALERT: 20 Bad record MAC
+ecc-random.c:62: _nettle_ecc_mod_random: Assertion `nbytes <= m->size * sizeof (mp_limb_t)' failed.
 ```
 
-`bad_record_mac` (alert 20) is a TLS **record-layer** failure: the server
-could not decrypt/authenticate the client's first encrypted record. The
-server's handshake messages reach the 32-bit client intact (the
-ServerKeyExchange RSA-PSS signature verifies — inbound is fine), and the
-`secur32` push/pull adapters move the *same byte counts* as the passing
-64-bit run (`Push 231 … Push 42 … Push 6 … Push 37` — identical). Yet the
-server rejects the 32-bit client's `Finished`.
+`ecc-random.c` / `_nettle_ecc_mod_random` is **`nettle`** source
+(`libnettle.so.9`), a native Linux shared library. Wine does not — and
+cannot — make `assert()` fire inside native `nettle` code; it merely
+hosts the process. The crash is in `nettle`'s own ECC scalar generation.
 
-Same byte counts, opposite outcome, only on 32-bit ⇒ the 32-bit
-`secur32` path produces a handshake the server cannot authenticate —
-either the ClientKeyExchange / record keying or the encrypted record is
-corrupted. The bug lives in Wine's `i386-windows` `secur32` (the
-PE↔unix `wow64_*` marshalling in `dlls/secur32/schannel_gnutls.c` and the
-32-bit `schannel.c` path are the suspects), **not** in `mshtml`, the TLS
-library (`gnutls-cli` passes), or Adobe's servers.
+**Test 2 — remove Wine entirely.** A 9-line **native** `gcc -m32` program
+linking the system 32-bit GnuTLS (`repro/nettle-i386/ntls-handshake.c`),
+no Wine in the process at all:
 
-### Outcome
+```
+64-bit native:  HANDSHAKE OK: (TLS1.3)-(ECDHE-SECP256R1)-(AES-256-GCM)
+32-bit native:  ecc-random.c:62: _nettle_ecc_mod_random: Assertion ... failed.
+```
 
-The networking wall is an **in-scope, reproducible 32-bit Wine `secur32`
-bug** — (c) Adobe-side is firmly ruled out. A minimal non-Adobe repro
-exists (`wine-patches/repro-winhttp-adobe/httptest32.exe`).
+Identical assertion, zero Wine. **Wine is fully exonerated.** So is Adobe
+and so is `mshtml`. The defect is in the host's 32-bit crypto stack.
 
-### Step 5 — formally closed (route blocked at the networking wall)
+### What is actually broken
 
-A Wine-side fix is **not shipped this attempt**, for two concrete reasons,
-not for want of trying:
+- Packages: `nettle 4.0-1` / `lib32-nettle 4.0-1` (`libnettle.so.9.0`,
+  `libhogweed.so.7.0`) and `gnutls 3.8.13` / `lib32-gnutls 3.8.13-3`
+  (`libgnutls.so.30.42.0`). 64-bit and 32-bit are the *same upstream
+  versions* — the only variable is ILP32 vs LP64.
+- The 32-bit (`i386`) build of `nettle` 4.0 fails its own internal
+  invariant in `_nettle_ecc_mod_random` (`nbytes <= m->size *
+  sizeof(mp_limb_t)`): an `ecc_modulo` whose limb count `m->size` is
+  inconsistent with the requested random byte count `nbytes`. On a NIST
+  curve this trips the `assert()` and aborts; on X25519+ChaCha20 the
+  outbound record's AEAD tag comes out wrong and the server answers
+  `bad_record_mac`. Both are the same 32-bit crypto-stack defect.
+- Candidate root causes (not pinned — out of scope this session):
+  (1) a `nettle` 4.0 `i386` regression in ECC limb handling;
+  (2) `lib32-nettle` 4.0 mis-detecting GMP's `mp_limb_t` size at build
+  time (laying out `ecc_modulo` tables with 64-bit assumptions);
+  (3) an ABI mismatch between `gnutls` 3.8.13 and the newer `nettle` 4.0
+  (`libnettle.so.9`/`libhogweed.so.7`) that only manifests on ILP32.
+  Pinning which one needs a `nettle` 4.0 i386 build with symbols — a
+  task for the upstream maintainer, not this repo.
 
-1. **The defect is not pinned and pinning it needs iterative byte-level
-   TLS debugging.** 32-bit and 64-bit `secur32` move *identical* handshake
-   byte counts, so the corruption is subtle — record keying or per-byte
-   content. Pinning it requires instrumenting `secur32`'s push/pull with
-   hex dumps (or `gdb` on the unixlib, or an `SSLKEYLOGFILE`-decrypted
-   capture) and a rebuild/compare loop against the passing 64-bit path.
+### Upstream status
 
-2. **The 32-bit unix `secur32` is not buildable in this environment.**
-   The 32-bit path is `i386-windows/secur32.dll` ↔ `i386-unix/secur32.so`.
-   The configured Wine source tree here (`~/wine-build/wine-src/build`)
-   builds **only** `x86_64-unix/secur32.so` — there is no `i386-unix`
-   build config. So even a correctly-pinned unix-side fix could not be
-   compiled into the prebuilt 32-bit `.so` the wine-patches/ pattern
-   requires; that needs a separate multilib 32-bit Wine unix build set up
-   first. (The PE side, `i386-windows/secur32.dll`, *is* buildable here —
-   but whether the defect is PE-side or unix-side is exactly what is not
-   yet pinned.)
+No filed report found for this exact signature (`_nettle_ecc_mod_random`
+`nbytes` assertion on `i386`) — searched the Wine GitLab/Bugzilla, the
+`nettle` tracker, and `bugs.archlinux.org`. The *class* of bug — a
+`lib32-nettle`/`lib32-gnutls` update breaking 32-bit TLS — is recurring on
+Arch (e.g. historical FS#44828). **This belongs upstream in `nettle`**
+(report to the `nettle-bugs` list / `gitlab.com/gnutls/nettle`) and/or as
+an Arch `lib32-nettle` packaging bug — **not** in Wine and **not** in
+Adobe. `repro/nettle-i386/ntls-handshake.c` is the self-contained,
+Wine-free reproducer to attach.
 
-Shipping an unverified guess at Wine TLS code would be worse than shipping
-nothing. So the installer route is **formally blocked at the networking
-wall**: a reproduced, in-scope 32-bit Wine `secur32` bug whose fix is a
-scoped follow-up (set up an i386-unix Wine build, instrument
-`schannel*.c`, pin, patch, verify `httptest32.exe` passes, ship the
-patched 32-bit DLL). No patch and no faked value were applied.
-`scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.
+### Outcome — Step 5 closed
+
+The networking wall is **not a Wine bug and not an Adobe rejection**. It
+is a broken 32-bit crypto library (`nettle` 4.0 on `i386`) on this host.
+Consequences:
+
+- **There is nothing for Wine to patch.** The `wine-patches/` pattern
+  (source patch + prebuilt DLL) does not apply — `secur32`/`winhttp` are
+  faithful passthroughs to a `nettle` that is itself broken on `i386`.
+  The earlier "scoped follow-up: build i386-unix Wine, patch `schannel`"
+  plan is **void** — it would have patched innocent code.
+- The Adobe CC installer route stays **blocked at the networking wall**
+  until the host's 32-bit `nettle` is fixed: upstream `nettle`/Arch ship a
+  corrected `lib32-nettle`, or the user downgrades `lib32-nettle` to a
+  3.x release that passes `repro/nettle-i386/ntls-handshake.c` 32-bit.
+  Either is a host/distro action, outside this repo's scope.
+- `scripts/install-cc-desktop.sh` stays WORK IN PROGRESS.
 
 What attempt 17 *did* deliver end-to-end: the `mshtml`
 `FEATURE_BROWSER_EMULATION` fix (the installer's React UI now parses and
-runs, Adobe binaries unmodified). The networking wall is the next, and
-separate, blocker.
+runs, Adobe binaries unmodified). The networking wall is a separate,
+host-environment blocker — no longer a Wine task.

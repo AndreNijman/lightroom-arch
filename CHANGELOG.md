@@ -44,29 +44,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its OOBE/NGL libraries make returns `-1` / `HTTP_Status:0` inside Wine,
   while the same endpoints return `200` from the host. Not an `mshtml`/
   platform-detection problem (corrected in `docs/attempt-17-cc-desktop.md`).
-- **Networking wall diagnosed and reproduced — a 32-bit Wine `secur32`
-  bug, not Adobe-side.** Every `Set-up.exe` WinHTTP connection fails in
-  `netconn_secure_connect`. Adobe-side rejection ((c)) is ruled out:
-  `gnutls-cli` (Wine's own `libgnutls`) completes TLS to every endpoint.
-  The trigger is **bitness**: `Set-up.exe` is `PE32 i386`, and a minimal
-  non-Adobe WinHTTP probe reproduces the failure when built 32-bit
-  (`WinHttpSendRequest err=12157`, `schan_handshake FATAL ALERT: 20 Bad
-  record MAC`) while the identical 64-bit probe passes 100%. So it is an
-  in-scope, reproducible bug in Wine's `i386-windows` `secur32` — the
-  32-bit client handshake is corrupted so the server rejects it. The exact
-  defective line is not yet pinned (32- and 64-bit `secur32` move identical
-  handshake bytes); no Wine patch is shipped for this wall — an unverified
-  TLS-code guess would be worse than none. Minimal repro + harness in
-  `wine-patches/repro-winhttp-adobe/`. Install script stays WORK IN PROGRESS.
-- **Installer route formally blocked at the networking wall.** A `secur32`
-  fix is a scoped follow-up, not done this attempt: pinning the defect
-  needs iterative byte-level TLS debugging, and the 32-bit unix
-  `i386-unix/secur32.so` is not buildable from the Wine tree configured
-  here (it builds `x86_64-unix` only) — so a prebuilt 32-bit patched DLL
-  cannot be produced without first setting up a multilib Wine unix build.
-  See `docs/attempt-17-cc-desktop.md` "Step 5 — formally closed". Attempt
-  17 delivered the `mshtml` fix end-to-end; the networking wall is the
-  next, separate blocker.
+- **Networking wall re-diagnosed — a 32-bit `nettle` bug, NOT Wine and
+  NOT Adobe.** *(Supersedes the earlier "32-bit Wine `secur32` bug"
+  claim — that diagnosis was wrong; it was never checked against a
+  non-Wine baseline.)* Every `Set-up.exe` WinHTTP connection fails;
+  Adobe-side rejection ((c)) is ruled out (`gnutls-cli` completes TLS to
+  every endpoint). The trigger is **bitness**, but the defect is *not*
+  in Wine: a **native, Wine-free** `gcc -m32` GnuTLS probe
+  (`repro/nettle-i386/`) aborts with the identical fault —
+  `ecc-random.c:62: _nettle_ecc_mod_random: Assertion 'nbytes <=
+  m->size * sizeof (mp_limb_t)' failed` — inside `libnettle.so.9`, a
+  native Linux library. Wine cannot make `assert()` fire inside native
+  `nettle` code. On X25519+ChaCha20 handshakes the same defect instead
+  yields a wrong AEAD tag → server `bad_record_mac`. Root cause is the
+  32-bit (`i386`) build of `nettle 4.0` (`lib32-nettle 4.0`); 64-bit is
+  fine on the same upstream versions. `secur32`/`winhttp` are faithful
+  passthroughs — Wine is exonerated.
+- **Installer route blocked at the networking wall — a host/distro
+  issue, no longer a Wine task.** There is nothing for Wine to patch; the
+  earlier "build i386-unix Wine, patch `secur32`" follow-up is void (it
+  would have patched innocent code). The wall stays until the host's
+  32-bit `nettle` is fixed — upstream `nettle`/Arch ship a corrected
+  `lib32-nettle`, or `lib32-nettle` is downgraded to a 3.x that passes
+  `repro/nettle-i386/ntls-handshake.c` 32-bit. No filed upstream report
+  found for this exact `i386` signature; report destination is `nettle`
+  (`gitlab.com/gnutls/nettle`, `nettle-bugs` list) and/or Arch
+  `lib32-nettle`. Repros: `repro/nettle-i386/` (Wine-free root-cause) and
+  `wine-patches/repro-winhttp-adobe/` (the installer's symptom path).
+  See `docs/attempt-17-cc-desktop.md` "Re-diagnosis". Attempt 17
+  delivered the `mshtml` fix end-to-end; the networking wall is a
+  separate, host-environment blocker. Install script stays WORK IN
+  PROGRESS.
 
 ## [2.4.0] - 2026-05-16
 
