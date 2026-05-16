@@ -91,6 +91,26 @@ for TARGET_UIA in ~/opt/wine-adobe/files/lib/wine/x86_64-windows/uiautomationcor
     fi
 done
 
+# Install the patched d2d1.dll. Lightroom draws its UI with Direct2D and
+# uses ID2D1GeometrySink::AddArc for every rounded shape; stock Wine's
+# AddArc is a stub that drops the curve and inserts a straight line to the
+# arc endpoint, so pill buttons rendered as pointed hexagons, circles as
+# polygons and rounded panels with cut corners. The patched DLL implements
+# AddArc (arc -> quadratic Beziers) and also carries the older d2d1 fixes
+# (ColorManagement effect + non-delay imports). See docs/attempt-16 and
+# installers/wine-patches/. Idempotent; keeps the stock DLL as d2d1.dll.orig.
+PATCHED_D2D1="$SCRIPT_DIR/wine-patches/d2d1.dll"
+for TARGET_D2D1 in ~/opt/wine-adobe/files/lib/wine/x86_64-windows/d2d1.dll \
+                   "$WINEPREFIX/drive_c/windows/system32/d2d1.dll"; do
+    if [ -f "$PATCHED_D2D1" ] && [ -f "$TARGET_D2D1" ] \
+       && ! cmp -s "$PATCHED_D2D1" "$TARGET_D2D1"; then
+        [ -f "$TARGET_D2D1.orig" ] || cp "$TARGET_D2D1" "$TARGET_D2D1.orig"
+        chmod u+w "$TARGET_D2D1" 2>/dev/null || true
+        cp "$PATCHED_D2D1" "$TARGET_D2D1"
+        echo "run-lightroom: installed patched d2d1.dll (UI curve fix)"
+    fi
+done
+
 # Match Wine's virtual desktop to the active monitor's pixel resolution.
 # If the desktop is smaller than the host window, Wine bitmap-upscales
 # its framebuffer to fill the window -- the UI looks blurry and aliased.

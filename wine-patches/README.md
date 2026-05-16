@@ -9,6 +9,7 @@ backing up each stock file as `<name>.orig`.
 | `winex11-vulkan-child-flush-fix.patch` | `winex11.so` | GPU-on Develop-edit flicker |
 | `winex11-wm-close-fix.patch` | `winex11.so` | Hyprland close shortcut a no-op |
 | `uiautomationcore-disconnect-all-providers.patch` | `uiautomationcore.dll` | Lightroom stalls on exit |
+| `../installers/wine-patches/wine-d2d1-addarc.patch` | `d2d1.dll` | rounded UI shapes render as polygons |
 
 ## winex11 — D3D child-swapchain flicker fix
 
@@ -107,6 +108,38 @@ stalled here.
 returns `S_OK` (`uia_provider.c`, `.spec`, header). Per-process UI
 Automation provider state is torn down at process exit anyway, so doing
 nothing is safe and lets Lightroom's shutdown finish.
+
+## d2d1 — UI shape rendering (AddArc)
+
+The prebuilt `d2d1.dll` here carries three patches (sources in
+`../installers/wine-patches/`): `wine-d2d1-color-management.patch` and
+`wine-d2d1-nondelay-imports.patch` (attempts 4 and 6) plus
+`wine-d2d1-addarc.patch` (attempt 16).
+
+### The bug
+
+Lightroom draws its UI with Direct2D and uses
+`ID2D1GeometrySink::AddArc` for every rounded shape (traced: 214 calls).
+Stock Wine's `AddArc` is an unimplemented stub — it discards the arc and
+inserts a single straight line to the arc's endpoint. So pill buttons
+rendered as pointed hexagons, circles as polygons, rounded panels with
+cut corners.
+
+### The fix
+
+`wine-d2d1-addarc.patch` implements `AddArc` in `dlls/d2d1/geometry.c`:
+it converts the arc (SVG endpoint parameterisation → centre form),
+splits the sweep into ≤30° pieces, approximates each with a quadratic
+Bézier, and feeds the sink's existing `AddQuadraticBeziers` path. A
+genuine upstream Wine bug — the patch is self-contained and upstreamable.
+
+### Rebuilding
+
+```sh
+git apply wine-d2d1-color-management.patch wine-d2d1-nondelay-imports.patch wine-d2d1-addarc.patch
+make -j"$(nproc)" dlls/d2d1/x86_64-windows/d2d1.dll
+# copy it over wine-patches/d2d1.dll
+```
 
 ### Rebuilding
 

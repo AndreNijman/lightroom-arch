@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-05-16
+
+### Fixed — UI shapes render correctly (Direct2D arc fix)
+
+- **Buttons, circles and rounded panels no longer render malformed.**
+  Lightroom drew pill-shaped toolbar buttons as pointed hexagons, the
+  rating circle as a jagged polygon, icon badges as diamonds, and rounded
+  panels with cut corners.
+- **Root cause** (`docs/attempt-16`): Lightroom draws its whole UI with
+  Direct2D and uses `ID2D1GeometrySink::AddArc` for every rounded shape
+  (traced: 214 `AddArc` calls). Stock Wine's `AddArc` is an unimplemented
+  stub — it discards the arc and inserts a straight line to the arc
+  endpoint, so every curve collapsed to a chord.
+- **Fix** (`installers/wine-patches/wine-d2d1-addarc.patch`): implements
+  `AddArc` — converts the arc (SVG endpoint parameterisation) to quadratic
+  Béziers and feeds the sink's existing curve path. Verified: pill buttons,
+  the rating circle, the "Assisted Culling" badge and rounded panels all
+  render with proper curves.
+- The patched `d2d1.dll` ships in `wine-patches/` and `run-lightroom.sh`
+  installs it idempotently (stock kept as `d2d1.dll.orig`). It carries all
+  three d2d1 fixes: the ColorManagement effect, non-delay imports, and
+  `AddArc`.
+
 ## [2.3.0] - 2026-05-16
 
 ### Fixed — Lightroom now exits cleanly

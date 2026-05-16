@@ -28,6 +28,7 @@ them** — the develop sliders work and visibly change the image.
 | Crisp UI | works — virtual desktop sized 1:1 to the monitor |
 | GPU acceleration | on — `winex11` patched so editing is flicker-free |
 | Quit | works — closes cleanly via the titlebar button and the Hyprland close shortcut |
+| UI shapes | works — buttons, circles and rounded panels render correctly (patched `d2d1` arc support) |
 
 The target is the **Creative Cloud Lightroom desktop app** (`Adobe
 Lightroom CC`, v9.3.1) — the cloud-synced Lightroom with Cloud/Local
@@ -133,7 +134,7 @@ bundled Wine ships separate `wine`+`wine64`; do not rebuild WoW64-style.
 
 ## The journey
 
-Fifteen attempts, fully documented in `docs/`:
+Sixteen attempts, fully documented in `docs/`:
 
 - `docs/attempt-2-*` — PhialsBasement patched Wine, CC installer (CEF
   blue-screen failures)
@@ -155,6 +156,9 @@ Fifteen attempts, fully documented in `docs/`:
 - `docs/attempt-15-*` — clean exit: `winex11` routes the WM close request
   to Lightroom's window, and `uiautomationcore` exports the
   `UiaDisconnectAllProviders` shutdown call Lightroom was aborting on
+- `docs/attempt-16-*` — UI shapes: implemented `d2d1`'s stubbed
+  `ID2D1GeometrySink::AddArc`, so buttons/circles/rounded panels render
+  with proper curves instead of polygons
 - `docs/WORKING-CONFIGURATION.md` — the recipe
 
 Wine patches: `wine-patches/` (winex11 flicker fix) and

@@ -1,0 +1,139 @@
+diff --git a/dlls/d2d1/geometry.c b/dlls/d2d1/geometry.c
+index 3da3ad2e..88bfb393 100644
+--- a/dlls/d2d1/geometry.c
++++ b/dlls/d2d1/geometry.c
+@@ -3334,8 +3334,17 @@ static void STDMETHODCALLTYPE d2d_geometry_sink_AddQuadraticBeziers(ID2D1Geometr
+ static void STDMETHODCALLTYPE d2d_geometry_sink_AddArc(ID2D1GeometrySink *iface, const D2D1_ARC_SEGMENT *arc)
+ {
+     struct d2d_geometry *geometry = impl_from_ID2D1GeometrySink(iface);
++    static const double pi = 3.14159265358979323846;
++    D2D1_QUADRATIC_BEZIER_SEGMENT *quads;
++    struct d2d_figure *figure;
++    D2D1_POINT_2F start;
++    double rx, ry, phi, cosphi, sinphi;
++    double x1, y1, x1p, y1p, cxp, cyp, cx, cy;
++    double lambda, coef, num, den, theta1, dtheta;
++    double ux, uy, vx, vy;
++    unsigned int i, count;
+ 
+-    FIXME("iface %p, arc %p stub!\n", iface, arc);
++    TRACE("iface %p, arc %p.\n", iface, arc);
+ 
+     if (geometry->u.path.state != D2D_GEOMETRY_STATE_FIGURE)
+     {
+@@ -3343,13 +3352,112 @@ static void STDMETHODCALLTYPE d2d_geometry_sink_AddArc(ID2D1GeometrySink *iface,
+         return;
+     }
+ 
+-    if (!d2d_figure_add_vertex(&geometry->u.path.figures[geometry->u.path.figure_count - 1], arc->point))
++    figure = &geometry->u.path.figures[geometry->u.path.figure_count - 1];
++    start = figure->vertices[figure->vertex_count - 1];
++
++    rx = fabs(arc->size.width);
++    ry = fabs(arc->size.height);
++
++    /* A zero radius, or coincident start/end points, degenerates to a line. */
++    if (rx < 1e-6 || ry < 1e-6
++            || (fabsf(start.x - arc->point.x) < 1e-6f && fabsf(start.y - arc->point.y) < 1e-6f))
+     {
+-        ERR("Failed to add vertex.\n");
++        d2d_geometry_sink_AddLine(iface, arc->point);
++        return;
++    }
++
++    /* Convert the SVG-style endpoint arc parameterisation to centre form
++     * (SVG 1.1 implementation notes, F.6.5) and approximate the arc with
++     * quadratic Béziers. The stock implementation was a stub that dropped
++     * the curve and inserted a single straight line to the arc endpoint,
++     * so every rounded UI shape (pill buttons, circles, rounded panels)
++     * rendered as a polygon. */
++    phi = arc->rotationAngle * (pi / 180.0);
++    cosphi = cos(phi);
++    sinphi = sin(phi);
++
++    x1 = (start.x - arc->point.x) / 2.0;
++    y1 = (start.y - arc->point.y) / 2.0;
++    x1p =  cosphi * x1 + sinphi * y1;
++    y1p = -sinphi * x1 + cosphi * y1;
++
++    lambda = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry);
++    if (lambda > 1.0)
++    {
++        double s = sqrt(lambda);
++        rx *= s;
++        ry *= s;
++    }
++
++    den = (rx * rx) * (y1p * y1p) + (ry * ry) * (x1p * x1p);
++    num = (rx * rx) * (ry * ry) - den;
++    coef = sqrt(num > 0.0 ? num / den : 0.0);
++    if ((arc->arcSize == D2D1_ARC_SIZE_LARGE)
++            == (arc->sweepDirection == D2D1_SWEEP_DIRECTION_CLOCKWISE))
++        coef = -coef;
++    cxp =  coef * rx * y1p / ry;
++    cyp = -coef * ry * x1p / rx;
++
++    cx = cosphi * cxp - sinphi * cyp + (start.x + arc->point.x) / 2.0;
++    cy = sinphi * cxp + cosphi * cyp + (start.y + arc->point.y) / 2.0;
++
++    ux = (x1p - cxp) / rx;
++    uy = (y1p - cyp) / ry;
++    vx = (-x1p - cxp) / rx;
++    vy = (-y1p - cyp) / ry;
++    theta1 = atan2(uy, ux);
++    dtheta = atan2(ux * vy - uy * vx, ux * vx + uy * vy);
++    if (arc->sweepDirection == D2D1_SWEEP_DIRECTION_CLOCKWISE)
++    {
++        if (dtheta < 0.0)
++            dtheta += 2.0 * pi;
++    }
++    else if (dtheta > 0.0)
++    {
++        dtheta -= 2.0 * pi;
++    }
++
++    /* One quadratic per 30 degrees of sweep keeps the deviation from the
++     * true arc well under a pixel for the radii used in application UI. */
++    count = (unsigned int)ceil(fabs(dtheta) / (pi / 6.0));
++    if (!count)
++        count = 1;
++    if (!(quads = calloc(count, sizeof(*quads))))
++    {
++        ERR("Failed to allocate arc segments.\n");
++        geometry->u.path.state = D2D_GEOMETRY_STATE_ERROR;
+         return;
+     }
+ 
+-    ++geometry->u.path.segment_count;
++    for (i = 0; i < count; ++i)
++    {
++        double a0 = theta1 + dtheta * ((double)i / count);
++        double a1 = theta1 + dtheta * ((double)(i + 1) / count);
++        double am = (a0 + a1) / 2.0;
++        double k = cos((a1 - a0) / 2.0);
++        double cpx, cpy, epx, epy;
++
++        if (fabs(k) < 1e-6)
++            k = k < 0.0 ? -1e-6 : 1e-6;
++
++        /* Quadratic control point: on the angle bisector, pushed out by
++         * 1/cos(half-angle) so the curve is tangent to the arc at both ends. */
++        cpx = cos(am) / k;
++        cpy = sin(am) / k;
++        epx = cos(a1);
++        epy = sin(a1);
++
++        quads[i].point1.x = (float)(cx + cosphi * (rx * cpx) - sinphi * (ry * cpy));
++        quads[i].point1.y = (float)(cy + sinphi * (rx * cpx) + cosphi * (ry * cpy));
++        quads[i].point2.x = (float)(cx + cosphi * (rx * epx) - sinphi * (ry * epy));
++        quads[i].point2.y = (float)(cy + sinphi * (rx * epx) + cosphi * (ry * epy));
++    }
++
++    /* Pin the final vertex exactly on the requested endpoint. */
++    quads[count - 1].point2 = arc->point;
++
++    d2d_geometry_sink_AddQuadraticBeziers(iface, quads, count);
++    free(quads);
+ }
+ 
+ static const struct ID2D1GeometrySinkVtbl d2d_geometry_sink_vtbl =

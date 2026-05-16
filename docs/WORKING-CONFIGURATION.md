@@ -1,9 +1,10 @@
 # Working Configuration — Adobe Lightroom on Arch Linux via Wine
 
-After fifteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
+After sixteen attempts, Adobe Lightroom (Creative Cloud desktop app) is
 usable under Wine on Arch Linux (Hyprland/Wayland). It launches, signs
-in, loads its full UI (crisp, 1:1), browses photos, edits them without
-flashing, and quits cleanly. Run it with `./run-lightroom.sh`.
+in, loads its full UI (crisp, 1:1, with correctly-rendered buttons and
+shapes), browses photos, edits them without flashing, and quits cleanly.
+Run it with `./run-lightroom.sh`.
 
 ## Status
 
@@ -58,6 +59,15 @@ prefix's `system32`:
    in the bundled Wine loader. Normal imports skip the helper entirely.
    Patch: `installers/wine-patches/wine-d2d1-nondelay-imports.patch`
 
+3. **`geometry.c`** — implement `ID2D1GeometrySink::AddArc`. Stock Wine's
+   `AddArc` is a stub that drops the arc and inserts a straight line to
+   the arc endpoint, so Lightroom's rounded UI shapes rendered as
+   polygons. The patch converts the arc to quadratic Béziers.
+   Patch: `installers/wine-patches/wine-d2d1-addarc.patch` (see attempt 16)
+
+The prebuilt `d2d1.dll` carrying all three changes ships in
+`wine-patches/`; `run-lightroom.sh` installs it.
+
 ## The journey (attempts 1-14)
 
 1-3. Adobe CC installer under Wine — blue-screen CEF render failures.
@@ -105,8 +115,13 @@ prefix's `system32`:
     `UiaDisconnectAllProviders`; patched `uiautomationcore` to export it
     as a no-op. Both the titlebar button and the close shortcut now quit
     Lightroom with no leftover processes.
+16. Fixed malformed UI shapes. Lightroom draws its UI with Direct2D;
+    Wine's `ID2D1GeometrySink::AddArc` was an unimplemented stub that
+    dropped every arc, so pill buttons rendered as pointed hexagons and
+    circles as polygons. Implemented `AddArc` (arc → quadratic Béziers)
+    in `d2d1`; buttons, circles and rounded panels now render correctly.
 
-See `docs/attempt-7-*` … `attempt-15-*` for detail.
+See `docs/attempt-7-*` … `attempt-16-*` for detail.
 
 ## Reproduce
 
