@@ -126,13 +126,14 @@ Decompiling `CCDInstaller.js`: the root class is
 `isWinPlatform` is set once from the init context as
 `"win" === t.platform`. `t.platform` is **not** read from
 `navigator.platform` — it is data the *native* `Set-up.exe` host feeds
-into the React app as init context. WAM logs `Embedded json data not
-found in the binary`. So the native→JS init bridge (the
-`window.external` / WAM embedded-config mechanism that Wine `mshtml`
-implements differently from IE) is not delivering `platform`, the React
-app defaults to `mac`, and it parks on the spinner. This bridge — not a
-paint bug, not the UA string — is the real wall, and it is a deep Wine
-`mshtml` host-object gap.
+into the React app as init context, so the React app defaults to `mac`.
+
+**Superseded — see "Step 5 investigation" below.** This section earlier
+concluded the native→JS init bridge / `window.external` host-object gap
+was "the real wall". The WAM-log evidence in the step-5 section disproves
+that: WAM's back-end workflow reaches `START_SIGNIN_WORKFLOW`
+*independently* of the React platform value and parks there on a Wine
+networking failure. `cci-root mac` is cosmetic, not the blocker.
 
 ## What this attempt ships
 
@@ -253,5 +254,84 @@ launches `Set-up.exe` with **no Adobe-shipped file touched**: the
 `index.html` `chrome=1`→`IE=11` rewrite and its `inotifywait` watcher are
 deleted, and `FEATURE_BROWSER_EMULATION` is no longer pre-seeded.
 
-The post-parse loading-spinner wall (platform detection) is unchanged by
-this fix — see below.
+The post-parse loading-spinner wall is unchanged by this fix — see below.
+
+## Step 5 investigation — the loading-spinner wall is NOT a host-object gap
+
+The goal asked to investigate the loading-spinner wall as a Wine
+*host-object* gap (Wine `mshtml` failing to deliver `window.external` /
+the native→JS init context). The investigation **disproves** that
+hypothesis. Primary evidence: the installer's own WAM log,
+`drive_c/users/<u>/AppData/Local/Temp/CreativeCloud/ACC/WAM.log`.
+
+WAM (the native installer back-end, `WAMB`) initialises and runs its
+state machine cleanly — *independently of the React UI*:
+
+```
+Embedded json data not found in the binary        <- INFO, handled; harmless
+Application pre initialized successfully
+Application initialized successfully
+WorkflowManager: ACQUIRE_LOCKS
+WorkflowManager: CHECK_GENERAL_SYSTEM_REQUIREMENTS  <- system req check PASSES
+WorkflowManager: CHECK_FOR_PROXY
+WorkflowManager: CHECK_FOR_NETWORK
+WorkflowManager: CHECK_ALREADY_INSTALLED_PRODUCT
+WorkflowManager: SHOW_WELCOME_SCREEN
+WorkflowManager: START_SIGNIN_WORKFLOW              <- reaches sign-in
+```
+
+So the earlier "platform mis-detection parks it on the spinner" /
+"native→JS init bridge is the real wall" conclusion was wrong:
+
+- `Embedded json data not found in the binary` is an **INFO** line, not
+  an error — WAM handles it and reports *initialized successfully*. The
+  generic `ACCCx` installer simply carries no embedded JSON.
+- WAM passes `CHECK_GENERAL_SYSTEM_REQUIREMENTS` and reaches
+  `START_SIGNIN_WORKFLOW`. If the platform were judged ineligible
+  (`platformIneligible.*`), WAM would stop at the system-requirements
+  state — it does not. The `cci-root mac` class and the
+  `window.external`-not-found in `jscript` traces are real but
+  **cosmetic**: the React shell renders, the back-end workflow does not
+  depend on them.
+
+The actual wall is **networking**. At `START_SIGNIN_WORKFLOW`:
+
+```
+NGLWrapper: GetSUSIURL API failed with -1 code and url-empty description
+UserProfile: Failed to getSUSIUrl                  (retried 3x)
+HTTPConnector: HEAD https://ccmdls.adobe.com:443/AdobeESD/CCD/healthcheck
+HTTPConnector: The http request returned HTTP_Status:0
+HTTPConnector: Received HTTP response: Response code = -1
+WorkflowManager: showErrorAlert. Showing errorAlert for 206
+```
+
+Every Adobe HTTP request the installer's OOBE `HTTPConnector` and the NGL
+licensing library make returns `-1` / `HTTP_Status:0` inside Wine. The
+**same endpoints are fully reachable from the host** — native `curl`:
+
+```
+https://ccmdls.adobe.com/AdobeESD/CCD/healthcheck   -> 200  (TLS OK)
+https://cc-api-data.adobe.io/ingest                 -> 403  (TLS OK)
+https://ims-na1.adobelogin.com/ims/check/v6/token   -> 400  (TLS OK)
+```
+
+So the host is online and the endpoints work; the failure is **Wine-side
+HTTP**, specific to the HTTP client OOBE/NGL use (distinct from the
+`dunamis` analytics path, which attempt 2 found *does* complete its TLS
+handshake — different HTTP stacks). The `GetIEProxyInfo ... error:12180`
+(`ERROR_WINHTTP_AUTODETECTION_FAILED`, WPAD) is logged but is non-fatal.
+
+### Verdict (per the goal's scope rule)
+
+The loading-spinner wall is **not** an `mshtml`/host-object/`jscript`
+problem and not solvable by feeding the installer a platform value (the
+platform value is not what blocks it). It is a Wine `winhttp`/`wininet`/
+`schannel` networking gap in the path the Adobe OOBE and NGL libraries
+use. That is a separate investigation outside step 5's stated
+"Wine host-object gap" scope. Per the goal: **stopping here and reporting
+back rather than improvising a network workaround or a forced value.**
+
+`scripts/install-cc-desktop.sh` therefore stays marked WORK IN PROGRESS:
+it gets a clean machine to a CC installer whose React UI runs (JS parse
+wall solved) but which cannot complete sign-in until the Wine networking
+gap is addressed.

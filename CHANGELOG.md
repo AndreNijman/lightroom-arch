@@ -38,10 +38,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rewrite (an Adobe-side hack) and its `inotifywait` watcher are removed.
   Verified with a minimal non-Adobe repro
   (`wine-patches/repro-feature-browser-emulation/`).
-- **Known remaining wall:** the React installer runs but stays in its
-  loading state (platform mis-detection / catalog fetch), so the native
-  teal splash never lifts to reveal the WebBrowser. Tracked in
-  `docs/attempt-17-cc-desktop.md`.
+- **Known remaining wall — networking, not the UI.** The installer's own
+  `WAM.log` shows the native back-end workflow runs cleanly through to
+  `START_SIGNIN_WORKFLOW`; it parks there because every Adobe HTTP request
+  its OOBE/NGL libraries make returns `-1` / `HTTP_Status:0` inside Wine,
+  while the same endpoints return `200` from the host. This is a Wine
+  `winhttp`/`wininet`/`schannel` gap — not an `mshtml`/platform-detection
+  problem (the earlier "platform mis-detection" diagnosis is corrected in
+  `docs/attempt-17-cc-desktop.md`). Out of this attempt's scope; the
+  install script stays WORK IN PROGRESS.
 
 ## [2.4.0] - 2026-05-16
 
